@@ -849,7 +849,7 @@ tr.total-row .amount-approx{font-size:16px}
           </div>
           <div id="u-notes-rich" contenteditable="true"
             data-placeholder="— ข้อดี / ข้อเสียของมหาลัยนี้"
-            oninput="NOTES.save()" onkeyup="NOTES.updateToolbar()" onmouseup="NOTES.updateToolbar()"></div>
+            oninput="NOTES.save()" onkeyup="NOTES.onEditorKeyUp()" onmouseup="NOTES.onEditorMouseUp()"></div>
         </div>
       </div>
     </div>
@@ -1688,40 +1688,110 @@ const UNI=(function(){
 /* ── NOTES RICH EDITOR MODULE ── */
 const NOTES=(function(){
   function getEl(){return document.getElementById('u-notes-rich');}
+  let savedRange=null;
   function save(){
     const u=UNI._unis().find(x=>x.id===UNI.getActiveId());
     if(!u)return;
     const el=getEl();if(!el)return;
     u.notesHtml=el.innerHTML;
-    // also strip to plain text for PDF export compat
     u.notes=el.innerText;
     STORAGE.save();
   }
-  function exec(cmd){document.execCommand(cmd,false,null);save();updateToolbar();}
+  // Save selection before toolbar steals focus
+  function saveSelection(){
+    const sel=window.getSelection();
+    if(sel&&sel.rangeCount>0)savedRange=sel.getRangeAt(0).cloneRange();
+  }
+  // Restore saved selection into editor
+  function restoreSelection(){
+    const el=getEl();if(!el)return false;
+    el.focus();
+    if(!savedRange)return false;
+    const sel=window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+    return !savedRange.collapsed;
+  }
+  // Wrap selected text in a span with given style prop+value
+  function wrapSelection(prop,value){
+    if(!restoreSelection())return;
+    const sel=window.getSelection();
+    if(!sel||sel.rangeCount===0||sel.isCollapsed)return;
+    const range=sel.getRangeAt(0);
+    // Try execCommand first (Chrome/Firefox)
+    let ok=false;
+    try{
+      if(prop==='background'){ok=document.execCommand('hiliteColor',false,value);}
+      else if(prop==='color'){ok=document.execCommand('foreColor',false,value);}
+      else if(prop==='fontWeight'){ok=document.execCommand('bold',false,null);}
+      else if(prop==='textDecoration'){ok=document.execCommand('underline',false,null);}
+    }catch(e){ok=false;}
+    // Fallback: manual span wrap (Safari)
+    if(!ok||!document.queryCommandSupported('hiliteColor')){
+      const span=document.createElement('span');
+      span.style[prop]=value;
+      try{
+        range.surroundContents(span);
+      }catch(e){
+        // If selection spans multiple nodes, extract and wrap
+        const frag=range.extractContents();
+        span.appendChild(frag);
+        range.insertNode(span);
+      }
+      // Collapse selection to end
+      sel.removeAllRanges();
+      const newRange=document.createRange();
+      newRange.setStartAfter(span);
+      newRange.collapse(true);
+      sel.addRange(newRange);
+    }
+    save();
+  }
+  function exec(cmd){
+    saveSelection();
+    if(cmd==='bold')wrapSelection('fontWeight','bold');
+    else if(cmd==='underline')wrapSelection('textDecoration','underline');
+    updateToolbar();
+  }
   function highlight(color,swatch){
-    // clear active highlight swatches
-    document.querySelectorAll('.notes-toolbar .color-swatch').forEach(s=>{
-      if(s.dataset.type==='hl')s.classList.remove('active');
-    });
-    document.execCommand('hiliteColor',false,color);
-    if(swatch){swatch.dataset.type='hl';swatch.classList.add('active');}
+    document.querySelectorAll('.notes-toolbar .color-swatch[data-type="hl"]').forEach(s=>s.classList.remove('active'));
+    if(color==='transparent'){
+      // Remove highlight from selection
+      saveSelection();
+      restoreSelection();
+      try{document.execCommand('hiliteColor',false,'transparent');}catch(e){}
+      // Also try removing via span
+      const sel=window.getSelection();
+      if(sel&&!sel.isCollapsed){
+        const range=sel.getRangeAt(0);
+        const span=document.createElement('span');
+        span.style.background='transparent';
+        try{range.surroundContents(span);}catch(e){}
+      }
+    } else {
+      wrapSelection('background',color);
+      if(swatch){swatch.dataset.type='hl';swatch.classList.add('active');}
+    }
     save();
   }
   function color(clr,swatch){
-    document.querySelectorAll('.notes-toolbar .color-swatch').forEach(s=>{
-      if(s.dataset.type==='fg')s.classList.remove('active');
-    });
-    document.execCommand('foreColor',false,clr);
+    document.querySelectorAll('.notes-toolbar .color-swatch[data-type="fg"]').forEach(s=>s.classList.remove('active'));
+    wrapSelection('color',clr);
     if(swatch){swatch.dataset.type='fg';swatch.classList.add('active');}
     save();
   }
   function updateToolbar(){
     const bold=document.getElementById('tb-bold');
     const ul=document.getElementById('tb-underline');
-    if(bold)bold.classList.toggle('active',document.queryCommandState('bold'));
-    if(ul)ul.classList.toggle('active',document.queryCommandState('underline'));
+    try{
+      if(bold)bold.classList.toggle('active',document.queryCommandState('bold'));
+      if(ul)ul.classList.toggle('active',document.queryCommandState('underline'));
+    }catch(e){}
   }
-  return {save,exec,highlight,color,updateToolbar};
+  // Track selection while user is in editor
+  function onEditorMouseUp(){saveSelection();updateToolbar();}
+  function onEditorKeyUp(){saveSelection();updateToolbar();}
+  return {save,exec,highlight,color,updateToolbar,onEditorMouseUp,onEditorKeyUp};
 })();
 
 /* ── COMPARE MODULE ── */
