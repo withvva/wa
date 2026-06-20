@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Round — University Application Summary</title>
+<!-- jsPDF for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Thai:wght@300;400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F4F2E8;--cream-dark:#E8E5D8;--blue-light:#D4C9F5;--blue-mid:#A98DE0;
+  --blue-dark:#7B57CE;--text-primary:#1A1A18;--text-secondary:#5A584F;
+  --text-muted:#8A887E;--white:#FDFCF8;--border:rgba(26,26,24,0.12);
+  --tag-apply-bg:#D4E8F7;--tag-apply-fg:#1A5276;
+  --tag-doc-bg:#D5F0E0;--tag-doc-fg:#1A6B3A;
+  --tag-inter-bg:#FDE8D0;--tag-inter-fg:#7D3A0A;
+  --tag-result-bg:#EDE8F7;--tag-result-fg:#4A2D8A;
+}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans Thai',sans-serif;background:var(--cream);color:var(--text-primary);font-size:15px;line-height:1.7;min-height:100vh}
+header{background:var(--white);border-bottom:0.5px solid var(--border);padding:0 48px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.logo{font-family:'Libre Baskerville',serif;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-primary);text-decoration:none;cursor:pointer;background:none;border:none}
+.logo::after{content:"pichamon";font-style:italic;font-size:10px;color:rgba(123,87,206,0.4);margin-left:7px;letter-spacing:0.05em;text-transform:none;font-weight:400;}
+nav{display:flex;gap:28px;align-items:center}
+nav button{font-size:12px;letter-spacing:0.06em;color:var(--text-secondary);text-transform:uppercase;transition:color .2s;background:none;border:none;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif;padding:0}
+nav button:hover,nav button.active{color:var(--text-primary)}
+.save-indicator{font-size:10px;color:var(--text-muted);letter-spacing:0.08em;transition:opacity .4s;opacity:0}
+.save-indicator.show{opacity:1}
+#sync-status{font-size:10px;letter-spacing:0.07em;padding:2px 9px;border-radius:10px;transition:all .3s;white-space:nowrap}
+#sync-status.synced{background:#D5F0E0;color:#1A6B3A}
+#sync-status.syncing{background:#FDE8D0;color:#7D3A0A}
+#sync-status.offline{background:#FDDEDE;color:#7A1A1A}
+#loading-overlay{position:fixed;inset:0;background:var(--cream);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+#loading-overlay .lo-title{font-family:'Libre Baskerville',serif;font-size:24px;font-weight:400}
+#loading-overlay .lo-sub{font-size:13px;color:var(--text-muted)}
+#loading-overlay .lo-spinner{width:32px;height:32px;border:2px solid var(--blue-light);border-top-color:var(--blue-dark);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.page{display:none}.page.active{display:block}
+.page-header{background:var(--white);border-bottom:0.5px solid var(--border);padding:48px 48px 36px}
+.eyebrow{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+.page-title{font-family:'Libre Baskerville',serif;font-size:clamp(28px,4vw,42px);font-weight:400;line-height:1.2}
+.page-title em{font-style:italic;color:var(--blue-dark)}
+.page-sub{margin-top:12px;font-size:13px;color:var(--text-secondary);max-width:520px}
+.section{padding:36px 48px;border-bottom:0.5px solid var(--border)}
+.sec-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;letter-spacing:0.06em;padding:7px 16px;border-radius:3px;border:0.5px solid var(--border);background:var(--white);color:var(--text-primary);cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--cream);border-color:var(--blue-mid)}
+.btn-primary{background:var(--blue-dark);color:white;border-color:var(--blue-dark)}
+.btn-primary:hover{background:#2d5a88}
+.btn-sm{font-size:11px;padding:5px 11px}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--blue-dark);padding:5px 8px}
+.btn-ghost:hover{background:var(--blue-light);border-color:transparent}
+.btn-danger{font-size:11px;padding:5px 11px;background:transparent;border:0.5px solid #FDDEDE;color:#7A1A1A;border-radius:3px;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif;letter-spacing:.04em;transition:background .15s}
+.btn-danger:hover{background:#FDDEDE}
+.add-btn{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;padding:7px 14px;border-radius:3px;border:0.5px dashed var(--blue-mid);background:transparent;color:var(--blue-dark);cursor:pointer;transition:background .15s}
+.add-btn:hover{background:var(--blue-light)}
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:2px;letter-spacing:0.05em;white-space:nowrap}
+.tag-apply{background:var(--tag-apply-bg);color:var(--tag-apply-fg)}
+.tag-doc{background:var(--tag-doc-bg);color:var(--tag-doc-fg)}
+.tag-inter{background:var(--tag-inter-bg);color:var(--tag-inter-fg)}
+.tag-result{background:var(--tag-result-bg);color:var(--tag-result-fg)}
+.pill{display:inline-block;font-size:10px;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:0.04em}
+.pill-waiting{background:#FDE8D0;color:#7D3A0A}
+.pill-prep{background:#EDE8F7;color:#4A2D8A}
+.pill-applied{background:#D4E8F7;color:#1A5276}
+.pill-result{background:#D5E8F0;color:#1A4A5E}
+.pill-pass{background:#D5F0E0;color:#1A6B3A}
+.pill-fail{background:#FDDEDE;color:#7A1A1A}
+.status-badge{font-size:10px;padding:2px 8px;border-radius:10px;white-space:nowrap;font-weight:500}
+.s-0{background:#E8E8E8;color:#6B6B6B}
+.s-1{background:#EDE8F7;color:#4A2D8A}
+.s-2{background:#D4E8F7;color:#1A5276}
+.s-3{background:#FDE8D0;color:#7D3A0A}
+.s-4{background:#D5E8E0;color:#1A4A3A}
+.s-5{background:#D5F0E0;color:#1A6B3A}
+.s-fail{background:#FDDEDE;color:#7A1A1A}
+.modal-overlay{position:fixed;inset:0;background:rgba(26,26,24,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:6px;padding:28px 32px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;border:0.5px solid var(--border)}
+.modal-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:400;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.modal-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-muted);line-height:1}
+.modal-close:hover{color:var(--text-primary)}
+.form-group{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.form-group label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+.form-group input,.form-group select,.form-group textarea{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:8px 10px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);transition:border-color .15s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--blue-mid)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+footer{padding:24px 48px;background:var(--white);border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+footer p{font-size:11px;color:var(--text-muted);letter-spacing:.06em}
+.hero{background:var(--white);border-bottom:0.5px solid var(--border);padding:72px 48px 56px}
+.hero-title{font-family:'Libre Baskerville',serif;font-size:clamp(36px,5vw,58px);font-weight:400;line-height:1.15;max-width:640px}
+.hero-title em{font-style:italic;color:var(--blue-dark)}
+.home-main-grid{display:grid;grid-template-columns:70fr 30fr;min-height:420px;border-bottom:0.5px solid var(--border);max-width:100%;overflow:hidden}
+.info-panel{background:var(--white);display:grid;grid-template-rows:auto 0.5px auto;min-width:0;overflow:hidden}
+.panel-sec{padding:28px 36px;min-width:0;overflow:hidden}
+.panel-div{background:var(--border)}
+.panel-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:18px}
+.deadline-list,.status-list{display:flex;flex-direction:column;gap:10px}
+.deadline-item{display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:10px 14px;border-radius:4px;background:var(--cream);border:0.5px solid var(--border)}
+.d-date{text-align:center;line-height:1.2}
+.d-day{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;display:block}
+.d-month{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+.d-name{font-size:13px;font-weight:500}
+.d-uni{font-size:11px;color:var(--text-muted);margin-top:2px;cursor:pointer;transition:color .15s}
+.d-uni:hover{color:var(--blue-dark);text-decoration:underline}
+.status-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:4px;background:var(--cream);border:0.5px solid var(--border);cursor:pointer;transition:border-color .15s,background .15s;overflow:hidden;max-width:100%}
+.status-item:hover{border-color:var(--blue-mid);background:var(--cream-dark)}
+.s-uni{font-size:13px;font-weight:500;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-track{font-size:11px;color:var(--text-muted)}
+.photo-panel{background:var(--cream-dark);border-left:0.5px solid var(--border);display:flex;flex-direction:column;padding:28px 24px;gap:16px;min-width:0;overflow:hidden}
+.photo-panel-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:0}
+.photo-gallery-scroll{display:flex;overflow:hidden;height:240px;align-items:stretch;position:relative;width:100%}
+
+.photo-item{position:absolute;top:0;left:0;width:100%;height:240px;transition:transform 0.4s ease}
+.photo-item img{width:100%;height:240px;object-fit:contain;background:#1a1a18;border-radius:4px;border:0.5px solid var(--border);display:block}
+.photo-item-del{position:absolute;top:5px;right:5px;background:rgba(26,26,24,.7);border:none;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:white;line-height:1;opacity:0;transition:opacity .2s}
+.photo-item:hover .photo-item-del{opacity:1}
+.photo-empty{width:100%;min-height:160px;border:1.5px dashed var(--blue-mid);border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);background:var(--white);cursor:pointer;transition:background .15s}
+.photo-empty:hover{background:var(--blue-light)}
+.photo-empty-icon{font-size:28px;opacity:.5}
+.photo-empty-text{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;text-align:center;line-height:1.6}
+.photo-upload-btn{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:6px 14px;border-radius:3px;border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary);cursor:pointer;letter-spacing:.04em;transition:background .15s,border-color .15s}
+.photo-upload-btn:hover{background:var(--blue-light);border-color:var(--blue-mid)}
+#photo-file-input{display:none}
+.summary-bar{background:var(--blue-dark);padding:28px 48px;display:flex;gap:48px;align-items:center;flex-wrap:wrap}
+.stat .num{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:700;display:block;line-height:1.1;color:#fff}
+.stat .lbl{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue-light);margin-top:4px}
+.sdiv{width:0.5px;height:40px;background:rgba(255,255,255,.2)}
+.uni-chips{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.chip{background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.25);color:#fff;font-size:11px;padding:4px 12px;border-radius:2px;letter-spacing:.04em;cursor:pointer;transition:background .15s}
+.chip:hover{background:rgba(255,255,255,.25)}
+.nav-section{background:var(--cream-dark);padding:48px;border-bottom:0.5px solid var(--border)}
+.nav-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.nav-card{background:var(--white);border:0.5px solid var(--border);border-radius:4px;padding:24px 20px;cursor:pointer;color:var(--text-primary);transition:border-color .2s,background .2s;display:block;text-align:left;width:100%}
+.nav-card:hover{border-color:var(--blue-mid);background:var(--cream)}
+.nc-num{font-family:'Libre Baskerville',serif;font-size:11px;color:var(--text-muted);margin-bottom:10px;letter-spacing:0.1em}
+.nc-title{font-size:14px;font-weight:500;margin-bottom:6px}
+.nc-desc{font-size:12px;color:var(--text-secondary);line-height:1.6}
+.nc-arrow{margin-top:16px;font-size:16px;color:var(--blue-dark);display:block}
+.legend-bar{background:var(--white);border-bottom:0.5px solid var(--border);padding:14px 48px;display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+.legend-title{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap}
+.legend-group{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.legend-uni-link{cursor:pointer;color:var(--text-secondary);transition:color .15s}
+.legend-uni-link:hover{color:var(--blue-dark);text-decoration:underline}
+.cal-section{padding:32px 48px}
+.cal-controls{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.cal-month-label{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:400;min-width:200px}
+.calendar{background:var(--white);border:0.5px solid var(--border);border-radius:4px;overflow:hidden}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:0.5px solid var(--border)}
+.cal-wd{padding:10px 0;text-align:center;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day{min-height:84px;padding:8px 6px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .15s;position:relative}
+.cal-day:nth-child(7n){border-right:none}
+.cal-day:hover{background:var(--cream)}
+.cal-day.other-month .day-num{color:var(--text-muted);opacity:.3}
+.cal-day.today{background:#EFF5FB}
+.day-num{font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.cal-day.today .day-num{font-weight:500;color:var(--blue-dark)}
+.event-pill{font-size:9px;padding:2px 5px;border-radius:2px;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block;line-height:1.4}
+.cal-modal-overlay{position:fixed;inset:0;background:rgba(26,26,24,.4);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+.cal-modal-overlay.open{display:flex}
+.cal-modal{background:var(--white);border-radius:6px;padding:28px 32px;max-width:460px;width:100%;max-height:80vh;overflow-y:auto;border:0.5px solid var(--border)}
+.cal-modal-date{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:400;margin-bottom:4px}
+.cal-modal-sub{font-size:12px;color:var(--text-muted);margin-bottom:20px;letter-spacing:.06em;text-transform:uppercase}
+.cal-modal-events{display:flex;flex-direction:column;gap:10px}
+.cal-modal-event{padding:12px 14px;border-radius:4px;border-left:3px solid;background:var(--cream);position:relative}
+.cal-modal-event-title{font-size:14px;font-weight:500;margin-bottom:2px;padding-right:20px}
+.cal-modal-event-meta{font-size:12px;color:var(--text-muted);cursor:pointer;transition:color .15s}
+.cal-modal-event-meta:hover{color:var(--blue-dark);text-decoration:underline}
+.cal-modal-event-step{font-size:11px;margin-top:6px;padding:3px 8px;border-radius:2px;display:inline-block}
+.cal-modal-empty{font-size:13px;color:var(--text-muted);text-align:center;padding:20px 0}
+.modal-close-btn{float:right;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text-muted);line-height:1}
+.modal-close-btn:hover{color:var(--text-primary)}
+.cal-modal-add{margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border)}
+.cal-modal-add-title{font-size:12px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+.cal-modal-form-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.cal-modal-form-row select,.cal-modal-form-row input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);flex:1;min-width:100px}
+.del-ev{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-muted);line-height:1;padding:2px}
+.del-ev:hover{color:#7A1A1A}
+.add-section{padding:0 48px 40px}
+.add-form{background:var(--white);border:0.5px solid var(--border);border-radius:4px;padding:24px 28px}
+.add-title{font-size:14px;font-weight:500;margin-bottom:16px}
+.tl-form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.tabs{display:flex;border-bottom:0.5px solid var(--border);background:var(--white);padding:0 48px}
+.tab{padding:14px 0;margin-right:32px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;border-top:none;border-left:none;border-right:none;color:var(--text-muted);transition:color .2s,border-color .2s;background:none;font-family:'IBM Plex Sans Thai',sans-serif}
+.tab:hover{color:var(--text-primary)}
+.tab.active{color:var(--text-primary);border-bottom-color:var(--blue-dark)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.roadmap-wrap{overflow-x:auto;padding-bottom:8px}
+.roadmap{display:flex;align-items:flex-start;min-width:max-content}
+.rm-step{display:flex;flex-direction:column;align-items:center;width:96px;position:relative}
+.rm-step:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:96px;height:1px;background:var(--border);z-index:0}
+.rm-step.done:not(:last-child)::after{background:var(--blue-dark)}
+.rm-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:10px;position:relative;z-index:1;margin-bottom:8px;color:var(--text-muted);flex-shrink:0}
+.rm-step.done .rm-dot{background:var(--blue-dark);border-color:var(--blue-dark);color:white}
+.rm-step.current .rm-dot{background:var(--white);border-color:var(--blue-dark);border-width:2px;color:var(--blue-dark)}
+.rm-label{font-size:10px;text-align:center;color:var(--text-secondary);line-height:1.4;max-width:84px;word-break:keep-all}
+.rm-step.done .rm-label{color:var(--blue-dark);font-weight:500}
+.rm-step.current .rm-label{color:var(--text-primary);font-weight:500}
+.round-list{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.round-card{border:0.5px solid var(--border);border-radius:4px;overflow:hidden}
+.round-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--cream);cursor:pointer;transition:background .15s;border:none;width:100%;text-align:left;font-family:'IBM Plex Sans Thai',sans-serif}
+.round-header:hover{background:var(--cream-dark)}
+.round-title{font-size:14px;font-weight:500;color:var(--text-primary)}
+.round-sub{font-size:12px;color:var(--text-muted);margin-top:2px}
+.round-chevron{font-size:12px;color:var(--text-muted);transition:transform .2s;flex-shrink:0;margin-left:12px}
+.round-body{padding:16px 18px;background:var(--white);border-top:0.5px solid var(--border);display:none}
+.round-body.open{display:block}
+.round-desc{font-size:13px;color:var(--text-secondary);line-height:1.8}
+.round-status{font-size:11px;border:0.5px solid var(--border);border-radius:2px;padding:2px 6px;background:var(--white);color:var(--text-secondary);font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer}
+.next-activity{font-size:12px;color:var(--blue-dark);margin-top:6px;width:100%;font-weight:500}
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{background:var(--cream);border:0.5px solid var(--border);border-radius:4px;overflow:hidden}
+.check-main{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.check-main input[type="checkbox"]{width:16px;height:16px;accent-color:var(--blue-dark);flex-shrink:0;cursor:pointer}
+.check-lbl{flex:1;font-size:13px;color:var(--text-primary);transition:color .15s}
+.check-lbl.done{text-decoration:line-through;color:var(--text-muted)}
+.check-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.check-status-sel{font-size:11px;border:0.5px solid var(--border);border-radius:2px;padding:3px 7px;background:var(--white);color:var(--text-secondary);font-family:'IBM Plex Sans Thai',sans-serif;cursor:pointer}
+.check-expand{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px;transition:transform .2s;line-height:1;flex-shrink:0}
+.check-detail{display:none;padding:10px 14px 12px 42px;border-top:0.5px solid var(--border);background:var(--white)}
+.check-detail.open{display:block}
+.check-detail-text{font-size:12px;color:var(--text-secondary);line-height:1.8}
+.check-detail-edit{display:flex;gap:8px;margin-top:8px}
+.check-detail-edit input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);flex:1}
+.check-detail-edit input:focus{outline:none;border-color:var(--blue-mid)}
+.gks-uni-fields{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.gks-uni-row{display:flex;align-items:center;gap:8px}
+.gks-uni-row input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:6px 10px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);flex:1}
+.gks-uni-row input:focus{outline:none;border-color:var(--blue-mid)}
+.overview-controls{padding:20px 48px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.uni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:24px 48px 48px}
+.uni-card{background:var(--white);border:0.5px solid var(--border);border-radius:4px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative}
+.uni-card:hover{border-color:var(--blue-mid);box-shadow:0 2px 12px rgba(58,111,160,.08)}
+.uni-card-body{padding:16px 18px;flex:1;display:flex;flex-direction:column;gap:8px}
+.uni-card-name{font-family:'Libre Baskerville',serif;font-size:15px;font-weight:400;line-height:1.3}
+.uni-card-eng{font-size:11px;color:var(--text-muted);letter-spacing:0.04em;margin-top:1px}
+.uni-card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px}
+.uni-card-deadline{font-size:12px;color:var(--text-secondary);margin-top:auto;padding-top:10px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.deadline-date{font-size:11px;color:var(--text-muted)}
+.uc-del-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.85);border:0.5px solid var(--border);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--text-muted);opacity:0;transition:opacity .2s;z-index:2}
+.uni-card:hover .uc-del-btn{opacity:1}
+.uc-del-btn:hover{color:#7A1A1A;background:white}
+.uni-card-bar{height:6px}
+.detail-header{background:var(--white);border-bottom:0.5px solid var(--border);padding:24px 48px 20px;display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.detail-back{font-size:12px;color:var(--text-muted);cursor:pointer;letter-spacing:0.06em;border:none;background:none;font-family:'IBM Plex Sans Thai',sans-serif;padding:0;transition:color .15s;white-space:nowrap;margin-top:4px}
+.detail-back:hover{color:var(--blue-dark)}
+.detail-header-content{flex:1;min-width:200px}
+.detail-uni-name{font-family:'Libre Baskerville',serif;font-size:clamp(20px,3vw,30px);font-weight:400;line-height:1.2}
+.detail-uni-eng{font-size:13px;color:var(--text-muted);margin-top:4px}
+.detail-header-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.detail-tabs{display:flex;border-bottom:0.5px solid var(--border);background:var(--white);padding:0 48px;overflow-x:auto}
+.dtab{padding:12px 0;margin-right:28px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;border-top:none;border-left:none;border-right:none;color:var(--text-muted);transition:color .2s,border-color .2s;background:none;font-family:'IBM Plex Sans Thai',sans-serif;white-space:nowrap}
+.dtab:hover{color:var(--text-primary)}
+.dtab.active{color:var(--text-primary);border-bottom-color:var(--blue-dark)}
+.dtab-content{display:none}
+.dtab-content.active{display:block}
+.dates-list{display:flex;flex-direction:column;gap:10px}
+.date-row{display:grid;grid-template-columns:64px 1fr auto auto;gap:14px;align-items:center;padding:12px 16px;background:var(--cream);border:0.5px solid var(--border);border-radius:4px}
+.dr-date{text-align:center}
+.dr-day{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;display:block;line-height:1}
+.dr-month{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+.dr-name{font-size:13px;font-weight:500}
+.dr-del{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px}
+.dr-del:hover{color:#7A1A1A}
+.date-add-row{display:grid;grid-template-columns:140px 1fr 120px auto;gap:10px;align-items:end;margin-top:14px}
+.cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin-bottom:20px}
+.cost-card{background:var(--white);border:0.5px solid var(--border);border-radius:4px;padding:16px 18px}
+.cost-card-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.cost-card-amount{font-family:'IBM Plex Sans Thai',sans-serif;font-size:18px;font-weight:400;color:var(--text-primary);line-height:1.2}
+.cost-card-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
+.cost-edit-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.cost-inp-group{display:flex;flex-direction:column;gap:4px}
+.cost-inp-group label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
+.cost-inp-row{display:flex;gap:4px}
+.cost-inp-row input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:7px 10px;border:0.5px solid var(--border);border-radius:3px 0 0 3px;background:var(--white);color:var(--text-primary);flex:1;min-width:0}
+.cost-inp-row input:focus{outline:none;border-color:var(--blue-mid)}
+.cost-currency-btn{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:0 8px;border:0.5px solid var(--border);border-left:none;border-radius:0 3px 3px 0;background:var(--cream);color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:background .15s}
+.cost-currency-btn:hover,.cost-currency-btn.active{background:var(--blue-dark);color:white;border-color:var(--blue-dark)}
+.thai-prep-note-wrap{margin-top:10px}
+.thai-prep-note-wrap label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:4px}
+.thai-prep-note-wrap textarea{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;padding:8px 10px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%;resize:vertical;min-height:70px;transition:border-color .15s}
+.thai-prep-note-wrap textarea:focus{outline:none;border-color:var(--blue-mid)}
+.sch-table-wrap{overflow-x:auto}
+.sch-table{width:100%;border-collapse:collapse;font-size:13px}
+.sch-table th{text-align:left;padding:10px 14px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border);white-space:nowrap;font-weight:500}
+.sch-table td{padding:12px 14px;border-bottom:0.5px solid var(--border);vertical-align:top}
+.sch-table tr:last-child td{border-bottom:none}
+.sch-table tr:hover td{background:var(--cream)}
+.sch-amount{font-size:14px;color:var(--blue-dark)}
+.sch-del{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px}
+.sch-del:hover{color:#7A1A1A}
+.pdfs-area,.links-area{display:flex;flex-direction:column;gap:8px}
+.pdf-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cream);border:0.5px solid var(--border);border-radius:4px}
+.pdf-icon{font-size:16px;flex-shrink:0}
+.pdf-name{font-size:13px;flex:1}
+.pdf-name a{color:var(--blue-dark);text-decoration:none}
+.pdf-name a:hover{text-decoration:underline}
+.pdf-size{font-size:11px;color:var(--text-muted);flex-shrink:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdf-del-row{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px}
+.pdf-del-row:hover{color:#7A1A1A}
+.controls-bar{background:var(--white);border-bottom:0.5px solid var(--border);padding:14px 48px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cb-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-right:2px;white-space:nowrap}
+.col-toggles{display:flex;gap:6px;flex-wrap:wrap}
+.col-toggle-btn{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:4px 10px;border:0.5px solid var(--border);border-radius:2px;background:var(--white);color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.col-toggle-btn.on{background:var(--blue-dark);color:white;border-color:var(--blue-dark)}
+.table-section{padding:32px 48px}
+.table-wrap{overflow-x:auto}
+.compare-table{width:100%;border-collapse:collapse;font-size:13px;min-width:600px}
+.compare-table th:first-child,.compare-table td:first-child{position:sticky;left:0;z-index:2;background:var(--white);border-right:0.5px solid var(--border);min-width:140px}
+.compare-table thead th:first-child{background:var(--cream-dark)}
+.compare-table tr:hover td:first-child{background:var(--cream)}
+.compare-table thead tr th{padding:12px 16px;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);border-bottom:0.5px solid var(--border);background:var(--cream-dark);font-weight:500;white-space:nowrap;vertical-align:bottom}
+.compare-table thead tr.uni-row th{padding:16px 16px 10px;background:var(--white);font-size:13px;text-transform:none;letter-spacing:0;color:var(--text-primary);font-weight:500;border-bottom:0.5px solid var(--border)}
+.uni-row .uni-th-name{font-family:'Libre Baskerville',serif;font-size:14px;font-weight:400}
+.uni-row .uni-th-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;flex-shrink:0}
+.compare-table td{padding:12px 16px;border-bottom:0.5px solid var(--border);vertical-align:middle;white-space:nowrap}
+.compare-table tr:hover td{background:var(--cream)}
+.amount-cell{font-family:'IBM Plex Sans Thai',sans-serif;font-size:14px;font-weight:400;color:var(--text-primary)}
+.amount-cell.lowest{color:var(--blue-dark)}
+.amount-cell.highest{color:#7D3A0A}
+.amount-raw{font-size:11px;color:var(--text-muted);margin-top:2px}
+.amount-approx{font-size:14px;color:var(--text-primary);font-weight:500}
+.amount-approx.lowest{color:var(--blue-dark)}
+.amount-approx.highest{color:#7D3A0A}
+.row-label{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);font-weight:500}
+.row-sub{font-size:10px;color:var(--text-muted);margin-top:1px;font-weight:400;letter-spacing:0;text-transform:none}
+tr.total-row td{border-top:1.5px solid var(--border);background:var(--cream-dark) !important;font-weight:500}
+tr.total-row .amount-approx{font-size:16px}
+.chart-section{padding:0 48px 40px}
+.bar-group{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-uni-name{font-size:12px;color:var(--text-secondary);width:100px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;background:var(--cream-dark);border-radius:2px;height:24px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .6s ease;display:flex;align-items:center;padding:0 8px;min-width:30px}
+.bar-fill-label{font-size:11px;color:white;font-weight:500;white-space:nowrap}
+.bar-amount{font-size:11px;color:var(--text-secondary);width:160px;flex-shrink:0;line-height:1.4;white-space:normal}
+.bar-amount .amount-approx{font-size:13px;display:block}
+.bar-amount .amount-raw{display:block}
+.currency-toggle{display:flex;border:0.5px solid var(--border);border-radius:3px;overflow:hidden}
+.rate-input-group{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary)}
+.rate-input-group input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;width:64px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary)}
+.rate-input-group input:focus{outline:none;border-color:var(--blue-mid)}
+.currency-btn{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;padding:5px 12px;border:none;background:var(--white);color:var(--text-muted);cursor:pointer;transition:background .15s,color .15s}
+.currency-btn.active{background:var(--blue-dark);color:white}
+.card-status-sel{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:4px 24px 4px 10px;border-radius:20px;border:none;cursor:pointer;font-weight:500;appearance:none;-webkit-appearance:none;outline:none;transition:opacity .15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235A584F' opacity='.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.card-status-sel:hover{opacity:.85}
+#u-notes-area:focus{outline:none;border-color:var(--blue-mid)}
+
+/* ── NEW: Export/Import toolbar strip ── */
+.export-strip{background:var(--cream-dark);border-bottom:0.5px solid var(--border);padding:10px 48px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto}
+.export-strip-label{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-right:4px;white-space:nowrap}
+.btn-export{display:inline-flex;align-items:center;gap:5px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:5px 12px;border-radius:3px;border:0.5px solid var(--border);background:var(--white);color:var(--text-secondary);cursor:pointer;letter-spacing:.04em;transition:background .15s,border-color .15s;white-space:nowrap}
+.btn-export:hover{background:var(--cream);border-color:var(--blue-mid);color:var(--text-primary)}
+.btn-export-pdf{border-color:var(--blue-mid);color:var(--blue-dark)}
+.btn-export-pdf:hover{background:var(--blue-light)}
+.btn-import{border-color:var(--border);color:var(--text-secondary)}
+#import-file-input{display:none}
+
+/* ── NEW: Home nav button highlight ── */
+#nav-home{color:var(--blue-dark);font-weight:500}
+#nav-home:hover{color:#2d5a88}
+
+@media(max-width:768px){
+  /* ── ป้องกัน scroll ขวา ── */
+  html,body{max-width:100vw;overflow-x:hidden}
+
+  /* ── Header ── */
+  header{
+    padding:0 16px;
+    height:auto;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .logo{padding:10px 0 4px;font-size:12px}
+  nav{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    padding:6px 0 10px;
+    border-top:0.5px solid var(--border);
+    gap:0;
+  }
+  nav::-webkit-scrollbar{display:none}
+  nav button{white-space:nowrap;padding:4px 12px;flex-shrink:0;font-size:11px}
+  #sync-status{font-size:9px;flex-shrink:0}
+  .btn-danger{flex-shrink:0;font-size:10px;padding:3px 8px}
+
+  /* ── Layout ── */
+  .hero,.page-header{padding:32px 20px 24px}
+  .home-main-grid{grid-template-columns:1fr;width:100%}
+  .info-panel{width:100%}
+  .photo-panel{
+    border-left:none;
+    border-top:0.5px solid var(--border);
+    width:100%;
+    padding:20px 16px;
+  }
+  .photo-gallery-scroll{padding-right:16px}
+  .photo-upload-btn{width:100%}
+  .summary-bar{padding:20px;gap:20px;width:100%}
+  .uni-chips{margin-left:0}
+  .nav-section{padding:24px 20px}
+
+  /* ── Export strip ── */
+  .export-strip{
+    padding:10px 16px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    gap:6px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .export-strip::-webkit-scrollbar{display:none}
+  .export-strip-label{flex-shrink:0;font-size:10px}
+  .btn-export{flex-shrink:0;font-size:10px;padding:4px 10px}
+
+  /* ── Sections ── */
+  .legend-bar,.cal-section,.add-section,.controls-bar,.table-section,.chart-section{padding-left:20px;padding-right:20px}
+  .overview-controls,.uni-grid{padding-left:20px;padding-right:20px}
+  .section{padding-left:20px;padding-right:20px}
+  .detail-header{padding:20px}
+  .detail-tabs{padding:0 20px}
+  .date-add-row{grid-template-columns:1fr 1fr}
+  .tl-form-row{grid-template-columns:1fr}
+  footer{padding:20px;flex-direction:column;gap:8px;text-align:center}
+  .tabs{padding:0 20px}
+  .cost-edit-row{grid-template-columns:1fr 1fr}
+
+  /* ── Status item ── */
+  .status-list{width:100%}
+  .status-item{max-width:100%;overflow:hidden}
+
+  /* ── Calendar ── */
+  .cal-day{min-height:60px;padding:4px 3px}
+  .event-pill{font-size:8px;padding:1px 3px}
+
+  /* ── Compare ── */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+/* ── Photo Carousel ── */
+.photo-carousel-wrap{position:relative;width:100%;overflow:hidden;border-radius:4px}
+.photo-carousel-track{display:flex;transition:transform 0.4s ease;width:100%}
+.photo-carousel-track .photo-item{min-width:100%;width:100%}
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(26,26,24,.55);border:none;color:white;font-size:18px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s;line-height:1}
+.carousel-btn:hover{background:rgba(26,26,24,.8)}
+.carousel-btn-prev{left:8px}
+.carousel-btn-next{right:8px}
+.carousel-dots{display:flex;justify-content:center;gap:5px;margin-top:8px}
+.carousel-dot{width:6px;height:6px;border-radius:50%;background:var(--blue-light);cursor:pointer;transition:background .2s;border:none;padding:0}
+.carousel-dot.active{background:var(--blue-dark)}
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="lo-spinner"></div>
+  <div class="lo-title">Spring Round</div>
+  <div class="lo-sub">กำลังโหลดข้อมูล…</div>
+</div>
+
+<header>
+  <button class="logo" onclick="goPage('home')">Spring Round</button>
+  <nav>
+    <button id="nav-home" onclick="goPage('home')">Home</button>
+    <button id="nav-timeline" onclick="goPage('timeline')">Timeline</button>
+    <button id="nav-gks" onclick="goPage('gks')">GKS</button>
+    <button id="nav-universities" onclick="goPage('universities')">Universities</button>
+    <button id="nav-compare" onclick="goPage('compare')">Compare</button>
+    <span id="sync-status" class="synced">● Synced</span>
+    <button class="btn btn-danger btn-sm" onclick="STORAGE.confirmClear()" title="ล้างข้อมูลทั้งหมด" style="margin-left:8px">รีเซ็ต</button>
+  </nav>
+</header>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <!-- Export/Import strip for Home page -->
+  <div class="export-strip">
+    <span class="export-strip-label">ข้อมูล</span>
+    <button class="btn-export" onclick="EXPORT.asJSON()" title="สำรองข้อมูลเป็น JSON">⬇ Export JSON</button>
+    <button class="btn-export btn-export-pdf" onclick="EXPORT.asPDF()" title="ส่งออกเป็น PDF">⬇ Export PDF</button>
+    <button class="btn-export btn-import" onclick="document.getElementById('import-file-input').click()" title="นำเข้าไฟล์ JSON">⬆ Import JSON</button>
+    <input type="file" id="import-file-input" accept=".json,application/json" onchange="EXPORT.importJSON(event)">
+  </div>
+
+  <div class="hero">
+    <p class="eyebrow">Spring Round</p>
+    <h1 class="hero-title">University<br><em>Application</em><br>Summary</h1>
+  </div>
+  <div class="home-main-grid">
+    <div class="info-panel">
+      <div class="panel-sec">
+        <p class="panel-label">Upcoming Deadlines</p>
+        <div class="deadline-list" id="home-deadline-list"></div>
+      </div>
+      <div class="panel-div"></div>
+      <div class="panel-sec">
+        <p class="panel-label">สถานะแต่ละแห่ง</p>
+        <div class="status-list" id="home-status-list"></div>
+      </div>
+    </div>
+    <div class="photo-panel">
+      <p class="photo-panel-label">รูปภาพ</p>
+      <div class="photo-carousel-wrap" id="photo-carousel-wrap">
+        <div class="photo-gallery-scroll" id="photo-gallery">
+          <div class="photo-empty" id="photo-empty" onclick="document.getElementById('photo-file-input').click()">
+            <span class="photo-empty-icon">🖼</span>
+            <span class="photo-empty-text">คลิกเพื่อเลือกรูป<br>หรือลากวางที่นี่</span>
+          </div>
+        </div>
+        <button class="carousel-btn carousel-btn-prev" id="carousel-prev" onclick="PHOTO.slide(-1)" style="display:none">‹</button>
+        <button class="carousel-btn carousel-btn-next" id="carousel-next" onclick="PHOTO.slide(1)" style="display:none">›</button>
+      </div>
+      <div class="carousel-dots" id="carousel-dots"></div>
+      <input type="file" id="photo-file-input" accept="image/*" multiple onchange="PHOTO.handleFiles(event)">
+      <button class="photo-upload-btn" onclick="document.getElementById('photo-file-input').click()">+ เพิ่มรูปภาพ</button>
+    </div>
+  </div>
+  <div class="summary-bar">
+    <div class="stat"><span class="num" id="home-stat-count">0</span><span class="lbl">แห่งที่ยื่น</span></div>
+    <div class="sdiv"></div>
+    <div class="stat"><span class="num" id="home-stat-rounds">2</span><span class="lbl">รอบที่สมัคร</span></div>
+    <div class="uni-chips" id="home-chips"></div>
+  </div>
+  <div class="nav-section">
+    <p class="sec-label" style="padding:0">ไปที่หัวข้อ</p>
+    <div class="nav-cards" style="margin-top:24px">
+      <button class="nav-card" onclick="goPage('timeline')"><div class="nc-num">01</div><div class="nc-title">Timeline</div><div class="nc-desc">ปฏิทินรวมทุกกิจกรรม แยกตามมหาลัยและประเภท</div><span class="nc-arrow">→</span></button>
+      <button class="nav-card" onclick="goPage('gks')"><div class="nc-num">02</div><div class="nc-title">GKS Round</div><div class="nc-desc">Embassy Track และ University Track พร้อม roadmap และ checklist</div><span class="nc-arrow">→</span></button>
+      <button class="nav-card" onclick="goPage('universities')"><div class="nc-num">03</div><div class="nc-title">University Round</div><div class="nc-desc">รายละเอียดแต่ละมหาลัย วันสำคัญ เอกสาร ทุน และค่าใช้จ่าย</div><span class="nc-arrow">→</span></button>
+      <button class="nav-card" onclick="goPage('compare')"><div class="nc-num">04</div><div class="nc-title">Compare</div><div class="nc-desc">ค่าเทอม ค่าหอ ค่าครองชีพ และค่าแรกเข้าทุกมหาลัยในที่เดียว</div><span class="nc-arrow">→</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE PAGE -->
+<div id="page-timeline" class="page">
+  <div class="page-header">
+    <p class="eyebrow">หน้า 01</p>
+    <h1 class="page-title"><em>Timeline</em></h1>
+    <p class="page-sub">ปฏิทินรวมทุกกิจกรรม กดวันเพื่อดูรายละเอียดหรือเพิ่มกิจกรรม</p>
+  </div>
+  <div class="legend-bar">
+    <span class="legend-title">มหาลัย</span>
+    <div class="legend-group" id="tl-legend-unis"><span class="legend-item"><span class="legend-dot" style="background:#7B57CE"></span>GKS</span></div>
+    <span class="legend-title" style="margin-left:12px">ประเภท</span>
+    <div class="legend-group">
+      <span class="legend-item"><span class="legend-sq" style="background:#1A5276"></span>สมัคร</span>
+      <span class="legend-item"><span class="legend-sq" style="background:#1A6B3A"></span>เอกสาร</span>
+      <span class="legend-item"><span class="legend-sq" style="background:#7D3A0A"></span>สัมภาษณ์</span>
+      <span class="legend-item"><span class="legend-sq" style="background:#4A2D8A"></span>ประกาศผล</span>
+    </div>
+  </div>
+  <div class="cal-section">
+    <div class="cal-controls">
+      <button class="btn" onclick="TL.prev()">← Previous</button>
+      <span class="cal-month-label" id="tl-month-label"></span>
+      <button class="btn" onclick="TL.next()">Next →</button>
+    </div>
+    <div class="calendar">
+      <div class="cal-weekdays"><div class="cal-wd">Sun</div><div class="cal-wd">Mon</div><div class="cal-wd">Tue</div><div class="cal-wd">Wed</div><div class="cal-wd">Thu</div><div class="cal-wd">Fri</div><div class="cal-wd">Sat</div></div>
+      <div class="cal-grid" id="tl-cal-grid"></div>
+    </div>
+  </div>
+  <div class="add-section">
+    <div class="add-form">
+      <div class="add-title">+ เพิ่มกิจกรรม</div>
+      <div class="tl-form-row">
+        <div class="form-group" style="margin:0"><label>วันที่</label><input type="date" id="ev-date"></div>
+        <div class="form-group" style="margin:0"><label>มหาลัย / รอบ</label><select id="ev-uni"></select></div>
+        <div class="form-group" style="margin:0"><label>ประเภท</label><select id="ev-type"><option value="apply">สมัคร / Deadline</option><option value="doc">เอกสาร</option><option value="inter">สัมภาษณ์</option><option value="result">ประกาศผล</option><option value="other">อื่นๆ</option></select></div>
+      </div>
+      <div class="tl-form-row" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+        <div class="form-group" style="margin:0"><label>ชื่อกิจกรรม</label><input type="text" id="ev-title" placeholder="เช่น ปิดรับสมัคร Online"></div>
+        <div class="form-group" style="margin:0"><label>หมายเหตุ</label><input type="text" id="ev-step" placeholder="เช่น รอบที่ 1"></div>
+      </div>
+      <button class="btn btn-primary" onclick="TL.addFromForm()">เพิ่มกิจกรรม</button>
+    </div>
+  </div>
+</div>
+
+<!-- Timeline day modal -->
+<div class="cal-modal-overlay" id="cal-modal" onclick="TL.closeOverlay(event)">
+  <div class="cal-modal">
+    <button class="modal-close-btn" onclick="document.getElementById('cal-modal').classList.remove('open')">✕</button>
+    <div class="cal-modal-date" id="cal-modal-date"></div>
+    <div class="cal-modal-sub" id="cal-modal-sub"></div>
+    <div class="cal-modal-events" id="cal-modal-events"></div>
+    <div class="cal-modal-add">
+      <div class="cal-modal-add-title">+ เพิ่มกิจกรรมในวันนี้</div>
+      <div class="cal-modal-form-row">
+        <select id="m-uni"></select>
+        <select id="m-type"><option value="apply">สมัคร</option><option value="doc">เอกสาร</option><option value="inter">สัมภาษณ์</option><option value="result">ประกาศผล</option><option value="other">อื่นๆ</option></select>
+      </div>
+      <div class="cal-modal-form-row">
+        <input type="text" id="m-title" placeholder="ชื่อกิจกรรม" style="flex:2">
+        <input type="text" id="m-step" placeholder="หมายเหตุ" style="flex:1">
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="TL.addFromModal()">เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- GKS PAGE -->
+<div id="page-gks" class="page">
+  <div class="page-header">
+    <p class="eyebrow">หน้า 02</p>
+    <h1 class="page-title">GKS <em>Round</em></h1>
+    <p class="page-sub">ทุนรัฐบาลเกาหลี (Global Korea Scholarship) แบ่งเป็น Embassy Track และ University Track</p>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="GKS.switchTab('emb',this)">Embassy Track</button>
+    <button class="tab" onclick="GKS.switchTab('uni',this)">University Track</button>
+    <button class="tab" onclick="GKS.switchTab('docs',this)">เอกสาร GKS</button>
+  </div>
+  <div id="gtab-emb" class="tab-content active">
+    <div class="section">
+      <div class="sec-label">Roadmap — Embassy Track</div>
+      <div class="roadmap-wrap"><div class="roadmap" id="emb-roadmap"></div></div>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="GKS.setRM('emb',GKS.cur.emb+1)">ขั้นถัดไป ✓</button>
+        <button class="btn btn-sm" onclick="GKS.setRM('emb',GKS.cur.emb-1)">← ย้อน</button>
+        <span style="font-size:12px;color:var(--text-muted);align-self:center" id="emb-rm-lbl"></span>
+        <div class="next-activity" id="emb-next-activity"></div>
+      </div>
+      <div class="round-list" id="emb-round-list"></div>
+      <div style="margin-top:20px">
+        <div class="sec-label" style="margin-bottom:10px">มหาวิทยาลัยที่ยื่น (Embassy Track)</div>
+        <div class="gks-uni-fields" id="emb-uni-fields"></div>
+        <button class="add-btn" style="margin-top:8px" onclick="GKS.addEmbUni()">+ เพิ่มมหาวิทยาลัย</button>
+      </div>
+    </div>
+  </div>
+  <div id="gtab-uni" class="tab-content">
+    <div class="section">
+      <div class="sec-label">Roadmap — University Track</div>
+      <div class="roadmap-wrap"><div class="roadmap" id="uni-roadmap"></div></div>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary btn-sm" onclick="GKS.setRM('uni',GKS.cur.uni+1)">ขั้นถัดไป ✓</button>
+        <button class="btn btn-sm" onclick="GKS.setRM('uni',GKS.cur.uni-1)">← ย้อน</button>
+        <span style="font-size:12px;color:var(--text-muted);align-self:center" id="uni-rm-lbl"></span>
+        <div class="next-activity" id="uni-next-activity"></div>
+      </div>
+      <div class="round-list" id="uni-round-list"></div>
+      <div style="margin-top:20px">
+        <div class="sec-label" style="margin-bottom:10px">มหาวิทยาลัยที่ยื่น (University Track)</div>
+        <div class="gks-uni-fields" id="uni-uni-fields"></div>
+        <button class="add-btn" style="margin-top:8px" onclick="GKS.addUniUni()">+ เพิ่มมหาวิทยาลัย</button>
+      </div>
+    </div>
+  </div>
+  <div id="gtab-docs" class="tab-content">
+    <div class="section">
+      <div class="sec-label">Roadmap — การเตรียมเอกสาร</div>
+      <div class="roadmap-wrap"><div class="roadmap" id="doc-roadmap"></div></div>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="GKS.setRM('doc',GKS.cur.doc+1)">ขั้นถัดไป ✓</button>
+        <button class="btn btn-sm" onclick="GKS.setRM('doc',GKS.cur.doc-1)">← ย้อน</button>
+        <span style="font-size:12px;color:var(--text-muted);align-self:center" id="doc-rm-lbl"></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-label">Checklist เอกสาร GKS</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">กด ▾ เพื่อดูรายละเอียด · เลือกสถานะ · ติ๊กเมื่อพร้อมส่ง</div>
+      <div class="check-list" id="gks-doc-checklist"></div>
+      <button class="add-btn" style="margin-top:10px" onclick="GKS.addDocItem()">+ เพิ่มเอกสาร</button>
+    </div>
+  </div>
+</div>
+
+<!-- UNIVERSITIES PAGE -->
+<div id="page-universities" class="page">
+  <div id="uview-overview">
+    <div class="page-header">
+      <p class="eyebrow">หน้า 03</p>
+      <h1 class="page-title">University <em>Round</em></h1>
+      <p class="page-sub">รายละเอียดแต่ละมหาวิทยาลัย กดการ์ดเพื่อดูวันสำคัญ เอกสาร ทุน และค่าใช้จ่าย</p>
+    </div>
+    <div class="overview-controls">
+      <span id="uni-count" style="font-size:12px;color:var(--text-muted)">— มหาวิทยาลัย</span>
+      <button class="btn btn-primary" onclick="UNI.openAddModal()">+ เพิ่มมหาวิทยาลัย</button>
+    </div>
+    <div class="uni-grid" id="uni-grid"></div>
+  </div>
+  <div id="uview-detail" style="display:none">
+    <div class="detail-header">
+      <button class="detail-back" onclick="UNI.showOverview()">← กลับ</button>
+      <div class="detail-header-content">
+        <div class="detail-uni-name" id="d-name"></div>
+        <div class="detail-uni-eng" id="d-eng"></div>
+        <div id="d-faculty-wrap" style="margin-top:4px;display:flex;align-items:center;gap:6px">
+          <span id="d-faculty-display" style="font-size:12px;color:var(--text-muted);letter-spacing:0.04em"></span>
+          <button id="d-faculty-edit-btn" onclick="UNI.editFaculty()" style="font-size:11px;color:var(--blue-mid);background:none;border:none;cursor:pointer;padding:0;letter-spacing:0.04em">✎ แก้ไข</button>
+        </div>
+        <div id="d-faculty-input-wrap" style="display:none;margin-top:4px">
+          <input type="text" id="d-faculty-input" placeholder="คณะ / สาขา เช่น คณะวิศวกรรมศาสตร์, Computer Science" style="font-size:12px;padding:4px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);width:320px;max-width:100%">
+          <button onclick="UNI.saveFaculty()" style="font-size:11px;margin-left:6px;padding:4px 10px;background:var(--blue-dark);color:white;border:none;border-radius:3px;cursor:pointer">บันทึก</button>
+          <button onclick="UNI.cancelFaculty()" style="font-size:11px;margin-left:4px;padding:4px 10px;background:none;border:0.5px solid var(--border);border-radius:3px;cursor:pointer">ยกเลิก</button>
+        </div>
+      </div>
+      <div class="detail-header-actions">
+        <a id="d-apply-link" href="#" target="_blank" class="btn btn-sm btn-primary">เว็บสมัคร ↗</a>
+      </div>
+    </div>
+    <div class="detail-tabs">
+      <button class="dtab active" onclick="UNI.switchDTab('dates',this)">วันสำคัญ</button>
+      <button class="dtab" onclick="UNI.switchDTab('docs',this)">เอกสาร</button>
+      <button class="dtab" onclick="UNI.switchDTab('schol',this)">ทุน</button>
+      <button class="dtab" onclick="UNI.switchDTab('cost',this)">ค่าใช้จ่าย</button>
+      <button class="dtab" onclick="UNI.switchDTab('links',this)">ลิงก์</button>
+      <button class="dtab" onclick="UNI.switchDTab('notes',this)">Notes</button>
+    </div>
+    <div id="udtab-dates" class="dtab-content active">
+      <div class="section">
+        <div class="sec-label">วันสำคัญ</div>
+        <div class="dates-list" id="u-dates-list"></div>
+        <div class="date-add-row">
+          <div class="form-group" style="margin:0"><label>วันที่</label><input type="date" id="add-date-val"></div>
+          <div class="form-group" style="margin:0"><label>ชื่อกิจกรรม</label><input type="text" id="add-date-name" placeholder="เช่น ปิดรับสมัคร"></div>
+          <div class="form-group" style="margin:0"><label>ประเภท</label><select id="add-date-type"><option value="apply">สมัคร</option><option value="doc">เอกสาร</option><option value="inter">สัมภาษณ์</option><option value="result">ประกาศผล</option><option value="other">อื่นๆ</option></select></div>
+          <button class="btn btn-primary btn-sm" style="align-self:end;height:36px" onclick="UNI.addDate()">+ เพิ่ม</button>
+        </div>
+      </div>
+    </div>
+    <div id="udtab-docs" class="dtab-content">
+      <div class="section">
+        <div class="sec-label">Checklist เอกสาร</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">กด ▾ รายละเอียด · เลือกสถานะ · ติ๊กเมื่อพร้อมส่ง</div>
+        <div class="check-list" id="u-doc-checklist"></div>
+        <button class="add-btn" style="margin-top:10px" onclick="UNI.addDocItem()">+ เพิ่มเอกสาร</button>
+      </div>
+    </div>
+    <div id="udtab-schol" class="dtab-content">
+      <div class="section">
+        <div class="sec-label">ทุนการศึกษา</div>
+        <div class="sch-table-wrap">
+          <table class="sch-table">
+            <thead><tr><th>ชื่อทุน</th><th>มูลค่า / รายละเอียด</th><th>เงื่อนไข</th><th>Deadline</th><th>สถานะ</th><th></th></tr></thead>
+            <tbody id="u-sch-tbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border)">
+          <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">+ เพิ่มทุน</div>
+          <div class="form-row-2" style="margin-bottom:10px">
+            <div class="form-group" style="margin:0"><label>ชื่อทุน</label><input type="text" id="s-name" placeholder="เช่น Departmental Scholarship"></div>
+            <div class="form-group" style="margin:0"><label>มูลค่า (ตัวเลข, ถ้ามี)</label><input type="number" id="s-amount" placeholder="0"></div>
+          </div>
+          <div class="form-group"><label>รายละเอียดมูลค่า / สิทธิ์ที่ได้รับ</label><textarea id="s-value-detail" placeholder="เช่น ฟรีค่าเทอม + หอพัก + ค่าใช้จ่ายรายเดือน 200,000 วอน"></textarea></div>
+          <div class="form-row-2" style="margin-bottom:10px">
+            <div class="form-group" style="margin:0"><label>เงื่อนไข</label><textarea id="s-cond" placeholder="เช่น GPA >= 3.5 ต่อเนื่อง 2 ภาคเรียน..." style="min-height:60px"></textarea></div>
+            <div class="form-group" style="margin:0">
+              <label>Deadline</label><input type="date" id="s-deadline" style="margin-bottom:8px">
+              <label>สถานะ</label>
+              <select id="s-status">
+                <option value="prep">กำลังเตรียม</option><option value="applied">สมัครแล้ว</option>
+                <option value="waiting">รอผล</option><option value="pass">ได้รับทุน ✓</option>
+                <option value="fail">ไม่ได้รับ</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="UNI.addScholarship()">+ เพิ่มทุน</button>
+        </div>
+      </div>
+    </div>
+    <div id="udtab-cost" class="dtab-content">
+      <div class="section">
+        <div class="sec-label">ค่าใช้จ่าย</div>
+        <div class="cost-grid" id="u-cost-grid"></div>
+        <div style="background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:14px 16px">
+          <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">แก้ไขค่าใช้จ่าย (กดสัญลักษณ์เงินเพื่อเปลี่ยนสกุล)</div>
+          <div class="cost-edit-row" id="u-cost-edit-row"></div>
+          <div class="thai-prep-note-wrap" style="margin-top:14px">
+            <label>Note — ค่าเตรียมตัวในไทย</label>
+            <textarea id="thai-prep-note" placeholder="เช่น ค่าแปลเอกสาร, ค่ารับรอง, ค่าตั๋วเครื่องบิน, ค่าวีซ่า..." onblur="UNI.saveThaiPrepNote()"></textarea>
+          </div>
+          <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="UNI.saveCosts()">บันทึก</button></div>
+        </div>
+      </div>
+    </div>
+    <div id="udtab-links" class="dtab-content">
+      <div class="section">
+        <div class="sec-label">ลิงก์สำคัญ</div>
+        <div class="links-area" id="u-links-area"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:12px">
+          <div class="form-group" style="margin:0"><label>ชื่อ</label><input type="text" id="link-name" placeholder="หน้าสมัคร"></div>
+          <div class="form-group" style="margin:0"><label>URL</label><input type="text" id="link-url" placeholder="https://"></div>
+          <button class="btn btn-primary btn-sm" style="align-self:end;height:36px" onclick="UNI.addLink()">+ เพิ่ม</button>
+        </div>
+      </div>
+    </div>
+    <div id="udtab-notes" class="dtab-content">
+      <div class="section">
+        <div class="sec-label">Notes</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">จดอะไรก็ได้ — บันทึกอัตโนมัติทุกครั้งที่พิมพ์</p>
+        <textarea id="u-notes-area"
+          style="width:100%;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;line-height:1.9;padding:16px 18px;border:0.5px solid var(--border);border-radius:4px;background:var(--white);color:var(--text-primary);resize:vertical;min-height:320px;transition:border-color .15s"
+          placeholder="— ข้อดี / ข้อเสียของมหาลัยนี้&#10;— ประเด็นที่อยากถามตอนสัมภาษณ์&#10;— เหตุผลที่อยากสมัครที่นี่&#10;— สิ่งที่ต้องเตรียมเพิ่มเติม&#10;— ลิงก์หรือข้อมูลที่จดไว้"
+          oninput="UNI.saveNotes()"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add University Modal -->
+<div class="modal-overlay" id="add-uni-modal" onclick="UNI.closeAddOverlay(event)">
+  <div class="modal">
+    <div class="modal-title">เพิ่มมหาวิทยาลัย<button class="modal-close" onclick="document.getElementById('add-uni-modal').classList.remove('open')">✕</button></div>
+    <div class="form-group"><label>ชื่อ (ย่อ / ภาษาไทย)</label><input type="text" id="new-name" placeholder="เช่น SNU, มหาวิทยาลัย A"></div>
+    <div class="form-group"><label>ชื่อเต็ม (English)</label><input type="text" id="new-eng" placeholder="Seoul National University"></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>สีธีม</label><input type="color" id="new-color" value="#BAD5EB" oninput="document.getElementById('new-color-preview').style.background=this.value"><div id="new-color-preview" style="height:6px;border-radius:3px;background:#BAD5EB;margin-top:4px;transition:background .15s"></div></div>
+      <div class="form-group"><label>สถานะ</label><select id="new-status"><option value="prep">เตรียมเอกสาร</option><option value="applied">สมัครแล้ว</option><option value="waiting">รอสัมภาษณ์</option><option value="result">รอประกาศผล</option><option value="pass">ผ่าน ✓</option><option value="fail">ไม่ผ่าน</option></select></div>
+    </div>
+    <div class="form-group"><label>เว็บสมัคร</label><input type="url" id="new-apply-url" placeholder="https://"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn" onclick="document.getElementById('add-uni-modal').classList.remove('open')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="UNI.addUniversity()">เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE PAGE -->
+<div id="page-compare" class="page">
+  <div class="page-header">
+    <p class="eyebrow">หน้า 04</p>
+    <h1 class="page-title">Cost <em>Comparison</em></h1>
+    <p class="page-sub">ค่าเทอม ค่าหอ ค่าครองชีพ และค่าใช้จ่ายอื่นๆ ทุกมหาวิทยาลัยในตารางเดียว</p>
+  </div>
+  <!-- Export/Import strip for Compare page -->
+  <div class="export-strip">
+    <span class="export-strip-label">ข้อมูล</span>
+    <button class="btn-export" onclick="EXPORT.asJSON()" title="สำรองข้อมูลเป็น JSON">⬇ Export JSON</button>
+    <button class="btn-export btn-export-pdf" onclick="EXPORT.asPDF()" title="ส่งออกเป็น PDF">⬇ Export PDF</button>
+    <button class="btn-export btn-import" onclick="document.getElementById('import-file-input').click()" title="นำเข้าไฟล์ JSON">⬆ Import JSON</button>
+  </div>
+  <div class="controls-bar">
+    <span class="cb-label">อัตราแลกเปลี่ยน</span>
+    <div class="rate-input-group" title="ใช้คำนวณยอด ≈ โดยประมาณเท่านั้น ไม่กระทบยอดดิบที่กรอกไว้">
+      <span>1฿ =</span>
+      <input type="number" id="cmp-rate-input" value="36" min="0.01" step="0.01" onchange="CMP.setRate(this.value)">
+      <span>₩</span>
+    </div>
+    <span class="cb-label" style="margin-left:8px">คอลัมน์</span>
+    <div class="col-toggles" id="col-toggles"></div>
+    <div style="margin-left:auto"><button class="btn btn-sm" onclick="CMP.openAddModal()">+ เพิ่มมหาวิทยาลัย</button></div>
+  </div>
+  <div class="table-section"><div class="table-wrap"><table class="compare-table" id="compare-table"></table></div></div>
+  <div class="chart-section">
+    <div class="sec-label" id="cmp-chart-lbl">Total Estimated Cost (THB)</div>
+    <div class="bar-group" id="bar-group"></div>
+    <div style="margin-top:12px;font-size:11px;color:var(--text-muted);line-height:1.6">
+      * คำนวณจาก ค่าเทอม + ค่าหอ×6 + ค่าครองชีพ×6 + ค่าสมัคร + ค่าแรกเข้า + ค่าเตรียมตัวในไทย<br>
+      * ตัวเลขตัวใหญ่ที่มี "≈" คือยอดประมาณการรวมเป็นสกุลเดียวเพื่อใช้เทียบขนาด/จัดอันดับเท่านั้น คำนวณด้วยอัตราที่ตั้งไว้ด้านบน (ตอนนี้ 1฿ = <span id="cmp-rate-note">36</span>₩) — <strong>ปรับเลขอัตราด้านบนให้ตรงกับวันนี้เพื่อความแม่นยำ</strong><br>
+      * ตัวเลขเล็กบรรทัดล่าง (เช่น ฿120,000 + ₩3,000,000) คือยอดดิบตามที่กรอกจริง ไม่มีการแปลงค่าเงินใดๆ
+    </div>
+  </div>
+</div>
+
+<!-- Add Compare Modal -->
+<div class="modal-overlay" id="add-cmp-modal" onclick="CMP.closeAddOverlay(event)">
+  <div class="modal">
+    <div class="modal-title">เพิ่มมหาวิทยาลัย<button class="modal-close" onclick="document.getElementById('add-cmp-modal').classList.remove('open')">✕</button></div>
+    <div class="form-group"><label>ชื่อ (ย่อ)</label><input type="text" id="cn-name" placeholder="เช่น KAIST"></div>
+    <div class="form-group"><label>สีธีม</label><input type="color" id="cn-color" value="#C0D4E8"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-group"><label>ค่าสมัคร (฿)</label><input type="number" id="cn-apply" placeholder="0"></div>
+      <div class="form-group"><label>ค่าเทอม (฿)</label><input type="number" id="cn-tuition" placeholder="0"></div>
+      <div class="form-group"><label>ค่าหอ/เดือน (฿)</label><input type="number" id="cn-dorm" placeholder="0"></div>
+      <div class="form-group"><label>ค่าครองชีพ/เดือน (฿)</label><input type="number" id="cn-living" placeholder="0"></div>
+      <div class="form-group"><label>ค่าแรกเข้า (฿)</label><input type="number" id="cn-entrance" placeholder="0"></div>
+      <div class="form-group"><label>ค่าเตรียมตัวในไทย (฿)</label><input type="number" id="cn-thaiprep" placeholder="0"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn" onclick="document.getElementById('add-cmp-modal').classList.remove('open')">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="CMP.addUni()">เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Spring Round — University Application Summary</p>
+  <p id="footer-note"></p>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════
+     FIREBASE SDK (Realtime Database)
+     ════════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCxk3-JjJKBzyFWsIdHt3U9wQMDCZPvVz8",
+  authDomain: "university-application-summary.firebaseapp.com",
+  databaseURL: "https://university-application-summary-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "university-application-summary",
+  storageBucket: "university-application-summary.firebasestorage.app",
+  messagingSenderId: "67113554306",
+  appId: "1:67113554306:web:34eaaa01ba7d0e59d37f9b",
+  measurementId: "G-B78XFMWLSF"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+const DB_PATH = "springround/data";
+
+const syncEl = document.getElementById('sync-status');
+function setSynced()  { syncEl.textContent='● Synced';  syncEl.className='synced'; }
+function setSyncing() { syncEl.textContent='↻ Saving…'; syncEl.className='syncing'; }
+function setOffline() { syncEl.textContent='✕ Offline'; syncEl.className='offline'; }
+
+let saveTimer = null;
+let isRemoteUpdate = false;
+
+window.FIREBASE_SAVE = function(dataObj) {
+  clearTimeout(saveTimer);
+  setSyncing();
+  saveTimer = setTimeout(() => {
+    set(ref(db, DB_PATH), dataObj)
+      .then(setSynced)
+      .catch(err => { console.error('Firebase save error', err); setOffline(); });
+  }, 600);
+};
+
+window.FIREBASE_CLEAR = function() {
+  remove(ref(db, DB_PATH))
+    .then(() => { setSynced(); location.reload(); })
+    .catch(err => { console.error('Firebase clear error', err); setOffline(); });
+};
+
+onValue(ref(db, DB_PATH), (snapshot) => {
+  const saved = snapshot.val();
+  isRemoteUpdate = true;
+  try {
+    if (saved) {
+      if (!window._appReady) {
+        window._savedData = saved;
+        window._bootApp && window._bootApp(saved);
+      } else {
+        window._applyRemoteData && window._applyRemoteData(saved);
+      }
+    } else {
+      window._bootApp && window._bootApp(null);
+    }
+  } finally {
+    isRemoteUpdate = false;
+  }
+}, (error) => {
+  console.error('Firebase listen error', error);
+  setOffline();
+  window._bootApp && window._bootApp(null);
+});
+
+window._isRemoteUpdate = () => isRemoteUpdate;
+// Auto slideshow photos
+(function(){
+  function startSlide(){
+    const gallery = document.getElementById('photo-gallery');
+    if(!gallery) return;
+    const items = gallery.querySelectorAll('.photo-item');
+    if(items.length < 2) return;
+    let cur = 0;
+    setInterval(()=>{
+      cur = (cur + 1) % items.length;
+      items[cur].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+    }, 3000);
+  }
+  // รอให้รูปโหลดก่อน
+  setTimeout(startSlide, 2000);
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════
+     APP SCRIPT
+     ════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── PAGE NAVIGATION ── */
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+id);
+  if(nb) nb.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='universities') UNI.renderOverview();
+  if(id==='compare') CMP.render();
+  if(id==='home') HOME.refresh();
+  if(id==='timeline') { TL.refreshUniSelects(); TL.render(); }
+}
+
+(function(){
+  const el=document.getElementById('footer-note');if(!el)return;
+  const d=new Date();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  el.textContent='อัปเดตล่าสุด: '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+})();
+
+/* ── SHARED CONSTANTS ── */
+const EN_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const STATUS_OPTIONS=['ยังไม่เริ่ม','เตรียม','แปลแล้ว','รับรองกงสุล','รับรองสถานทูต','พร้อมส่ง'];
+const STATUS_CLASS=['s-0','s-1','s-2','s-3','s-4','s-5'];
+const PILL_MAP={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',result:'pill-result',pass:'pill-pass',fail:'pill-fail'};
+const PILL_LABEL={prep:'เตรียมเอกสาร',applied:'สมัครแล้ว',waiting:'รอสัมภาษณ์',result:'รอประกาศผล',pass:'ผ่าน ✓',fail:'ไม่ผ่าน'};
+const TAG_MAP={apply:'tag-apply',doc:'tag-doc',inter:'tag-inter',result:'tag-result',other:'tag-apply'};
+const TAG_LABEL={apply:'สมัคร',doc:'เอกสาร',inter:'สัมภาษณ์',result:'ประกาศผล',other:'อื่นๆ'};
+
+function fmtDate(str){
+  const d=new Date(str+'T00:00:00');
+  return d.getDate()+' '+d.toLocaleString('en',{month:'short'})+' '+(d.getFullYear()+543);
+}
+
+/* ── PHOTO MODULE ── */
+const PHOTO=(function(){
+  let photos=[];
+  let cur=0;
+  let slideTimer=null;
+
+  function renderDots(){
+    const dotsEl=document.getElementById('carousel-dots');
+    if(!dotsEl)return;
+    dotsEl.innerHTML=photos.map((_,i)=>`<button class="carousel-dot${i===cur?' active':''}" onclick="PHOTO.goTo(${i})"></button>`).join('');
+  }
+
+  function showSlide(n){
+    if(!photos.length)return;
+    cur=(n+photos.length)%photos.length;
+    const gallery=document.getElementById('photo-gallery');
+    if(!gallery)return;
+    const items=gallery.querySelectorAll('.photo-item');
+    items.forEach((item,i)=>{
+      item.style.transform=`translateX(${(i-cur)*100}%)`;
+    });
+    renderDots();
+  }
+
+  function startAuto(){
+    clearInterval(slideTimer);
+    if(photos.length>1){
+      slideTimer=setInterval(()=>showSlide(cur+1),3000);
+    }
+  }
+
+  function render(){
+    const gallery=document.getElementById('photo-gallery');
+    const empty=document.getElementById('photo-empty');
+    const prevBtn=document.getElementById('carousel-prev');
+    const nextBtn=document.getElementById('carousel-next');
+    if(!gallery)return;
+    gallery.querySelectorAll('.photo-item').forEach(el=>el.remove());
+    if(photos.length===0){
+      empty.style.display='flex';
+      if(prevBtn)prevBtn.style.display='none';
+      if(nextBtn)nextBtn.style.display='none';
+      renderDots();
+    }else{
+      empty.style.display='none';
+      if(prevBtn)prevBtn.style.display=photos.length>1?'flex':'none';
+      if(nextBtn)nextBtn.style.display=photos.length>1?'flex':'none';
+      photos.forEach((src,i)=>{
+        const wrap=document.createElement('div');
+        wrap.className='photo-item';
+        wrap.style.cssText='position:absolute;top:0;left:0;width:100%;height:240px;transform:translateX('+(i-cur)*100+'%)';
+        const img=document.createElement('img');img.src=src;img.alt='photo '+(i+1);
+        const del=document.createElement('button');del.className='photo-item-del';del.textContent='✕';del.title='ลบ';
+        del.onclick=(e)=>{e.stopPropagation();photos.splice(i,1);if(cur>=photos.length)cur=Math.max(0,photos.length-1);render();STORAGE.save();};
+        wrap.appendChild(img);wrap.appendChild(del);gallery.appendChild(wrap);
+      });
+      // Make gallery relative for absolute children
+      gallery.style.position='relative';
+      gallery.style.height='240px';
+      gallery.style.overflow='hidden';
+      renderDots();
+      startAuto();
+    }
+  }
+
+  function handleFiles(e){
+    const files=Array.from(e.target.files);let loaded=0;
+    files.forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=ev=>{photos.push(ev.target.result);loaded++;if(loaded===files.length){cur=photos.length-1;render();STORAGE.save();}};
+      reader.readAsDataURL(file);
+    });
+    e.target.value='';
+  }
+
+  return {
+    handleFiles,render,
+    slide(dir){clearInterval(slideTimer);showSlide(cur+dir);startAuto();},
+    goTo(n){clearInterval(slideTimer);showSlide(n);startAuto();},
+    _photos:()=>photos,
+    _setPhotos(a){photos=[...a];cur=0;render();}
+  };
+})();
+
+/* ── HOME MODULE ── */
+const HOME=(function(){
+  function renderDeadlines(){
+    const el=document.getElementById('home-deadline-list');if(!el)return;
+    const unis=UNI.getUnis();const allDates=[];
+    unis.forEach(u=>{
+      (u.dates||[]).forEach(d=>{allDates.push({val:d.val,name:d.name,type:d.type,uniId:u.id,uniName:u.name});});
+      if(u.deadline) allDates.push({val:u.deadline,name:'Deadline หลัก',type:'apply',uniId:u.id,uniName:u.name});
+    });
+    const today=new Date();today.setHours(0,0,0,0);
+    const upcoming=allDates.filter(d=>{const dt=new Date(d.val+'T00:00:00');return dt>=today;})
+      .sort((a,b)=>a.val.localeCompare(b.val)).slice(0,4);
+    if(!upcoming.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0">ยังไม่มี deadline ที่กำลังจะมาถึง</div>';return;}
+    el.innerHTML=upcoming.map(d=>{
+      const dt=new Date(d.val+'T00:00:00');
+      const mon=dt.toLocaleString('en',{month:'short'}).toUpperCase();
+      const tag=TAG_MAP[d.type]||'tag-apply';const lbl=TAG_LABEL[d.type]||'อื่นๆ';
+      return `<div class="deadline-item">
+        <div class="d-date"><span class="d-day">${dt.getDate()}</span><span class="d-month">${mon}</span></div>
+        <div><div class="d-name">${d.name}</div><div class="d-uni" onclick="HOME.openUni(${d.uniId})">${d.uniName}</div></div>
+        <span class="tag ${tag}">${lbl}</span>
+      </div>`;
+    }).join('');
+  }
+  function renderStatusList(){
+    const el=document.getElementById('home-status-list');if(!el)return;
+    const unis=UNI.getUnis();
+    if(!unis.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted)">ยังไม่มีมหาวิทยาลัย — <button class="btn-ghost" onclick="goPage(\'universities\')">เพิ่มที่นี่</button></div>';return;}
+    const today=new Date();today.setHours(0,0,0,0);
+    el.innerHTML=unis.map(u=>{
+      const upcoming=(u.dates||[]).filter(d=>{const dt=new Date(d.val+'T00:00:00');return dt>=today;}).sort((a,b)=>a.val.localeCompare(b.val));
+      let subHtml='';
+      if(upcoming.length){
+        const nxt=upcoming[0];const dt=new Date(nxt.val+'T00:00:00');
+        const dayStr=dt.getDate()+' '+dt.toLocaleString('en',{month:'short'});
+        const tagCls='tag '+(TAG_MAP[nxt.type]||'tag-apply');
+        subHtml=`<div class="s-track" style="margin-top:3px;display:flex;align-items:center;gap:5px"><span class="${tagCls}" style="font-size:9px;padding:2px 6px">${dayStr}</span><span style="font-size:11px;color:var(--text-secondary)">${nxt.name}</span></div>`;
+      }else{subHtml=`<div class="s-track">${u.eng||'University Round'}</div>`;}
+      return `<div class="status-item" onclick="HOME.openUni(${u.id})" title="ไปยัง ${u.name}">
+        <div style="flex:1;min-width:0"><div class="s-uni">${u.name}</div>${subHtml}</div>
+        <span class="pill ${PILL_MAP[u.status]||'pill-prep'}" style="flex-shrink:0">${PILL_LABEL[u.status]||u.status}</span>
+      </div>`;
+    }).join('');
+  }
+  function renderChips(){
+    const el=document.getElementById('home-chips');if(!el)return;
+    const unis=UNI.getUnis();
+    el.innerHTML='<span class="chip" onclick="goPage(\'gks\')">GKS</span>'+unis.map(u=>`<span class="chip" onclick="HOME.openUni(${u.id})">${u.name}</span>`).join('');
+  }
+  function renderCount(){const el=document.getElementById('home-stat-count');if(el)el.textContent=UNI.getUnis().length;}
+  function renderRounds(){
+    const el=document.getElementById('home-stat-rounds');if(!el)return;
+    const unis=UNI.getUnis();
+    // GKS Embassy: +1 if there's at least one embUnis entry with a non-empty name
+    const embCount=(GKS._embUnis&&GKS._embUnis().some(n=>n&&n.trim()))?1:0;
+    // GKS University: +1 if there's at least one uniUnis entry with a non-empty name
+    const uniCount=(GKS._uniUnis&&GKS._uniUnis().some(n=>n&&n.trim()))?1:0;
+    // University rounds: count unis whose status is not 'prep' (เตรียมเอกสาร)
+    const submittedCount=unis.filter(u=>u.status&&u.status!=='prep').length;
+    el.textContent=embCount+uniCount+submittedCount;
+  }
+  function refresh(){renderDeadlines();renderStatusList();renderChips();renderCount();renderRounds();}
+  function openUni(id){goPage('universities');UNI.openDetail(id);}
+  return {refresh,openUni};
+})();
+
+/* ── TIMELINE MODULE ── */
+const TL=(function(){
+  const TYPE_COLOR={apply:'#1A5276',doc:'#1A6B3A',inter:'#7D3A0A',result:'#4A2D8A',other:'#6B6B6B'};
+  const TYPE_BG={apply:'#D4E8F7',doc:'#D5F0E0',inter:'#FDE8D0',result:'#EDE8F7',other:'#E8E8E8'};
+  const TYPE_LABEL={apply:'สมัคร',doc:'เอกสาร',inter:'สัมภาษณ์',result:'ประกาศผล',other:'อื่นๆ'};
+  let events=[
+    {date:'2026-01-15',uniId:'gks',type:'apply',title:'ปิดรับสมัคร Online',step:'Embassy Track'},
+    {date:'2026-01-20',uniId:'gks',type:'doc',title:'ส่งเอกสารตัวจริง',step:'Embassy Track'},
+    {date:'2026-02-03',uniId:2,type:'inter',title:'วันสัมภาษณ์',step:'รอบคัดเลือก'},
+    {date:'2026-02-10',uniId:3,type:'apply',title:'ปิดรับสมัคร',step:''},
+    {date:'2026-03-01',uniId:'gks',type:'result',title:'ประกาศผล NIIED',step:'Final Result'},
+  ];
+  const now=new Date();
+  let year=now.getFullYear(),month=now.getMonth(),curModalDate='';
+  function uniLabel(uniId){if(uniId==='gks')return 'GKS';if(uniId==='personal')return 'Personal';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.name:'Unknown';}
+  function uniColor(uniId){if(uniId==='gks')return '#3A6FA0';if(uniId==='personal')return '#A0522D';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.color:'#A0522D';}
+  // วันสำคัญที่กรอกไว้ในหน้า University (u.dates) — แปลงให้อยู่ในรูปแบบเดียวกับ event ของปฏิทิน
+  // ไม่ได้ copy ข้อมูลมาเก็บซ้ำ แค่ "มอง" ข้อมูลเดิมในรูปแบบใหม่ตอน render ทุกครั้ง
+  // จึงไม่มีปัญหาข้อมูลไม่ตรงกัน (out of sync) ระหว่าง 2 หน้า
+  function uniDateEvents(){
+    return UNI.getUnis().flatMap(u=>(u.dates||[]).map((d,idx)=>(
+      {date:d.val,uniId:u.id,type:d.type,title:d.name,step:'',_src:'uni',_idx:idx}
+    )));
+  }
+  function allEvents(){return [...events,...uniDateEvents()];}
+  function refreshUniSelects(){
+    const unis=UNI.getUnis();
+    const opts='<option value="gks">GKS</option>'+unis.map(u=>`<option value="${u.id}">${u.name}</option>`).join('')+'<option value="personal">Personal</option>';
+    ['ev-uni','m-uni'].forEach(id=>{const el=document.getElementById(id);if(el){const prev=el.value;el.innerHTML=opts;el.value=prev;}});
+    renderLegend();
+  }
+  function renderLegend(){
+    const el=document.getElementById('tl-legend-unis');if(!el)return;
+    const unis=UNI.getUnis();
+    el.innerHTML='<span class="legend-item"><span class="legend-dot" style="background:#7B57CE"></span>GKS</span>'
+      +unis.map(u=>`<span class="legend-item"><span class="legend-dot" style="background:${u.color}"></span><span class="legend-uni-link" onclick="TL.goToUni(${u.id})">${u.name}</span></span>`).join('')
+      +'<span class="legend-item"><span class="legend-dot" style="background:#A0522D"></span>Personal</span>';
+  }
+  function render(){
+    const label=document.getElementById('tl-month-label');const grid=document.getElementById('tl-cal-grid');if(!label||!grid)return;
+    label.textContent=EN_MONTHS[month]+' '+year;grid.innerHTML='';
+    const merged=allEvents();
+    const first=new Date(year,month,1).getDay();const dim=new Date(year,month+1,0).getDate();
+    const today=new Date();
+    for(let i=0;i<first;i++){const p=new Date(year,month,0-(first-i-1));grid.innerHTML+=`<div class="cal-day other-month"><div class="day-num">${p.getDate()}</div></div>`;}
+    for(let d=1;d<=dim;d++){
+      const isToday=today.getFullYear()===year&&today.getMonth()===month&&today.getDate()===d;
+      const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const evs=merged.filter(e=>e.date===ds);
+      let html=`<div class="cal-day${isToday?' today':''}" onclick="TL.openModal('${ds}',${d})"><div class="day-num">${d}</div>`;
+      evs.slice(0,3).forEach(e=>{const bg=uniColor(e.uniId);html+=`<span class="event-pill" style="background:${bg}">${uniLabel(e.uniId)}·${e.title}</span>`;});
+      if(evs.length>3)html+=`<span style="font-size:9px;color:var(--text-muted)">+${evs.length-3}</span>`;
+      grid.innerHTML+=html+'</div>';
+    }
+    const trail=(7-((first+dim)%7))%7;
+    for(let i=1;i<=trail;i++)grid.innerHTML+=`<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
+  }
+  function renderModalEvents(ds){
+    const evs=allEvents().filter(e=>e.date===ds);const el=document.getElementById('cal-modal-events');
+    if(!evs.length){el.innerHTML='<div class="cal-modal-empty">ไม่มีกิจกรรมในวันนี้</div>';return;}
+    el.innerHTML=evs.map(e=>{
+      const isUni=e.uniId!=='gks'&&e.uniId!=='personal';
+      const metaClick=isUni?`onclick="TL.goToUni(${e.uniId})" style="cursor:pointer"`:'';
+      const fromUni=e._src==='uni';
+      const idx=events.indexOf(e);
+      const actionBtn=fromUni
+        ? `<button class="del-ev" title="แก้ไขที่หน้ามหาวิทยาลัย" onclick="TL.goToUni(${e.uniId})">✎</button>`
+        : `<button class="del-ev" onclick="TL.del(${idx})">✕</button>`;
+      return `<div class="cal-modal-event" style="border-left-color:${TYPE_COLOR[e.type]||'#6B6B6B'}">
+        ${actionBtn}
+        <div class="cal-modal-event-title">${e.title}</div>
+        <div class="cal-modal-event-meta" ${metaClick}>${uniLabel(e.uniId)}${fromUni?' · วันสำคัญจากหน้ามหาวิทยาลัย':''}</div>
+        ${e.step?`<span class="cal-modal-event-step" style="background:${TYPE_BG[e.type]};color:${TYPE_COLOR[e.type]}">${TYPE_LABEL[e.type]}${e.step?' · '+e.step:''}</span>`:''}
+      </div>`;
+    }).join('');
+  }
+  function goToUni(id){document.getElementById('cal-modal').classList.remove('open');goPage('universities');UNI.openDetail(id);}
+  return {
+    prev(){if(month===0){month=11;year--;}else month--;render();},
+    next(){if(month===11){month=0;year++;}else month++;render();},
+    openModal(ds,d){
+      curModalDate=ds;
+      document.getElementById('cal-modal-date').textContent=d+' '+EN_MONTHS[month]+' '+year;
+      document.getElementById('cal-modal-sub').textContent=ds;
+      document.getElementById('m-title').value='';document.getElementById('m-step').value='';
+      renderModalEvents(ds);document.getElementById('cal-modal').classList.add('open');
+    },
+    closeOverlay(e){if(e.target===document.getElementById('cal-modal'))document.getElementById('cal-modal').classList.remove('open');},
+    del(i){events.splice(i,1);render();renderModalEvents(curModalDate);STORAGE.save();},
+    addFromModal(){
+      const title=document.getElementById('m-title').value.trim();if(!title){alert('กรุณาใส่ชื่อกิจกรรม');return;}
+      const rawUni=document.getElementById('m-uni').value;const uniId=(rawUni==='gks'||rawUni==='personal')?rawUni:parseInt(rawUni);
+      events.push({date:curModalDate,uniId,type:document.getElementById('m-type').value,title,step:document.getElementById('m-step').value.trim()});
+      render();renderModalEvents(curModalDate);
+      document.getElementById('m-title').value='';document.getElementById('m-step').value='';
+      STORAGE.save();
+    },
+    addFromForm(){
+      const date=document.getElementById('ev-date').value;const title=document.getElementById('ev-title').value.trim();
+      if(!date||!title){alert('กรุณาใส่วันที่และชื่อกิจกรรม');return;}
+      const rawUni=document.getElementById('ev-uni').value;const uniId=(rawUni==='gks'||rawUni==='personal')?rawUni:parseInt(rawUni);
+      events.push({date,uniId,type:document.getElementById('ev-type').value,title,step:document.getElementById('ev-step').value.trim()});
+      const d=new Date(date);if(d.getFullYear()===year&&d.getMonth()===month)render();
+      document.getElementById('ev-date').value='';document.getElementById('ev-title').value='';document.getElementById('ev-step').value='';
+      STORAGE.save();
+    },
+    goToUni,refreshUniSelects,render,
+    _events:()=>events,
+    _setEvents(a){events=[...a];render();},
+    init(){refreshUniSelects();render();}
+  };
+})();
+
+/* ── GKS MODULE ── */
+const GKS=(function(){
+  const embSteps=['ตรวจคุณสมบัติ','เตรียมเอกสาร','สมัครออนไลน์','สัมภาษณ์/คัดเลือก','สถานทูตเสนอชื่อ','NIIED ตรวจสอบ','มอ.พิจารณา','ประกาศผล','ยืนยันทุน/วีซ่า','เตรียมไปเกาหลี'];
+  const uniSteps=['ตรวจคุณสมบัติ','เตรียมเอกสาร','สมัครกับมหาลัย','สัมภาษณ์','มอ.เสนอชื่อ','NIIED ตรวจสอบ','ประกาศผล','ยืนยันทุน/วีซ่า','เตรียมไปเกาหลี'];
+  const docSteps=['ตรวจสอบรายการ','เก็บต้นฉบับ','แปลเอกสาร','รับรองกงสุล','รับรองสถานทูต','จัดเรียง/ส่ง'];
+  const stepsMap={emb:embSteps,uni:uniSteps,doc:docSteps};
+  let embUnis=['SNU','Yonsei','Korea University'];
+  let uniUnis=['KAIST'];
+  let gksDocs=[
+    {label:'ใบสมัครทุน GKS-U',checked:false,status:0,note:'ดาวน์โหลดจากเว็บ NIIED — กรอกด้วยภาษาอังกฤษ'},
+    {label:'Transcript (เกรดตัวจริง)',checked:false,status:1,note:'ขอจากโรงเรียน ต้องมีตราประทับ'},
+    {label:'Graduation Certificate',checked:false,status:1,note:'ใบรับรองการจบการศึกษา'},
+    {label:'Recommendation Letters ×2',checked:false,status:0,note:'จากอาจารย์หรือผู้บริหาร ใส่ซองปิดผนึก'},
+    {label:'Statement of Purpose',checked:false,status:2,note:'เรียงความตามแบบฟอร์ม NIIED'},
+    {label:'Language Proficiency (TOPIK / IELTS)',checked:true,status:5,note:'ใช้คะแนนที่ยังไม่หมดอายุ'},
+    {label:'Passport Copy',checked:true,status:5,note:'หน้าที่มีรูปและข้อมูล สแกนชัด'},
+    {label:'Medical Certificate',checked:false,status:0,note:'ตามแบบฟอร์มของ NIIED'},
+  ];
+  function renderRM(track,cur){
+    const steps=stepsMap[track];const el=document.getElementById(track+'-roadmap');if(!el)return;
+    el.innerHTML=steps.map((s,i)=>{
+      let cls='rm-step';if(i<cur)cls+=' done';else if(i===cur)cls+=' current';
+      return `<div class="${cls}"><div class="rm-dot">${i<cur?'✓':i+1}</div><div class="rm-label">${s}</div></div>`;
+    }).join('');
+    const lbl=document.getElementById(track+'-rm-lbl');
+    if(lbl)lbl.textContent='ขั้นตอน '+(cur+1)+'/'+steps.length+' — '+steps[Math.min(cur,steps.length-1)];
+  }
+  function renderUniFields(list,containerId){
+    const el=document.getElementById(containerId);if(!el)return;el.innerHTML='';
+    list.forEach((name,i)=>{
+      const row=document.createElement('div');row.className='gks-uni-row';
+      const inp=document.createElement('input');inp.type='text';inp.value=name;inp.placeholder='ชื่อมหาวิทยาลัย';
+      inp.addEventListener('blur',()=>{list[i]=inp.value;STORAGE.save();});
+      const del=document.createElement('button');del.className='btn btn-sm';del.style.cssText='color:#7A1A1A;border-color:transparent;background:transparent;padding:4px 8px';
+      del.textContent='✕';del.onclick=()=>{list.splice(i,1);renderUniFields(list,containerId);STORAGE.save();};
+      row.appendChild(inp);row.appendChild(del);el.appendChild(row);
+    });
+  }
+  function renderChecklist(){
+    const el=document.getElementById('gks-doc-checklist');if(!el)return;
+    el.innerHTML=gksDocs.map((d,i)=>`
+      <div class="check-item" id="gci-${i}">
+        <div class="check-main">
+          <input type="checkbox" ${d.checked?'checked':''} onchange="GKS.toggleCheck(${i},this.checked)">
+          <span class="check-lbl${d.checked?' done':''}" id="glbl-${i}">${d.label}</span>
+          <div class="check-right">
+            <span class="status-badge ${STATUS_CLASS[d.status]}" id="gsbadge-${i}">${STATUS_OPTIONS[d.status]}</span>
+            <select class="check-status-sel" onclick="event.stopPropagation()" onchange="GKS.changeStatus(${i},this.value)">
+              ${STATUS_OPTIONS.map((s,si)=>`<option value="${si}"${d.status==si?' selected':''}>${s}</option>`).join('')}
+            </select>
+            <button class="check-expand" onclick="GKS.toggleDetail(${i})">▾</button>
+          </div>
+        </div>
+        <div class="check-detail" id="gdet-${i}">
+          <p class="check-detail-text" id="gnote-text-${i}">${d.note||'—'}</p>
+          <div class="check-detail-edit">
+            <input type="text" value="${d.note||''}" placeholder="เพิ่มโน้ต..." id="gnote-inp-${i}">
+            <button class="btn btn-sm" onclick="GKS.saveNote(${i})">บันทึก</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  const cur={emb:1,uni:0,doc:2};
+  return {
+    docs:gksDocs,cur,
+    switchTab(id,btn){
+      document.querySelectorAll('#page-gks .tab-content').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('#page-gks .tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('gtab-'+id).classList.add('active');btn.classList.add('active');
+    },
+    toggleRound(header){
+      const body=header.nextElementSibling;const chevron=header.querySelector('.round-chevron');
+      body.classList.toggle('open');if(chevron)chevron.style.transform=body.classList.contains('open')?'rotate(180deg)':'';
+    },
+    setRM(track,n){
+      const steps=stepsMap[track];cur[track]=Math.max(0,Math.min(n,steps.length-1));renderRM(track,cur[track]);STORAGE.save();
+    },
+    toggleCheck(i,v){
+      gksDocs[i].checked=v;const l=document.getElementById('glbl-'+i);if(l)v?l.classList.add('done'):l.classList.remove('done');STORAGE.save();
+    },
+    changeStatus(i,v){
+      gksDocs[i].status=parseInt(v);const b=document.getElementById('gsbadge-'+i);
+      if(b){b.textContent=STATUS_OPTIONS[gksDocs[i].status];b.className='status-badge '+STATUS_CLASS[gksDocs[i].status];}
+      STORAGE.save();
+    },
+    toggleDetail(i){
+      const det=document.getElementById('gdet-'+i);const btn=document.querySelector(`#gci-${i} .check-expand`);
+      det.classList.toggle('open');if(btn)btn.style.transform=det.classList.contains('open')?'rotate(180deg)':'';
+    },
+    saveNote(i){const inp=document.getElementById('gnote-inp-'+i);gksDocs[i].note=inp.value;const txt=document.getElementById('gnote-text-'+i);if(txt)txt.textContent=gksDocs[i].note||'—';STORAGE.save();},
+    addDocItem(){const n=prompt('ชื่อเอกสาร:');if(n&&n.trim()){gksDocs.push({label:n.trim(),checked:false,status:0,note:''});renderChecklist();STORAGE.save();}},
+    _embUnis:()=>embUnis,
+    _uniUnis:()=>uniUnis,
+    _setEmbUnis(a){embUnis=[...a];renderUniFields(embUnis,'emb-uni-fields');},
+    _setUniUnis(a){uniUnis=[...a];renderUniFields(uniUnis,'uni-uni-fields');},
+    addEmbUni(){embUnis.push('');renderUniFields(embUnis,'emb-uni-fields');STORAGE.save();},
+    addUniUni(){uniUnis.push('');renderUniFields(uniUnis,'uni-uni-fields');STORAGE.save();},
+    init(){['emb','uni','doc'].forEach(t=>renderRM(t,cur[t]));renderChecklist();renderUniFields(embUnis,'emb-uni-fields');renderUniFields(uniUnis,'uni-uni-fields');}
+  };
+})();
+
+/* ── UNIVERSITIES MODULE ── */
+const UNI=(function(){
+  const KRW_RATE=36;
+  const COST_FIELDS=[
+    {key:'tuition',label:'ค่าเทอม',sub:'ต่อภาค'},
+    {key:'dorm',label:'ค่าหอพัก',sub:'ต่อเดือน'},
+    {key:'living',label:'ค่าครองชีพ',sub:'ต่อเดือน'},
+    {key:'apply',label:'ค่าสมัคร',sub:'ครั้งเดียว'},
+    {key:'entrance',label:'ค่าแรกเข้า',sub:'ครั้งเดียว'},
+    {key:'thaiPrep',label:'ค่าเตรียมตัวในไทย',sub:'ก่อนเดินทาง'},
+  ];
+  function defaultCurrencies(){return {tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',thaiPrep:'THB'};}
+  let unis=[]
+  let activeId=null;
+  function getU(){return unis.find(x=>x.id===activeId);}
+  function notifyAll(){HOME.refresh();TL.refreshUniSelects();}
+  function renderDocChecklist(docs,listId,ns){
+    const el=document.getElementById(listId);if(!el)return;
+    el.innerHTML=docs.map((d,i)=>`
+      <div class="check-item" id="${ns}ci-${i}">
+        <div class="check-main">
+          <input type="checkbox" ${d.checked?'checked':''} onchange="${ns}chk(${i},this.checked)">
+          <span class="check-lbl${d.checked?' done':''}" id="${ns}lbl-${i}">${d.label}</span>
+          <div class="check-right">
+            <span class="status-badge ${STATUS_CLASS[d.status]}" id="${ns}badge-${i}">${STATUS_OPTIONS[d.status]}</span>
+            <select class="check-status-sel" onclick="event.stopPropagation()" onchange="${ns}cst(${i},this.value)">
+              ${STATUS_OPTIONS.map((s,si)=>`<option value="${si}"${d.status==si?' selected':''}>${s}</option>`).join('')}
+            </select>
+            <button class="check-expand" onclick="${ns}det(${i})">▾</button>
+            <button class="btn-ghost btn-sm" onclick="${ns}del(${i})" style="font-size:13px;padding:2px 5px">✕</button>
+          </div>
+        </div>
+        <div class="check-detail" id="${ns}detbox-${i}">
+          <p class="check-detail-text" id="${ns}note-${i}">${d.note||'—'}</p>
+          <div class="check-detail-edit">
+            <input type="text" value="${d.note||''}" placeholder="เพิ่มโน้ต..." id="${ns}noteinp-${i}">
+            <button class="btn btn-sm" onclick="${ns}save(${i})">บันทึก</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  window.uchk=function(i,v){const d=getU().docs[i];d.checked=v;const l=document.getElementById('ulbl-'+i);if(l)v?l.classList.add('done'):l.classList.remove('done');STORAGE.save();};
+  window.ucst=function(i,v){const d=getU().docs[i];d.status=parseInt(v);const b=document.getElementById('ubadge-'+i);if(b){b.textContent=STATUS_OPTIONS[d.status];b.className='status-badge '+STATUS_CLASS[d.status];}STORAGE.save();};
+  window.udet=function(i){const det=document.getElementById('udetbox-'+i);const btn=document.querySelector(`#uci-${i} .check-expand`);if(!det)return;det.classList.toggle('open');if(btn)btn.style.transform=det.classList.contains('open')?'rotate(180deg)':'';};
+  window.udel=function(i){if(!confirm('ลบ?'))return;getU().docs.splice(i,1);UNI.renderDocs();STORAGE.save();};
+  window.usave=function(i){const inp=document.getElementById('unoteinp-'+i);getU().docs[i].note=inp?inp.value:'';const txt=document.getElementById('unote-'+i);if(txt)txt.textContent=getU().docs[i].note||'—';STORAGE.save();};
+  return {
+    renderOverview(){
+      const grid=document.getElementById('uni-grid');const cnt=document.getElementById('uni-count');if(!grid)return;
+      cnt.textContent=unis.length+' มหาวิทยาลัย';
+      const STATUS_OPTS=[
+        {v:'prep',l:'เตรียมเอกสาร'},{v:'applied',l:'สมัครแล้ว'},
+        {v:'waiting',l:'รอสัมภาษณ์'},{v:'result',l:'รอประกาศผล'},
+        {v:'pass',l:'ผ่าน ✓'},{v:'fail',l:'ไม่ผ่าน'},
+      ];
+      grid.innerHTML=unis.map(u=>{
+        const today=new Date();today.setHours(0,0,0,0);
+        const upcoming=(u.dates||[]).filter(d=>{const dt=new Date(d.val+'T00:00:00');return dt>=today;}).sort((a,b)=>a.val.localeCompare(b.val));
+        const dlDisplay=upcoming.length?(fmtDate(upcoming[0].val)+(upcoming[0].name?' — '+upcoming[0].name:'')):(u.deadline?fmtDate(u.deadline):'—');
+        const opts=STATUS_OPTS.map(o=>`<option value="${o.v}"${u.status===o.v?' selected':''}>${o.l}</option>`).join('');
+        return `<div class="uni-card" id="uni-card-${u.id}" onclick="UNI.openDetail(${u.id})">
+          <button class="uc-del-btn" onclick="event.stopPropagation();UNI.delUni(${u.id})" title="ลบ">✕</button>
+          <div class="uni-card-bar" style="background:${u.color}"></div>
+          <div class="uni-card-body">
+            <div class="uni-card-name">${u.name}</div>
+            <div class="uni-card-eng">${u.eng}</div>
+            ${u.faculty?`<div style="font-size:11px;color:var(--text-muted);margin-top:2px;letter-spacing:0.03em">${u.faculty}</div>`:''}
+            <div class="uni-card-meta" style="margin-top:6px">
+              <select id="csel-${u.id}" class="card-status-sel"
+                onclick="event.stopPropagation()"
+                onchange="event.stopPropagation();UNI.changeCardStatus(${u.id},this.value)"
+              >${opts}</select>
+            </div>
+            <div class="uni-card-deadline"><span>กิจกรรมถัดไป</span><span class="deadline-date">${dlDisplay}</span></div>
+          </div>
+        </div>`;
+      }).join('');
+      unis.forEach(u=>applySelectColor(u.id,u.status));
+      notifyAll();TL.refreshUniSelects();
+    },
+    delUni(id){if(!confirm('ลบมหาวิทยาลัยนี้?'))return;unis=unis.filter(u=>u.id!==id);this.renderOverview();STORAGE.save();},
+    openAddModal(){document.getElementById('add-uni-modal').classList.add('open');},
+    closeAddOverlay(e){if(e.target===document.getElementById('add-uni-modal'))document.getElementById('add-uni-modal').classList.remove('open');},
+    addUniversity(){
+      const name=document.getElementById('new-name').value.trim();if(!name){alert('กรุณาใส่ชื่อ');return;}
+      unis.push({id:Date.now(),name,eng:document.getElementById('new-eng').value.trim()||name,color:document.getElementById('new-color').value,status:document.getElementById('new-status').value,deadline:'',applyUrl:document.getElementById('new-apply-url').value||'#',notes:'',dates:[],docs:[],scholarships:[],costs:{apply:0,tuition:0,dorm:0,entrance:0,thaiPrep:0,living:0},currencies:defaultCurrencies(),links:[],thaiPrepNote:''});
+      document.getElementById('add-uni-modal').classList.remove('open');
+      ['new-name','new-eng','new-apply-url'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('new-color').value='#BAD5EB';document.getElementById('new-color-preview').style.background='#BAD5EB';
+      this.renderOverview();STORAGE.save();
+    },
+    openDetail(id){
+      activeId=id;const u=getU();if(!u)return;
+      document.getElementById('uview-overview').style.display='none';document.getElementById('uview-detail').style.display='block';
+      document.getElementById('d-name').textContent=u.name;document.getElementById('d-eng').textContent=u.eng;
+      const facDisp=document.getElementById('d-faculty-display');
+      if(facDisp)facDisp.textContent=u.faculty||'— ยังไม่ได้ใส่คณะ/สาขา';
+      const facInput=document.getElementById('d-faculty-input');
+      if(facInput)facInput.value=u.faculty||'';
+      document.getElementById('d-faculty-input-wrap').style.display='none';
+      document.getElementById('d-faculty-wrap').style.display='flex';
+      const al=document.getElementById('d-apply-link');al.href=u.applyUrl||'#';al.style.display=(u.applyUrl&&u.applyUrl!=='#')?'':'none';
+      document.querySelectorAll('.dtab').forEach((t,i)=>t.classList.toggle('active',i===0));
+      document.querySelectorAll('.dtab-content').forEach((c,i)=>c.classList.toggle('active',i===0));
+      this.renderDates();this.renderDocs();this.renderScholarships();this.renderCosts();this.renderLinks();this.renderNotes();
+      window.scrollTo(0,0);
+    },
+    showOverview(){document.getElementById('uview-overview').style.display='block';document.getElementById('uview-detail').style.display='none';this.renderOverview();},
+    editFaculty(){
+      document.getElementById('d-faculty-wrap').style.display='none';
+      document.getElementById('d-faculty-input-wrap').style.display='flex';
+      document.getElementById('d-faculty-input').focus();
+    },
+    saveFaculty(){
+      const u=getU();if(!u)return;
+      u.faculty=document.getElementById('d-faculty-input').value.trim();
+      document.getElementById('d-faculty-display').textContent=u.faculty||'— ยังไม่ได้ใส่คณะ/สาขา';
+      document.getElementById('d-faculty-input-wrap').style.display='none';
+      document.getElementById('d-faculty-wrap').style.display='flex';
+      STORAGE.save();
+    },
+    cancelFaculty(){
+      document.getElementById('d-faculty-input-wrap').style.display='none';
+      document.getElementById('d-faculty-wrap').style.display='flex';
+    },
+    switchDTab(id,btn){
+      document.querySelectorAll('.dtab-content').forEach(c=>c.classList.remove('active'));
+      document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('udtab-'+id).classList.add('active');btn.classList.add('active');
+    },
+    renderDates(){
+      const u=getU();if(!u)return;const el=document.getElementById('u-dates-list');if(!el)return;
+      if(!u.dates)u.dates=[];
+      if(!u.dates.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0">ยังไม่มีวันสำคัญ</div>';return;}
+      el.innerHTML=u.dates.map((d,i)=>{
+        const dt=new Date(d.val+'T00:00:00');
+        return `<div class="date-row">
+          <div class="dr-date"><span class="dr-day">${dt.getDate()}</span><span class="dr-month">${dt.toLocaleString('en',{month:'short'}).toUpperCase()}</span></div>
+          <div><div class="dr-name">${d.name}</div></div>
+          <span class="tag ${TAG_MAP[d.type]||'tag-apply'}">${TAG_LABEL[d.type]||d.type}</span>
+          <button class="dr-del" onclick="UNI.delDate(${i})">✕</button>
+        </div>`;
+      }).join('');
+    },
+    addDate(){
+      const val=document.getElementById('add-date-val').value;const name=document.getElementById('add-date-name').value.trim();
+      if(!val||!name){alert('กรุณาใส่วันที่และชื่อ');return;}
+      const u=getU();if(!u){alert('ไม่พบข้อมูลมหาวิทยาลัย กรุณาเปิดหน้ารายละเอียดก่อน');return;}
+      u.dates.push({val,name,type:document.getElementById('add-date-type').value});
+      u.dates.sort((a,b)=>a.val.localeCompare(b.val));
+      document.getElementById('add-date-val').value='';document.getElementById('add-date-name').value='';
+      this.renderDates();HOME.refresh();STORAGE.save();
+    },
+    delDate(i){getU().dates.splice(i,1);this.renderDates();HOME.refresh();STORAGE.save();},
+    renderDocs(){renderDocChecklist(getU().docs,'u-doc-checklist','u');},
+    addDocItem(){const n=prompt('ชื่อเอกสาร:');if(n&&n.trim()){getU().docs.push({label:n.trim(),checked:false,status:0,note:''});this.renderDocs();STORAGE.save();}},
+    renderScholarships(){
+      const u=getU();if(!u)return;const tbody=document.getElementById('u-sch-tbody');if(!tbody)return;
+      if(!u.scholarships.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px">ยังไม่มีทุน</td></tr>';return;}
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
+      tbody.innerHTML=u.scholarships.map((s,i)=>{
+        const amtText=s.amountTHB?'฿'+s.amountTHB.toLocaleString():'';
+        const display=[amtText,s.valueDetail].filter(Boolean).join(' · ');
+        return `<tr>
+          <td style="font-weight:500">${s.name}</td>
+          <td class="sch-amount">${display||'—'}</td>
+          <td style="font-size:12px;color:var(--text-secondary);max-width:200px;line-height:1.6;white-space:normal">${s.cond||'—'}</td>
+          <td>${s.deadline?fmtDate(s.deadline):'—'}</td>
+          <td><span class="pill sch-badge ${SCH_PILL[s.status]||'pill-prep'}" style="margin-right:6px">${schStatusLabel[s.status]||s.status}</span><select class="check-status-sel" onclick="event.stopPropagation()" onchange="UNI.changeSchStatus(${i},this.value)">${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}</select></td>
+          <td><button class="sch-del" onclick="UNI.delScholarship(${i})">✕</button></td>
+        </tr>`;
+      }).join('');
+    },
+    changeSchStatus(i,v){getU().scholarships[i].status=v;this.renderScholarships();STORAGE.save();},
+    delScholarship(i){if(!confirm('ลบทุนนี้?'))return;getU().scholarships.splice(i,1);this.renderScholarships();STORAGE.save();},
+    addScholarship(){
+      const name=document.getElementById('s-name').value.trim();if(!name){alert('กรุณาใส่ชื่อทุน');return;}
+      getU().scholarships.push({name,amountTHB:parseFloat(document.getElementById('s-amount').value)||0,valueDetail:document.getElementById('s-value-detail').value.trim(),cond:document.getElementById('s-cond').value.trim(),deadline:document.getElementById('s-deadline').value,status:document.getElementById('s-status').value});
+      ['s-name','s-amount','s-value-detail','s-cond','s-deadline'].forEach(id=>document.getElementById(id).value='');
+      this.renderScholarships();STORAGE.save();
+    },
+    renderCosts(){
+      const u=getU();if(!u)return;if(!u.currencies)u.currencies=defaultCurrencies();
+      document.getElementById('u-cost-grid').innerHTML=COST_FIELDS.map(f=>{
+        const raw=u.costs[f.key]||0;const curr=u.currencies[f.key]||'THB';
+        const display=(curr==='KRW'?'₩':'฿')+raw.toLocaleString();
+        return `<div class="cost-card"><div class="cost-card-label">${f.label}</div><div class="cost-card-amount">${display}</div><div class="cost-card-sub">${f.sub} · ${curr}</div></div>`;
+      }).join('');
+      document.getElementById('u-cost-edit-row').innerHTML=COST_FIELDS.map(f=>{
+        const curr=u.currencies[f.key]||'THB';
+        return `<div class="cost-inp-group"><label>${f.label}</label><div class="cost-inp-row">
+          <input type="number" id="cinp-${f.key}" value="${u.costs[f.key]||0}" min="0">
+          <button class="cost-currency-btn${curr==='THB'?' active':''}" id="ccbtn-${f.key}-thb" onclick="UNI.toggleCostCurrency('${f.key}','THB')">฿</button>
+          <button class="cost-currency-btn${curr==='KRW'?' active':''}" id="ccbtn-${f.key}-krw" onclick="UNI.toggleCostCurrency('${f.key}','KRW')">₩</button>
+        </div></div>`;
+      }).join('');
+      const noteTA=document.getElementById('thai-prep-note');if(noteTA)noteTA.value=u.thaiPrepNote||'';
+    },
+    toggleCostCurrency(key,curr){
+      const u=getU();if(!u)return;if(!u.currencies)u.currencies={};u.currencies[key]=curr;
+      document.getElementById('ccbtn-'+key+'-thb').classList.toggle('active',curr==='THB');
+      document.getElementById('ccbtn-'+key+'-krw').classList.toggle('active',curr==='KRW');
+      this.saveCosts();
+    },
+    saveCosts(){const u=getU();COST_FIELDS.forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});this.renderCosts();STORAGE.save();},
+    saveThaiPrepNote(){const u=getU();if(!u)return;const ta=document.getElementById('thai-prep-note');if(ta)u.thaiPrepNote=ta.value;STORAGE.save();},
+    renderLinks(){
+      const u=getU();if(!u)return;const area=document.getElementById('u-links-area');if(!area)return;
+      if(!u.links)u.links=[];
+      if(!u.links.length){area.innerHTML='<div style="font-size:13px;color:var(--text-muted)">ยังไม่มีลิงก์</div>';return;}
+      area.innerHTML=u.links.map((l,i)=>`<div class="pdf-row"><span class="pdf-icon">🔗</span><span class="pdf-name"><a href="${l.url}" target="_blank">${l.name}</a></span><span class="pdf-size">${l.url}</span><button class="pdf-del-row" onclick="UNI.delLink(${i})">✕</button></div>`).join('');
+    },
+    addLink(){
+      const name=document.getElementById('link-name').value.trim();const url=document.getElementById('link-url').value.trim();
+      if(!name||!url){alert('กรุณาใส่ชื่อและ URL');return;}
+      const u=getU();if(!u){alert('ไม่พบข้อมูลมหาวิทยาลัย กรุณาเปิดหน้ารายละเอียดก่อน');return;}
+      u.links.push({name,url});document.getElementById('link-name').value='';document.getElementById('link-url').value='';this.renderLinks();STORAGE.save();
+    },
+    delLink(i){getU().links.splice(i,1);this.renderLinks();STORAGE.save();},
+    renderNotes(){
+      const u=getU();if(!u)return;
+      const ta=document.getElementById('u-notes-area');
+      if(ta)ta.value=u.notes||'';
+    },
+    saveNotes(){
+      const u=getU();if(!u)return;
+      const ta=document.getElementById('u-notes-area');
+      if(ta){u.notes=ta.value;STORAGE.save();}
+    },
+    changeCardStatus(id,value){
+      const u=unis.find(x=>x.id===id);if(!u)return;
+      u.status=value;applySelectColor(id,value);HOME.refresh();STORAGE.save();
+    },
+    getUnis(){return unis;},
+    _unis:()=>unis,
+    _setUnis(a){unis=[...a];},
+    getActiveId(){return activeId;}
+  };
+})();
+
+/* ── COMPARE MODULE ── */
+const CMP=(function(){
+  const COST_COLS=[
+    {key:'tuition',label:'ค่าเทอม',sub:'ต่อภาค',visible:true},
+    {key:'dorm',label:'ค่าหอพัก',sub:'ต่อเดือน',visible:true},
+    {key:'living',label:'ค่าครองชีพ',sub:'ต่อเดือน',visible:true},
+    {key:'apply',label:'ค่าสมัคร',sub:'ครั้งเดียว',visible:true},
+    {key:'entrance',label:'ค่าแรกเข้า',sub:'ครั้งเดียว',visible:true},
+    {key:'thaiPrep',label:'ค่าเตรียมตัว',sub:'ก่อนเดินทาง',visible:true},
+  ];
+  let extraUnis=[];let currency='THB';let KRW_RATE=36;
+  function getUnis(){
+    const base=UNI.getUnis().map(u=>({id:u.id,name:u.name,color:u.color,costs:u.costs,currencies:u.currencies||{}}));
+    return [...base,...extraUnis];
+  }
+  function toTHB(raw,curr){return curr==='KRW'?Math.round(raw/KRW_RATE):raw;}
+  function convDisplay(rawTHB){return currency==='THB'?'฿'+rawTHB.toLocaleString():'₩'+Math.round(rawTHB*KRW_RATE).toLocaleString();}
+  function calcTotal(costs,currencies){
+    const cu=currencies||{};const f=k=>toTHB(costs[k]||0,cu[k]||'THB');
+    return f('tuition')+f('dorm')*6+f('living')*6+f('apply')+f('entrance')+f('thaiPrep');
+  }
+  // รวมยอด "ดิบ" แยกตามสกุลเงินจริงที่กรอกไว้ในแต่ละช่อง — ไม่แปลงค่าเงินใดๆ ทั้งสิ้น
+  // เผื่อกรณีมหาลัยเดียวกันกรอกบางช่องเป็น ฿ บางช่องเป็น ₩ ก็จะได้ยอดดิบของทั้งสองสกุลแยกกันชัดเจน
+  function rawTotalsByCurrency(costs,currencies){
+    const cu=currencies||{};const mult={tuition:1,dorm:6,living:6,apply:1,entrance:1,thaiPrep:1};
+    const sums={};
+    Object.keys(mult).forEach(k=>{
+      const curr=cu[k]||'THB';const amt=(costs[k]||0)*mult[k];
+      sums[curr]=(sums[curr]||0)+amt;
+    });
+    return sums;
+  }
+  function formatRawBreakdown(sums){
+    const parts=[];
+    if(sums.THB) parts.push('฿'+Math.round(sums.THB).toLocaleString());
+    if(sums.KRW) parts.push('₩'+Math.round(sums.KRW).toLocaleString());
+    return parts.length?parts.join(' + '):'฿0';
+  }
+  function renderColToggles(){
+    const el=document.getElementById('col-toggles');if(!el)return;
+    el.innerHTML=COST_COLS.map((c,i)=>`<button class="col-toggle-btn ${c.visible?'on':''}" onclick="CMP.toggleCol(${i})">${c.label}</button>`).join('');
+  }
+  function renderTable(){
+    const unis=getUnis();const vis=COST_COLS.filter(c=>c.visible);const table=document.getElementById('compare-table');if(!table)return;
+    const colStats={};
+    vis.forEach(c=>{const vals=unis.map(u=>toTHB(u.costs[c.key]||0,(u.currencies||{})[c.key]||'THB'));colStats[c.key]={min:Math.min(...vals),max:Math.max(...vals)};});
+    const totals=unis.map(u=>calcTotal(u.costs,u.currencies));const minT=Math.min(...totals);const maxT=Math.max(...totals);
+    let html='<thead><tr class="uni-row"><th>รายการ</th>';
+    unis.forEach(u=>{html+=`<th><span class="uni-th-dot" style="background:${u.color}"></span><span class="uni-th-name">${u.name}</span></th>`;});
+    html+='</tr><tr><th></th>';unis.forEach(()=>html+='<th></th>');html+='</tr></thead><tbody>';
+    vis.forEach(c=>{
+      html+=`<tr><td><div class="row-label">${c.label}</div><div class="row-sub">${c.sub}</div></td>`;
+      unis.forEach(u=>{
+        const origCurr=(u.currencies||{})[c.key]||'THB';
+        const origAmt=u.costs[c.key]||0;
+        const rawTHB=toTHB(origAmt,origCurr);
+        const isMin=rawTHB===colStats[c.key].min&&unis.length>1;const isMax=rawTHB===colStats[c.key].max&&unis.length>1&&rawTHB!==colStats[c.key].min;
+        const rawNote=(origCurr==='KRW'&&origAmt)?`<div class="amount-raw" style="margin-top:2px">₩${Math.round(origAmt).toLocaleString()}</div>`:'';
+        html+=`<td><span class="amount-cell${isMin?' lowest':isMax?' highest':''}">${convDisplay(rawTHB)}</span>${rawNote}</td>`;
+      });html+='</tr>';
+    });
+    html+='<tr class="total-row"><td><div class="row-label">Total (โดยประมาณ)</div><div class="row-sub">ทุกรายการ</div></td>';
+    unis.forEach((u,i)=>{
+      const t=totals[i];const isMin=t===minT&&unis.length>1;const isMax=t===maxT&&unis.length>1&&t!==minT;
+      const raw=formatRawBreakdown(rawTotalsByCurrency(u.costs,u.currencies));
+      html+=`<td>
+        <div class="amount-approx${isMin?' lowest':isMax?' highest':''}">≈ ${convDisplay(t)}</div>
+        <div class="amount-raw">${raw}</div>
+      </td>`;
+    });
+    html+='</tr></tbody>';table.innerHTML=html;
+  }
+  function renderBars(){
+    const unis=getUnis();
+    const el=document.getElementById('cmp-chart-lbl');if(el)el.textContent='Total Estimated Cost — ราคาดิบ + ประมาณการแปลงแล้ว';
+    const totals=unis.map(u=>calcTotal(u.costs,u.currencies));const maxT=Math.max(...totals)||1;
+    const bg=document.getElementById('bar-group');if(!bg)return;
+    bg.innerHTML=unis.map((u,i)=>{
+      const t=totals[i];const pct=Math.round(t/maxT*100);
+      const raw=formatRawBreakdown(rawTotalsByCurrency(u.costs,u.currencies));
+      return `<div class="bar-row"><span class="bar-uni-name">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx">≈ ${convDisplay(t)}</span><span class="amount-raw">${raw} จริง</span></span></div>`;
+    }).join('');
+  }
+  return {
+    toggleCol(i){COST_COLS[i].visible=!COST_COLS[i].visible;renderColToggles();renderTable();},
+    setCurrency(c){
+      currency='THB';renderTable();renderBars();
+    },
+    getRate(){return KRW_RATE;},
+    setRate(v){
+      const n=parseFloat(v);
+      const inp=document.getElementById('cmp-rate-input');
+      if(!n||n<=0){if(inp)inp.value=KRW_RATE;return;}
+      KRW_RATE=n;
+      this.render();
+      STORAGE.save();
+    },
+    render(){
+      renderColToggles();renderTable();renderBars();
+      const inp=document.getElementById('cmp-rate-input');if(inp)inp.value=KRW_RATE;
+      const note=document.getElementById('cmp-rate-note');if(note)note.textContent=KRW_RATE;
+    },
+    openAddModal(){document.getElementById('add-cmp-modal').classList.add('open');},
+    closeAddOverlay(e){if(e.target===document.getElementById('add-cmp-modal'))document.getElementById('add-cmp-modal').classList.remove('open');},
+    addUni(){
+      const name=document.getElementById('cn-name').value.trim();if(!name){alert('กรุณาใส่ชื่อ');return;}
+      const g=id=>parseFloat(document.getElementById(id).value)||0;
+      const defCurr={tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',thaiPrep:'THB'};
+      extraUnis.push({id:Date.now(),name,color:document.getElementById('cn-color').value,costs:{apply:g('cn-apply'),tuition:g('cn-tuition'),dorm:g('cn-dorm'),living:g('cn-living'),entrance:g('cn-entrance'),thaiPrep:g('cn-thaiprep')},currencies:defCurr});
+      document.getElementById('add-cmp-modal').classList.remove('open');
+      ['cn-name','cn-apply','cn-tuition','cn-dorm','cn-living','cn-entrance','cn-thaiprep'].forEach(id=>document.getElementById(id).value='');
+      this.render();
+    },
+    _extraUnis:()=>extraUnis,
+    _setExtraUnis(a){extraUnis=[...a];},
+    _rate:()=>KRW_RATE,
+    _setRate(v){KRW_RATE=parseFloat(v)||36;},
+  };
+})();
+
+/* ── STATUS PATCH ── */
+const ROUND_STATUS=[
+  {value:'not_started',label:'ยังไม่เริ่ม',cls:'s-0'},
+  {value:'preparing',label:'กำลังเตรียม',cls:'s-1'},
+  {value:'submitted',label:'ส่งแล้ว',cls:'s-2'},
+  {value:'interview',label:'สัมภาษณ์',cls:'s-3'},
+  {value:'waiting',label:'รอผล',cls:'s-4'},
+  {value:'pass',label:'ผ่าน / ได้รับ ✓',cls:'s-5'},
+  {value:'fail',label:'ไม่ผ่าน',cls:'s-fail'},
+];
+function getStatusDef(value){return ROUND_STATUS.find(s=>s.value===value)||ROUND_STATUS[0];}
+function statusOptionsHTML(current){return ROUND_STATUS.map(s=>`<option value="${s.value}"${s.value===current?' selected':''}>${s.label}</option>`).join('');}
+
+GKS.roundsData={
+  emb:[
+    {title:'รอบ 1 — สถานทูตคัดเลือก',sub:'Embassy Selection',desc:'สถานทูตเกาหลีประจำประเทศไทยรับสมัครและคัดเลือกผู้สมัคร',status:'preparing'},
+    {title:'รอบ 2 — NIIED คัดเลือก',sub:'NIIED Screening',desc:'NIIED ตรวจสอบและคัดเลือกผู้ที่ผ่านจากสถานทูต',status:'not_started'},
+    {title:'รอบ 3 — มหาวิทยาลัยพิจารณา',sub:'University Admission',desc:'มหาวิทยาลัยที่เลือกไว้จะพิจารณารับเข้า',status:'not_started'},
+    {title:'Final — ประกาศผู้ได้รับทุน',sub:'NIIED Final Result',desc:'NIIED ประกาศรายชื่อสุดท้ายของผู้ได้รับทุน GKS-U',status:'not_started'},
+  ],
+  uni:[
+    {title:'มหาวิทยาลัยเสนอชื่อ',sub:'University Nomination',desc:'มหาวิทยาลัยพิจารณาและเสนอชื่อผู้สมัครไปยัง NIIED',status:'preparing'},
+    {title:'NIIED ตรวจสอบ',sub:'NIIED Review',desc:'NIIED ตรวจสอบรายชื่อที่มหาวิทยาลัยเสนอมา',status:'not_started'},
+    {title:'NIIED Final Result',sub:'ประกาศผลสุดท้าย',desc:'NIIED ประกาศรายชื่อผู้ได้รับทุนอย่างเป็นทางการ',status:'not_started'},
+  ],
+};
+
+GKS.renderRounds=function(track,containerId){
+  const list=document.getElementById(containerId);if(!list)return;
+  const rounds=GKS.roundsData[track];
+  list.innerHTML=rounds.map((r,i)=>{
+    const sd=getStatusDef(r.status);
+    return `<div class="round-card">
+      <button class="round-header" onclick="GKS.toggleRound(this)">
+        <div style="text-align:left"><div class="round-title">${r.title}</div><div class="round-sub">${r.sub}</div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="status-badge ${sd.cls}" id="${track}-rbadge-${i}">${sd.label}</span>
+          <select class="round-status" id="${track}-rsel-${i}" onclick="event.stopPropagation()" onchange="GKS.changeRoundStatus('${track}',${i},this.value)">${statusOptionsHTML(r.status)}</select>
+          <span class="round-chevron">▾</span>
+        </div>
+      </button>
+      <div class="round-body${i===0?' open':''}"><p class="round-desc">${r.desc}</p></div>
+    </div>`;
+  }).join('');
+};
+
+GKS.changeRoundStatus=function(track,i,value){
+  GKS.roundsData[track][i].status=value;
+  const sd=getStatusDef(value);
+  const badge=document.getElementById(`${track}-rbadge-${i}`);
+  if(badge){badge.textContent=sd.label;badge.className='status-badge '+sd.cls;}
+  GKS.refreshNextActivity(track);
+  STORAGE.save();
+};
+
+GKS.refreshNextActivity=function(track){
+  const el=document.getElementById(track+'-next-activity');if(!el)return;
+  const rounds=GKS.roundsData[track];
+  const next=rounds.find(r=>r.status!=='pass'&&r.status!=='fail');
+  el.textContent=next?'กิจกรรมถัดไป: '+next.title+' ('+next.sub+')':'เสร็จสิ้นทุกขั้นตอนของ Track นี้';
+};
+
+(function wrapSetRM(){
+  const orig=GKS.setRM.bind(GKS);
+  GKS.setRM=function(track,n){
+    orig(track,n);
+    const rounds=GKS.roundsData[track];
+    if(rounds){
+      const idx=Math.min(GKS.cur[track],rounds.length-1);
+      if(rounds[idx]&&rounds[idx].status==='not_started'){
+        GKS.roundsData[track][idx].status='preparing';
+        const badge=document.getElementById(`${track}-rbadge-${idx}`);
+        const sel=document.getElementById(`${track}-rsel-${idx}`);
+        const sd=getStatusDef('preparing');
+        if(badge){badge.textContent=sd.label;badge.className='status-badge '+sd.cls;}
+        if(sel)sel.value='preparing';
+      }
+      GKS.refreshNextActivity(track);
+    }
+    STORAGE.save();
+  };
+})();
+
+(function wrapGKSChecklist(){
+  const origToggle=GKS.toggleCheck.bind(GKS);
+  const origChange=GKS.changeStatus.bind(GKS);
+  GKS.toggleCheck=function(i,v){
+    origToggle(i,v);
+    const newStatus=v?5:1;GKS.changeStatus(i,newStatus);
+    const sel=document.querySelector(`#gci-${i} .check-status-sel`);if(sel)sel.value=newStatus;
+  };
+  GKS.changeStatus=function(i,v){
+    origChange(i,v);v=parseInt(v);
+    const checkbox=document.querySelector(`#gci-${i} input[type="checkbox"]`);
+    const label=document.getElementById('glbl-'+i);const ready=(v===5);
+    if(checkbox)checkbox.checked=ready;if(label)ready?label.classList.add('done'):label.classList.remove('done');
+    GKS.docs[i]&&(GKS.docs[i].checked=ready);
+  };
+})();
+
+(function wrapUNIChecklist(){
+  const origChk=window.uchk;const origCst=window.ucst;
+  window.uchk=function(i,v){
+    origChk(i,v);const newStatus=v?5:1;window.ucst(i,newStatus);
+    const sel=document.querySelector(`#uci-${i} .check-status-sel`);if(sel)sel.value=newStatus;
+  };
+  window.ucst=function(i,v){
+    origCst(i,v);v=parseInt(v);
+    const checkbox=document.querySelector(`#uci-${i} input[type="checkbox"]`);
+    const label=document.getElementById('ulbl-'+i);const ready=(v===5);
+    if(checkbox)checkbox.checked=ready;if(label)ready?label.classList.add('done'):label.classList.remove('done');
+  };
+})();
+
+/* ── COLOR UTILS ── */
+const SELECT_COLORS={
+  prep:{bg:'var(--tag-result-bg)',fg:'var(--tag-result-fg)'},
+  applied:{bg:'var(--tag-apply-bg)',fg:'var(--tag-apply-fg)'},
+  waiting:{bg:'var(--tag-inter-bg)',fg:'var(--tag-inter-fg)'},
+  result:{bg:'#D5E8F0',fg:'#1A4A5E'},
+  pass:{bg:'var(--tag-doc-bg)',fg:'var(--tag-doc-fg)'},
+  fail:{bg:'#FDDEDE',fg:'#7A1A1A'},
+};
+function applySelectColor(id,status){
+  const sel=document.getElementById('csel-'+id);if(!sel)return;
+  const c=SELECT_COLORS[status]||SELECT_COLORS.prep;
+  sel.style.background=c.bg;sel.style.color=c.fg;
+}
+
+/* ════════════════════════════════════════════════════════════
+   STORAGE — Firebase Realtime Database
+   ════════════════════════════════════════════════════════════ */
+const STORAGE=(function(){
+  function buildData(){
+    return {
+      unis: UNI._unis(),
+      events: TL._events(),
+      photos: PHOTO._photos(),
+      gksCur: {...GKS.cur},
+      gksDocs: JSON.parse(JSON.stringify(GKS.docs)),
+      gksRoundsData: JSON.parse(JSON.stringify(GKS.roundsData)),
+      gksEmbUnis: [...GKS._embUnis()],
+      gksUniUnis: [...GKS._uniUnis()],
+      extraUnis: [...CMP._extraUnis()],
+      exchangeRate: CMP._rate(),
+    };
+  }
+
+  function save(){
+    if(window._isRemoteUpdate && window._isRemoteUpdate()) return;
+    try {
+      window.FIREBASE_SAVE && window.FIREBASE_SAVE(buildData());
+    } catch(e) {
+      console.warn('STORAGE.save error', e);
+    }
+  }
+
+  function applyData(saved){
+    try{
+      if(saved.unis != null) {
+        // Normalize each university to ensure all required fields exist
+        const normalizedUnis = saved.unis.map(u => ({
+          links: [],
+          docs: [],
+          dates: [],
+          scholarships: [],
+          costs: {apply:0,tuition:0,dorm:0,entrance:0,thaiPrep:0,living:0},
+          currencies: {tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',thaiPrep:'THB'},
+          thaiPrepNote: '',
+          notes: '',
+          ...u,
+        }));
+        UNI._setUnis(normalizedUnis);
+      }
+      if(saved.events != null)    TL._setEvents(saved.events);
+      if(saved.photos && saved.photos.length)    PHOTO._setPhotos(saved.photos);
+      if(saved.gksCur)                           Object.assign(GKS.cur, saved.gksCur);
+      if(saved.gksDocs && saved.gksDocs.length)  GKS.docs.splice(0, GKS.docs.length, ...saved.gksDocs);
+      if(saved.gksRoundsData){
+        if(saved.gksRoundsData.emb) GKS.roundsData.emb = saved.gksRoundsData.emb;
+        if(saved.gksRoundsData.uni) GKS.roundsData.uni = saved.gksRoundsData.uni;
+      }
+      if(saved.gksEmbUnis && saved.gksEmbUnis.length) GKS._setEmbUnis(saved.gksEmbUnis);
+      if(saved.gksUniUnis && saved.gksUniUnis.length) GKS._setUniUnis(saved.gksUniUnis);
+      if(saved.extraUnis && saved.extraUnis.length)   CMP._setExtraUnis(saved.extraUnis);
+      if(saved.exchangeRate)                          CMP._setRate(saved.exchangeRate);
+    }catch(e){
+      console.warn('applyData error', e);
+    }
+  }
+
+  function confirmClear(){
+    if(!confirm('ล้างข้อมูลทั้งหมดและเริ่มใหม่?\n(ข้อมูลจาก Firebase จะหายไปทุก device)')) return;
+    window.FIREBASE_CLEAR && window.FIREBASE_CLEAR();
+  }
+
+  return {save, applyData, confirmClear, buildData};
+})();
+
+/* ════════════════════════════════════════════════════════════
+   EXPORT MODULE — JSON backup, PDF, Text export, JSON import
+   ════════════════════════════════════════════════════════════ */
+const EXPORT=(function(){
+
+  /* ── helpers ── */
+  function timestamp(){
+    const d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  function downloadBlob(content,filename,mime){
+    const blob=new Blob([content],{type:mime});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=filename;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+
+  /* ── Export JSON (full backup) ── */
+  function asJSON(){
+    const data=STORAGE.buildData();
+    // Exclude photos from JSON to keep file size reasonable (they are base64 images)
+    const exportData={...data};
+    const json=JSON.stringify(exportData,null,2);
+    downloadBlob(json,'spring-round-backup-'+timestamp()+'.json','application/json');
+  }
+
+  /* ── Build human-readable text report ── */
+  function buildTextReport(){
+    const data=STORAGE.buildData();
+    const unis=data.unis||[];
+    const events=data.events||[];
+    const extraUnis=data.extraUnis||[];
+    const gksEmbUnis=data.gksEmbUnis||[];
+    const gksUniUnis=data.gksUniUnis||[];
+    const gksDocs=data.gksDocs||[];
+    const KRW_RATE=data.exchangeRate||CMP._rate();
+
+    const PILL_LABEL_EN={prep:'Preparing',applied:'Applied',waiting:'Waiting Interview',result:'Awaiting Result',pass:'Passed',fail:'Not Passed'};
+    const STATUS_OPTIONS_EN=['Not Started','Preparing','Translated','Notary Done','Embassy Certified','Ready to Submit'];
+    const TAG_LABEL_EN={apply:'Application',doc:'Document',inter:'Interview',result:'Result',other:'Other'};
+
+    function hr(char,len){return char.repeat(len);}
+    function section(title){return '\n'+hr('=',60)+'\n'+title+'\n'+hr('=',60)+'\n';}
+    function sub(title){return '\n'+hr('-',40)+'\n'+title+'\n'+hr('-',40)+'\n';}
+
+    let lines=[];
+    lines.push('SPRING ROUND — University Application Summary');
+    lines.push('Generated: '+new Date().toLocaleString('th-TH'));
+    lines.push(hr('=',60));
+
+    // ── Overview ──
+    lines.push(section('OVERVIEW'));
+    lines.push('Total Universities: '+unis.length);
+    lines.push('Total Events: '+events.length);
+    lines.push('Extra Compare Entries: '+extraUnis.length);
+
+    // ── Universities ──
+    lines.push(section('UNIVERSITIES'));
+    if(!unis.length){lines.push('  (none)');}
+    unis.forEach((u,i)=>{
+      lines.push(sub((i+1)+'. '+u.name+' — '+u.eng));
+      lines.push('  Status      : '+(PILL_LABEL_EN[u.status]||u.status));
+      lines.push('  Apply URL   : '+(u.applyUrl||'—'));
+
+      // Dates
+      if(u.dates&&u.dates.length){
+        lines.push('  Key Dates:');
+        u.dates.forEach(d=>{
+          const dt=new Date(d.val+'T00:00:00');
+          lines.push('    • '+d.val+' — '+d.name+' ['+( TAG_LABEL_EN[d.type]||d.type)+']');
+        });
+      }
+
+      // Costs
+      if(u.costs){
+        const c=u.costs;const cu=u.currencies||{};
+        function toTHB(raw,key){return (cu[key]||'THB')==='KRW'?Math.round(raw/KRW_RATE):raw;}
+        const total=toTHB(c.tuition,'tuition')+toTHB(c.dorm,'dorm')*6+toTHB(c.living,'living')*6+toTHB(c.apply,'apply')+toTHB(c.entrance,'entrance')+toTHB(c.thaiPrep,'thaiPrep');
+        lines.push('  Costs (THB):');
+        lines.push('    Tuition/semester : '+toTHB(c.tuition,'tuition').toLocaleString());
+        lines.push('    Dormitory/month  : '+toTHB(c.dorm,'dorm').toLocaleString());
+        lines.push('    Living/month     : '+toTHB(c.living,'living').toLocaleString());
+        lines.push('    Application fee  : '+toTHB(c.apply,'apply').toLocaleString());
+        lines.push('    Entrance fee     : '+toTHB(c.entrance,'entrance').toLocaleString());
+        lines.push('    Thai prep        : '+toTHB(c.thaiPrep,'thaiPrep').toLocaleString());
+        lines.push('    TOTAL (est 6mo)  : '+total.toLocaleString()+' THB');
+      }
+
+      // Scholarships
+      if(u.scholarships&&u.scholarships.length){
+        lines.push('  Scholarships:');
+        u.scholarships.forEach(s=>{
+          lines.push('    • '+s.name+' — '+(s.amountTHB?'฿'+s.amountTHB.toLocaleString():'')+' '+s.valueDetail);
+          lines.push('      Condition: '+(s.cond||'—'));
+          lines.push('      Status   : '+s.status);
+        });
+      }
+
+      // Docs
+      if(u.docs&&u.docs.length){
+        lines.push('  Documents:');
+        u.docs.forEach(d=>{
+          const ready=d.checked?'[READY]':'[    ]';
+          const statusTxt=STATUS_OPTIONS_EN[d.status]||'';
+          lines.push('    '+ready+' '+d.label+' ('+statusTxt+')');
+        });
+      }
+
+      // Notes
+      if(u.notes&&u.notes.trim()){
+        lines.push('  Notes:');
+        u.notes.trim().split('\n').forEach(l=>lines.push('    '+l));
+      }
+      lines.push('');
+    });
+
+    // ── Events ──
+    lines.push(section('TIMELINE EVENTS'));
+    if(!events.length){lines.push('  (none)');}
+    else{
+      const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+      sorted.forEach(e=>{
+        const uniName=(e.uniId==='gks')?'GKS':(e.uniId==='personal')?'Personal':(unis.find(u=>u.id===parseInt(e.uniId))||{}).name||String(e.uniId);
+        lines.push('  '+e.date+' | '+uniName.padEnd(14)+' | '+(TAG_LABEL_EN[e.type]||e.type).padEnd(12)+' | '+e.title+(e.step?' ('+e.step+')':''));
+      });
+    }
+
+    // ── GKS ──
+    lines.push(section('GKS — GLOBAL KOREA SCHOLARSHIP'));
+    lines.push(sub('Embassy Track Universities'));
+    if(!gksEmbUnis.length){lines.push('  (none)');}
+    else{gksEmbUnis.forEach((n,i)=>lines.push('  '+(i+1)+'. '+n));}
+
+    lines.push(sub('University Track Universities'));
+    if(!gksUniUnis.length){lines.push('  (none)');}
+    else{gksUniUnis.forEach((n,i)=>lines.push('  '+(i+1)+'. '+n));}
+
+    lines.push(sub('GKS Document Checklist'));
+    if(!gksDocs.length){lines.push('  (none)');}
+    else{
+      gksDocs.forEach(d=>{
+        const ready=d.checked?'[READY]':'[    ]';
+        const statusTxt=STATUS_OPTIONS_EN[d.status]||'';
+        lines.push('  '+ready+' '+d.label+' — '+statusTxt);
+        if(d.note)lines.push('         '+d.note);
+      });
+    }
+
+    // ── Extra Compare Entries ──
+    if(extraUnis.length){
+      lines.push(section('COMPARE — ADDITIONAL ENTRIES'));
+      extraUnis.forEach((u,i)=>{
+        const c=u.costs||{};const cu=u.currencies||{};
+        function toTHB(raw,key){return (cu[key]||'THB')==='KRW'?Math.round(raw/KRW_RATE):raw;}
+        const total=toTHB(c.tuition||0,'tuition')+toTHB(c.dorm||0,'dorm')*6+toTHB(c.living||0,'living')*6+toTHB(c.apply||0,'apply')+toTHB(c.entrance||0,'entrance')+toTHB(c.thaiPrep||0,'thaiPrep');
+        lines.push('  '+(i+1)+'. '+u.name+' | Total (est): '+total.toLocaleString()+' THB');
+      });
+    }
+
+    lines.push('\n'+hr('=',60));
+    lines.push('End of report — Spring Round');
+    return lines.join('\n');
+  }
+
+  /* ── Export as plain text ── */
+  function asText(){
+    const text=buildTextReport();
+    downloadBlob(text,'spring-round-report-'+timestamp()+'.txt','text/plain;charset=utf-8');
+  }
+
+  /* ── Export as PDF using jsPDF ── */
+  function asPDF(){
+    // Check if jsPDF loaded
+    if(typeof window.jspdf === 'undefined' && typeof window.jsPDF === 'undefined'){
+      alert('jsPDF ยังโหลดไม่เสร็จ กรุณารอสักครู่แล้วลองใหม่');
+      return;
+    }
+    const { jsPDF } = window.jspdf || window;
+    const doc = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+
+    // jsPDF supports only Latin-1 in core fonts; use a simple approach with ASCII-safe content
+    // and a note about Thai characters
+    const data=STORAGE.buildData();
+    const unis=data.unis||[];
+    const events=data.events||[];
+    const extraUnis=data.extraUnis||[];
+    const gksEmbUnis=data.gksEmbUnis||[];
+    const gksUniUnis=data.gksUniUnis||[];
+    const gksDocs=data.gksDocs||[];
+    const KRW_RATE=data.exchangeRate||CMP._rate();
+    const PILL_LABEL_EN={prep:'Preparing',applied:'Applied',waiting:'Waiting Interview',result:'Awaiting Result',pass:'Passed',fail:'Not Passed'};
+    const STATUS_OPTIONS_EN=['Not Started','Preparing','Translated','Notary Done','Embassy Certified','Ready'];
+    const TAG_LABEL_EN={apply:'Application',doc:'Document',inter:'Interview',result:'Result',other:'Other'};
+
+    const MARGIN=14;
+    const PW=210-MARGIN*2;
+    let y=20;
+    const pageH=297;
+
+    function checkPage(needed=8){
+      if(y+needed>pageH-16){doc.addPage();y=20;}
+    }
+    function addLine(text,size,bold,color){
+      checkPage(size+3);
+      doc.setFontSize(size||10);
+      doc.setFont('helvetica',bold?'bold':'normal');
+      if(color)doc.setTextColor(color[0],color[1],color[2]);
+      else doc.setTextColor(30,30,28);
+      // Strip non-Latin chars for jsPDF compatibility, mark with (*)
+      const safe=text.replace(/[^\x00-\x7F]/g,(c)=>{
+        const map={'฿':'B','₩':'W'};return map[c]||'';
+      });
+      const wrapped=doc.splitTextToSize(safe,PW);
+      wrapped.forEach(line=>{
+        checkPage(size+3);
+        doc.text(line,MARGIN,y);
+        y+=size*0.55;
+      });
+    }
+    function addSep(color){
+      checkPage(6);
+      doc.setDrawColor(...(color||[180,180,180]));
+      doc.setLineWidth(0.3);
+      doc.line(MARGIN,y,MARGIN+PW,y);
+      y+=4;
+    }
+
+    // Header
+    doc.setFillColor(123,87,206);
+    doc.rect(0,0,210,18,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(14);
+    doc.text('Spring Round  —  University Application Summary',MARGIN,12);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    doc.text('Generated: '+new Date().toLocaleString('en-GB'),MARGIN,17.5);
+    y=26;
+
+    // Note about Thai
+    doc.setFontSize(7.5);
+    doc.setTextColor(100,100,100);
+    doc.text('Note: Thai text is stored in the JSON export. This PDF shows English fields only.',MARGIN,y);
+    y+=6;
+
+    // ── Overview stats ──
+    addSep([58,111,160]);
+    addLine('OVERVIEW',11,true,[58,111,160]);
+    addLine('Universities: '+unis.length+'   |   Events: '+events.length+'   |   Extra Compare: '+extraUnis.length,9);
+    y+=3;
+
+    // ── Universities ──
+    addSep([58,111,160]);
+    addLine('UNIVERSITIES',11,true,[58,111,160]);
+    unis.forEach((u,i)=>{
+      y+=2;
+      addLine((i+1)+'. '+u.name+'  —  '+u.eng,10,true);
+      addLine('Status: '+(PILL_LABEL_EN[u.status]||u.status)+'   Apply URL: '+(u.applyUrl||'—'),8.5);
+      if(u.dates&&u.dates.length){
+        addLine('Key Dates:',8.5,true);
+        u.dates.forEach(d=>addLine('  '+d.val+'  '+d.name+' ['+TAG_LABEL_EN[d.type]+']',8));
+      }
+      if(u.costs){
+        const c=u.costs;const cu=u.currencies||{};
+        function toTHB(raw,key){return (cu[key]||'THB')==='KRW'?Math.round(raw/KRW_RATE):raw;}
+        const total=toTHB(c.tuition,'tuition')+toTHB(c.dorm,'dorm')*6+toTHB(c.living,'living')*6+toTHB(c.apply,'apply')+toTHB(c.entrance,'entrance')+toTHB(c.thaiPrep,'thaiPrep');
+        addLine('Costs (THB): Tuition '+toTHB(c.tuition,'tuition').toLocaleString()+' | Dorm '+toTHB(c.dorm,'dorm').toLocaleString()+'/mo | Living '+toTHB(c.living,'living').toLocaleString()+'/mo | Total est. '+total.toLocaleString(),8);
+      }
+      if(u.scholarships&&u.scholarships.length){
+        addLine('Scholarships:',8.5,true);
+        u.scholarships.forEach(s=>addLine('  '+s.name+' — '+(s.amountTHB?s.amountTHB.toLocaleString()+' THB ':'')+s.status,8));
+      }
+      if(u.docs&&u.docs.length){
+        addLine('Documents:',8.5,true);
+        u.docs.forEach(d=>addLine('  ['+(d.checked?'v':' ')+'] '+d.label+' ('+STATUS_OPTIONS_EN[d.status]+')',8));
+      }
+      addSep([220,220,220]);
+    });
+
+    // ── Events ──
+    y+=2;
+    addLine('TIMELINE EVENTS',11,true,[58,111,160]);
+    if(!events.length){addLine('  (none)',9);}
+    else{
+      const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+      sorted.forEach(e=>{
+        const uniName=(e.uniId==='gks')?'GKS':(e.uniId==='personal')?'Personal':(unis.find(u=>u.id===parseInt(e.uniId))||{}).name||String(e.uniId);
+        addLine(e.date+'  '+uniName+'  ['+TAG_LABEL_EN[e.type]+']  '+e.title+(e.step?' ('+e.step+')':''),8);
+      });
+    }
+
+    // ── GKS ──
+    y+=3;addSep([58,111,160]);
+    addLine('GKS — GLOBAL KOREA SCHOLARSHIP',11,true,[58,111,160]);
+    addLine('Embassy Track: '+gksEmbUnis.join(', '),9);
+    addLine('University Track: '+gksUniUnis.join(', '),9);
+    addLine('Documents:',9,true);
+    gksDocs.forEach(d=>{
+      addLine('  ['+(d.checked?'v':' ')+'] '+d.label+' — '+STATUS_OPTIONS_EN[d.status],8);
+    });
+
+    // ── Extra Compare ──
+    if(extraUnis.length){
+      y+=3;addSep([58,111,160]);
+      addLine('COMPARE — ADDITIONAL ENTRIES',11,true,[58,111,160]);
+      extraUnis.forEach((u,i)=>{
+        const c=u.costs||{};const cu=u.currencies||{};
+        function toTHB2(raw,key){return (cu[key]||'THB')==='KRW'?Math.round(raw/KRW_RATE):raw;}
+        const total=toTHB2(c.tuition||0,'tuition')+toTHB2(c.dorm||0,'dorm')*6+toTHB2(c.living||0,'living')*6+toTHB2(c.apply||0,'apply')+toTHB2(c.entrance||0,'entrance')+toTHB2(c.thaiPrep||0,'thaiPrep');
+        addLine((i+1)+'. '+u.name+'  Total est. '+total.toLocaleString()+' THB',9);
+      });
+    }
+
+    // Footer on each page
+    const total=doc.internal.getNumberOfPages();
+    for(let p=1;p<=total;p++){
+      doc.setPage(p);
+      doc.setFontSize(7);doc.setTextColor(160,160,160);
+      doc.text('Spring Round  |  Page '+p+'/'+total,MARGIN,pageH-6);
+      doc.text('springround.app',210-MARGIN,pageH-6,'right');
+    }
+
+    doc.save('spring-round-'+timestamp()+'.pdf');
+  }
+
+  /* ── Import JSON ── */
+  function importJSON(event){
+    const file=event.target.files[0];
+    if(!file){return;}
+    if(!file.name.endsWith('.json')&&file.type!=='application/json'){
+      alert('กรุณาเลือกไฟล์ .json เท่านั้น');
+      event.target.value='';return;
+    }
+    if(!confirm('Import จะแทนที่ข้อมูลปัจจุบันทั้งหมด\nยืนยันหรือไม่?')){
+      event.target.value='';return;
+    }
+    const reader=new FileReader();
+    reader.onload=function(e){
+      try{
+        const data=JSON.parse(e.target.result);
+        STORAGE.applyData(data);
+        // Re-render all modules
+        TL.init();
+        GKS.init();
+        GKS.renderRounds&&(['emb','uni'].forEach(t=>{GKS.renderRounds(t,t+'-round-list');GKS.refreshNextActivity(t);}));
+        UNI.renderOverview();
+        HOME.refresh();
+        PHOTO.render();
+        CMP.render();
+        // Push to Firebase
+        STORAGE.save();
+        alert('Import สำเร็จ!');
+      }catch(err){
+        console.error('Import error',err);
+        alert('ไม่สามารถ import ได้: ไฟล์อาจไม่ถูกต้อง\n'+err.message);
+      }
+      event.target.value='';
+    };
+    reader.readAsText(file,'utf-8');
+  }
+
+  return {asJSON, asPDF, asText, importJSON};
+})();
+
+/* ── BOOT ── */
+window._appReady = false;
+
+window._bootApp = function(saved) {
+  if(saved) STORAGE.applyData(saved);
+  TL.init();
+  GKS.init();
+  GKS.initStatusPatch = function(){
+    ['emb','uni'].forEach(track=>{GKS.renderRounds(track,track+'-round-list');GKS.refreshNextActivity(track);});
+  };
+  GKS.initStatusPatch();
+  UNI.renderOverview();
+  HOME.refresh();
+  PHOTO.render();
+  window._appReady = true;
+  const lo = document.getElementById('loading-overlay');
+  if(lo) lo.style.display = 'none';
+};
+
+window._applyRemoteData = function(saved) {
+  STORAGE.applyData(saved);
+  GKS.init();
+  GKS.initStatusPatch && GKS.initStatusPatch();
+  const activePage = document.querySelector('.page.active');
+  if(!activePage) return;
+  const pageId = activePage.id.replace('page-', '');
+  if(pageId === 'home') HOME.refresh();
+  else if(pageId === 'timeline') { TL.refreshUniSelects(); TL.render(); }
+  else if(pageId === 'universities') UNI.renderOverview();
+  else if(pageId === 'compare') CMP.render();
+};
+
+setTimeout(() => {
+  if(!window._appReady) {
+    console.warn('Firebase timeout — booting with defaults');
+    window._bootApp(null);
+  }
+}, 5000);
+</script>
+</body>
+</html>
