@@ -851,7 +851,8 @@ tr.total-row .amount-approx{font-size:16px}
             contenteditable="true"
             spellcheck="false"
             data-placeholder="— ข้อดี / ข้อเสียของมหาลัยนี้"
-            oninput="NOTES.save()"></div>
+            oninput="NOTES.save()"
+            onpaste="NOTES.onPaste(event)"></div>
         </div>
       </div>
     </div>
@@ -1745,7 +1746,22 @@ const NOTES=(function(){
     save();
   }
 
-  return {save,applyBold,applyUnderline,applyHighlight,applyColor,clearFormat};
+  function onPaste(e){
+    e.preventDefault();
+    const text=(e.clipboardData||window.clipboardData).getData('text/plain');
+    const sel=window.getSelection();
+    if(!sel||sel.rangeCount===0)return;
+    const range=sel.getRangeAt(0);
+    range.deleteContents();
+    const textNode=document.createTextNode(text);
+    range.insertNode(textNode);
+    range.setStartAfter(textNode);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    save();
+  }
+  return {save,applyBold,applyUnderline,applyHighlight,applyColor,clearFormat,onPaste};
 })();
 
 /* ── COMPARE MODULE ── */
