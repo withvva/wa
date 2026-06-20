@@ -353,6 +353,26 @@ tr.total-row .amount-approx{font-size:16px}
 .card-status-sel{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:4px 24px 4px 10px;border-radius:20px;border:none;cursor:pointer;font-weight:500;appearance:none;-webkit-appearance:none;outline:none;transition:opacity .15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235A584F' opacity='.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
 .card-status-sel:hover{opacity:.85}
 #u-notes-area:focus{outline:none;border-color:var(--blue-mid)}
+/* ── Rich Notes Editor ── */
+.notes-editor-wrap{position:relative}
+.notes-toolbar{display:flex;align-items:center;gap:2px;padding:6px 10px;background:var(--white);border:0.5px solid var(--border);border-bottom:none;border-radius:4px 4px 0 0;flex-wrap:wrap}
+.notes-toolbar button{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:none;background:none;border-radius:3px;cursor:pointer;font-size:13px;color:var(--text-secondary);transition:background .12s,color .12s;flex-shrink:0}
+.notes-toolbar button:hover{background:var(--cream);color:var(--text-primary)}
+.notes-toolbar button.active{background:var(--blue-light);color:var(--blue-dark)}
+.notes-toolbar .tb-sep{width:0.5px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0}
+.notes-toolbar .tb-label{font-size:10px;letter-spacing:0.1em;color:var(--text-muted);margin-right:2px}
+.notes-toolbar .color-swatch{width:20px;height:20px;border-radius:50%;border:1.5px solid transparent;cursor:pointer;flex-shrink:0;transition:border-color .12s}
+.notes-toolbar .color-swatch:hover,.notes-toolbar .color-swatch.active{border-color:var(--blue-dark)}
+.notes-toolbar .color-swatch.active{box-shadow:0 0 0 2px var(--white),0 0 0 3px var(--blue-dark)}
+#u-notes-rich{width:100%;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;line-height:1.9;padding:16px 18px;border:0.5px solid var(--border);border-radius:0 0 4px 4px;background:var(--white);color:var(--text-primary);min-height:320px;outline:none;transition:border-color .15s}
+#u-notes-rich:focus{border-color:var(--blue-mid)}
+#u-notes-rich:empty::before{content:attr(data-placeholder);color:var(--text-muted);pointer-events:none}
+.uni-email-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--cream);border:0.5px solid var(--border);border-radius:4px;margin-bottom:10px}
+.uni-email-row label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;min-width:80px}
+.uni-email-row input{flex:1;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:6px 10px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);transition:border-color .15s}
+.uni-email-row input:focus{outline:none;border-color:var(--blue-mid)}
+.uni-email-row a{font-size:12px;color:var(--blue-dark);text-decoration:none;white-space:nowrap}
+.uni-email-row a:hover{text-decoration:underline}
 
 /* ── NEW: Export/Import toolbar strip ── */
 .export-strip{background:var(--cream-dark);border-bottom:0.5px solid var(--border);padding:10px 48px;display:flex;align-items:center;gap:8px;flex-wrap:nowrap;overflow-x:auto}
@@ -789,6 +809,11 @@ tr.total-row .amount-approx{font-size:16px}
     <div id="udtab-links" class="dtab-content">
       <div class="section">
         <div class="sec-label">ลิงก์สำคัญ</div>
+        <div class="uni-email-row">
+          <label>อีเมลติดต่อ</label>
+          <input type="email" id="u-contact-email" placeholder="admissions@university.ac.kr" onblur="UNI.saveContactEmail()">
+          <a id="u-contact-email-link" href="#" style="display:none">✉ ส่งอีเมล</a>
+        </div>
         <div class="links-area" id="u-links-area"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:12px">
           <div class="form-group" style="margin:0"><label>ชื่อ</label><input type="text" id="link-name" placeholder="หน้าสมัคร"></div>
@@ -801,10 +826,31 @@ tr.total-row .amount-approx{font-size:16px}
       <div class="section">
         <div class="sec-label">Notes</div>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">จดอะไรก็ได้ — บันทึกอัตโนมัติทุกครั้งที่พิมพ์</p>
-        <textarea id="u-notes-area"
-          style="width:100%;font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;line-height:1.9;padding:16px 18px;border:0.5px solid var(--border);border-radius:4px;background:var(--white);color:var(--text-primary);resize:vertical;min-height:320px;transition:border-color .15s"
-          placeholder="— ข้อดี / ข้อเสียของมหาลัยนี้&#10;— ประเด็นที่อยากถามตอนสัมภาษณ์&#10;— เหตุผลที่อยากสมัครที่นี่&#10;— สิ่งที่ต้องเตรียมเพิ่มเติม&#10;— ลิงก์หรือข้อมูลที่จดไว้"
-          oninput="UNI.saveNotes()"></textarea>
+        <div class="notes-editor-wrap">
+          <div class="notes-toolbar" id="notes-toolbar">
+            <button title="ตัวหนา" onclick="NOTES.exec('bold')" id="tb-bold"><b>B</b></button>
+            <button title="ขีดเส้นใต้" onclick="NOTES.exec('underline')" id="tb-underline"><u>U</u></button>
+            <div class="tb-sep"></div>
+            <span class="tb-label">ไฮไลท์</span>
+            <span class="color-swatch" style="background:#FFF176" title="เหลือง" onclick="NOTES.highlight('#FFF176',this)"></span>
+            <span class="color-swatch" style="background:#A5D6A7" title="เขียว" onclick="NOTES.highlight('#A5D6A7',this)"></span>
+            <span class="color-swatch" style="background:#90CAF9" title="ฟ้า" onclick="NOTES.highlight('#90CAF9',this)"></span>
+            <span class="color-swatch" style="background:#F48FB1" title="ชมพู" onclick="NOTES.highlight('#F48FB1',this)"></span>
+            <span class="color-swatch" style="background:#CE93D8" title="ม่วง" onclick="NOTES.highlight('#CE93D8',this)"></span>
+            <button title="ล้างไฮไลท์" onclick="NOTES.highlight('transparent',null)" style="font-size:11px;width:auto;padding:0 6px">✕ ล้าง</button>
+            <div class="tb-sep"></div>
+            <span class="tb-label">สีตัวอักษร</span>
+            <span class="color-swatch" style="background:#1A1A18" title="ดำ" onclick="NOTES.color('#1A1A18',this)"></span>
+            <span class="color-swatch" style="background:#7B57CE" title="ม่วง" onclick="NOTES.color('#7B57CE',this)"></span>
+            <span class="color-swatch" style="background:#1565C0" title="น้ำเงิน" onclick="NOTES.color('#1565C0',this)"></span>
+            <span class="color-swatch" style="background:#2E7D32" title="เขียว" onclick="NOTES.color('#2E7D32',this)"></span>
+            <span class="color-swatch" style="background:#C62828" title="แดง" onclick="NOTES.color('#C62828',this)"></span>
+            <span class="color-swatch" style="background:#E65100" title="ส้ม" onclick="NOTES.color('#E65100',this)"></span>
+          </div>
+          <div id="u-notes-rich" contenteditable="true"
+            data-placeholder="— ข้อดี / ข้อเสียของมหาลัยนี้"
+            oninput="NOTES.save()" onkeyup="NOTES.updateToolbar()" onmouseup="NOTES.updateToolbar()"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1606,13 +1652,27 @@ const UNI=(function(){
     delLink(i){getU().links.splice(i,1);this.renderLinks();STORAGE.save();},
     renderNotes(){
       const u=getU();if(!u)return;
-      const ta=document.getElementById('u-notes-area');
-      if(ta)ta.value=u.notes||'';
+      const el=document.getElementById('u-notes-rich');
+      if(el)el.innerHTML=u.notesHtml||'';
+      // email
+      const emailEl=document.getElementById('u-contact-email');
+      if(emailEl)emailEl.value=u.contactEmail||'';
+      const emailLink=document.getElementById('u-contact-email-link');
+      if(emailLink){emailLink.href=u.contactEmail?'mailto:'+u.contactEmail:'#';emailLink.style.display=u.contactEmail?'':'none';}
     },
     saveNotes(){
       const u=getU();if(!u)return;
-      const ta=document.getElementById('u-notes-area');
-      if(ta){u.notes=ta.value;STORAGE.save();}
+      const el=document.getElementById('u-notes-rich');
+      if(el){u.notesHtml=el.innerHTML;STORAGE.save();}
+    },
+    saveContactEmail(){
+      const u=getU();if(!u)return;
+      const emailEl=document.getElementById('u-contact-email');
+      if(!emailEl)return;
+      u.contactEmail=emailEl.value.trim();
+      const emailLink=document.getElementById('u-contact-email-link');
+      if(emailLink){emailLink.href=u.contactEmail?'mailto:'+u.contactEmail:'#';emailLink.style.display=u.contactEmail?'':'none';}
+      STORAGE.save();
     },
     changeCardStatus(id,value){
       const u=unis.find(x=>x.id===id);if(!u)return;
@@ -1623,6 +1683,45 @@ const UNI=(function(){
     _setUnis(a){unis=[...a];},
     getActiveId(){return activeId;}
   };
+})();
+
+/* ── NOTES RICH EDITOR MODULE ── */
+const NOTES=(function(){
+  function getEl(){return document.getElementById('u-notes-rich');}
+  function save(){
+    const u=UNI._unis().find(x=>x.id===UNI.getActiveId());
+    if(!u)return;
+    const el=getEl();if(!el)return;
+    u.notesHtml=el.innerHTML;
+    // also strip to plain text for PDF export compat
+    u.notes=el.innerText;
+    STORAGE.save();
+  }
+  function exec(cmd){document.execCommand(cmd,false,null);save();updateToolbar();}
+  function highlight(color,swatch){
+    // clear active highlight swatches
+    document.querySelectorAll('.notes-toolbar .color-swatch').forEach(s=>{
+      if(s.dataset.type==='hl')s.classList.remove('active');
+    });
+    document.execCommand('hiliteColor',false,color);
+    if(swatch){swatch.dataset.type='hl';swatch.classList.add('active');}
+    save();
+  }
+  function color(clr,swatch){
+    document.querySelectorAll('.notes-toolbar .color-swatch').forEach(s=>{
+      if(s.dataset.type==='fg')s.classList.remove('active');
+    });
+    document.execCommand('foreColor',false,clr);
+    if(swatch){swatch.dataset.type='fg';swatch.classList.add('active');}
+    save();
+  }
+  function updateToolbar(){
+    const bold=document.getElementById('tb-bold');
+    const ul=document.getElementById('tb-underline');
+    if(bold)bold.classList.toggle('active',document.queryCommandState('bold'));
+    if(ul)ul.classList.toggle('active',document.queryCommandState('underline'));
+  }
+  return {save,exec,highlight,color,updateToolbar};
 })();
 
 /* ── COMPARE MODULE ── */
