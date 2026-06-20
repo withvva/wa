@@ -827,7 +827,7 @@ tr.total-row .amount-approx{font-size:16px}
         <div class="sec-label">Notes</div>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">จดอะไรก็ได้ — บันทึกอัตโนมัติทุกครั้งที่พิมพ์</p>
         <div class="notes-editor-wrap">
-          <div class="notes-toolbar" id="notes-toolbar">
+          <div class="notes-toolbar" id="notes-toolbar" onmousedown="return false">
             <button title="ตัวหนา" id="tb-bold" onclick="NOTES.applyBold()"><b>B</b></button>
             <button title="ขีดเส้นใต้" id="tb-underline" onclick="NOTES.applyUnderline()"><u>U</u></button>
             <div class="tb-sep"></div>
@@ -1691,19 +1691,6 @@ const UNI=(function(){
 /* ── NOTES RICH EDITOR MODULE ── */
 const NOTES=(function(){
   function getEl(){return document.getElementById('u-notes-rich');}
-  let savedRange=null;
-
-  // Listen globally for selection changes and save when inside editor
-  document.addEventListener('selectionchange',function(){
-    const sel=window.getSelection();
-    if(!sel||sel.rangeCount===0)return;
-    const el=getEl();if(!el)return;
-    const range=sel.getRangeAt(0);
-    // Only save if selection is inside our editor
-    if(el.contains(range.commonAncestorContainer)){
-      savedRange=range.cloneRange();
-    }
-  });
 
   function save(){
     const u=UNI._unis().find(x=>x.id===UNI.getActiveId());
@@ -1714,66 +1701,23 @@ const NOTES=(function(){
     STORAGE.save();
   }
 
-  function applyStyle(prop,value){
+  function cmd(command,value){
     const el=getEl();if(!el)return;
-    if(!savedRange||savedRange.collapsed)return;
-    // Restore selection
     el.focus();
-    const sel=window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedRange);
-    // Wrap with span
-    const span=document.createElement('span');
-    span.style[prop]=value;
-    try{
-      savedRange.surroundContents(span);
-    }catch(e){
-      const frag=savedRange.extractContents();
-      span.appendChild(frag);
-      savedRange.insertNode(span);
-    }
-    // Move cursor to after span
-    const newRange=document.createRange();
-    newRange.setStartAfter(span);
-    newRange.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(newRange);
-    savedRange=null;
+    document.execCommand(command,false,value||null);
     save();
   }
 
-  function applyBold(){applyStyle('fontWeight','bold');}
-  function applyUnderline(){applyStyle('textDecoration','underline');}
-  function applyHighlight(color){applyStyle('background',color);}
-  function applyColor(color){applyStyle('color',color);}
-
-  function clearFormat(){
-    const el=getEl();if(!el)return;
-    if(!savedRange||savedRange.collapsed)return;
-    el.focus();
-    const sel=window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(savedRange);
-    const text=document.createTextNode(savedRange.toString());
-    savedRange.deleteContents();
-    savedRange.insertNode(text);
-    savedRange=null;
-    save();
-  }
+  function applyBold(){cmd('bold');}
+  function applyUnderline(){cmd('underline');}
+  function applyHighlight(color){cmd('backColor',color);}
+  function applyColor(color){cmd('foreColor',color);}
+  function clearFormat(){cmd('removeFormat');}
 
   function onPaste(e){
     e.preventDefault();
     const text=(e.clipboardData||window.clipboardData).getData('text/plain');
-    const sel=window.getSelection();
-    if(!sel||sel.rangeCount===0)return;
-    const range=sel.getRangeAt(0);
-    range.deleteContents();
-    const textNode=document.createTextNode(text);
-    range.insertNode(textNode);
-    range.setStartAfter(textNode);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
+    document.execCommand('insertText',false,text);
     save();
   }
 
