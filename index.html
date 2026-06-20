@@ -1705,6 +1705,14 @@ const NOTES=(function(){
     const el=getEl();if(!el)return;
     el.focus();
     document.execCommand(command,false,value||null);
+    // Collapse selection to end so next typed text is unstyled
+    const sel=window.getSelection();
+    if(sel&&sel.rangeCount>0){
+      const r=sel.getRangeAt(0);
+      r.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(r);
+    }
     save();
   }
 
