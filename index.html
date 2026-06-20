@@ -827,25 +827,25 @@ tr.total-row .amount-approx{font-size:16px}
         <div class="sec-label">Notes</div>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">จดอะไรก็ได้ — บันทึกอัตโนมัติทุกครั้งที่พิมพ์</p>
         <div class="notes-editor-wrap">
-          <div class="notes-toolbar" id="notes-toolbar">
-            <button title="ตัวหนา" onclick="NOTES.exec('bold')" id="tb-bold"><b>B</b></button>
-            <button title="ขีดเส้นใต้" onclick="NOTES.exec('underline')" id="tb-underline"><u>U</u></button>
+          <div class="notes-toolbar" id="notes-toolbar" onmousedown="event.preventDefault()">
+            <button title="ตัวหนา" onmousedown="event.preventDefault();NOTES.exec('bold')" id="tb-bold"><b>B</b></button>
+            <button title="ขีดเส้นใต้" onmousedown="event.preventDefault();NOTES.exec('underline')" id="tb-underline"><u>U</u></button>
             <div class="tb-sep"></div>
             <span class="tb-label">ไฮไลท์</span>
-            <span class="color-swatch" style="background:#FFF176" title="เหลือง" onclick="NOTES.highlight('#FFF176',this)"></span>
-            <span class="color-swatch" style="background:#A5D6A7" title="เขียว" onclick="NOTES.highlight('#A5D6A7',this)"></span>
-            <span class="color-swatch" style="background:#90CAF9" title="ฟ้า" onclick="NOTES.highlight('#90CAF9',this)"></span>
-            <span class="color-swatch" style="background:#F48FB1" title="ชมพู" onclick="NOTES.highlight('#F48FB1',this)"></span>
-            <span class="color-swatch" style="background:#CE93D8" title="ม่วง" onclick="NOTES.highlight('#CE93D8',this)"></span>
-            <button title="ล้างไฮไลท์" onclick="NOTES.highlight('transparent',null)" style="font-size:11px;width:auto;padding:0 6px">✕ ล้าง</button>
+            <span class="color-swatch" style="background:#FFF176" title="เหลือง" onmousedown="event.preventDefault();NOTES.highlight('#FFF176',this)"></span>
+            <span class="color-swatch" style="background:#A5D6A7" title="เขียว" onmousedown="event.preventDefault();NOTES.highlight('#A5D6A7',this)"></span>
+            <span class="color-swatch" style="background:#90CAF9" title="ฟ้า" onmousedown="event.preventDefault();NOTES.highlight('#90CAF9',this)"></span>
+            <span class="color-swatch" style="background:#F48FB1" title="ชมพู" onmousedown="event.preventDefault();NOTES.highlight('#F48FB1',this)"></span>
+            <span class="color-swatch" style="background:#CE93D8" title="ม่วง" onmousedown="event.preventDefault();NOTES.highlight('#CE93D8',this)"></span>
+            <button title="ล้างไฮไลท์" onmousedown="event.preventDefault();NOTES.highlight('transparent',null)" style="font-size:11px;width:auto;padding:0 6px">✕ ล้าง</button>
             <div class="tb-sep"></div>
             <span class="tb-label">สีตัวอักษร</span>
-            <span class="color-swatch" style="background:#1A1A18" title="ดำ" onclick="NOTES.color('#1A1A18',this)"></span>
-            <span class="color-swatch" style="background:#7B57CE" title="ม่วง" onclick="NOTES.color('#7B57CE',this)"></span>
-            <span class="color-swatch" style="background:#1565C0" title="น้ำเงิน" onclick="NOTES.color('#1565C0',this)"></span>
-            <span class="color-swatch" style="background:#2E7D32" title="เขียว" onclick="NOTES.color('#2E7D32',this)"></span>
-            <span class="color-swatch" style="background:#C62828" title="แดง" onclick="NOTES.color('#C62828',this)"></span>
-            <span class="color-swatch" style="background:#E65100" title="ส้ม" onclick="NOTES.color('#E65100',this)"></span>
+            <span class="color-swatch" style="background:#1A1A18" title="ดำ" onmousedown="event.preventDefault();NOTES.color('#1A1A18',this)"></span>
+            <span class="color-swatch" style="background:#7B57CE" title="ม่วง" onmousedown="event.preventDefault();NOTES.color('#7B57CE',this)"></span>
+            <span class="color-swatch" style="background:#1565C0" title="น้ำเงิน" onmousedown="event.preventDefault();NOTES.color('#1565C0',this)"></span>
+            <span class="color-swatch" style="background:#2E7D32" title="เขียว" onmousedown="event.preventDefault();NOTES.color('#2E7D32',this)"></span>
+            <span class="color-swatch" style="background:#C62828" title="แดง" onmousedown="event.preventDefault();NOTES.color('#C62828',this)"></span>
+            <span class="color-swatch" style="background:#E65100" title="ส้ม" onmousedown="event.preventDefault();NOTES.color('#E65100',this)"></span>
           </div>
           <div id="u-notes-rich" contenteditable="true"
             data-placeholder="— ข้อดี / ข้อเสียของมหาลัยนี้"
