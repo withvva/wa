@@ -1691,6 +1691,20 @@ const UNI=(function(){
 /* ── NOTES RICH EDITOR MODULE ── */
 const NOTES=(function(){
   function getEl(){return document.getElementById('u-notes-rich');}
+  let savedRange=null;
+
+  // Listen globally for selection changes and save when inside editor
+  document.addEventListener('selectionchange',function(){
+    const sel=window.getSelection();
+    if(!sel||sel.rangeCount===0)return;
+    const el=getEl();if(!el)return;
+    const range=sel.getRangeAt(0);
+    // Only save if selection is inside our editor
+    if(el.contains(range.commonAncestorContainer)){
+      savedRange=range.cloneRange();
+    }
+  });
+
   function save(){
     const u=UNI._unis().find(x=>x.id===UNI.getActiveId());
     if(!u)return;
@@ -1700,49 +1714,50 @@ const NOTES=(function(){
     STORAGE.save();
   }
 
-  // Core: insert styled span around current selection
-  function applyStyle(cssText){
+  function applyStyle(prop,value){
     const el=getEl();if(!el)return;
-    // Make sure editor has focus
+    if(!savedRange||savedRange.collapsed)return;
+    // Restore selection
     el.focus();
     const sel=window.getSelection();
-    if(!sel||sel.rangeCount===0)return;
-    const range=sel.getRangeAt(0);
-    if(range.collapsed)return;
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+    // Wrap with span
     const span=document.createElement('span');
-    span.setAttribute('style',cssText);
+    span.style[prop]=value;
     try{
-      // Simple case: selection within single node
-      range.surroundContents(span);
+      savedRange.surroundContents(span);
     }catch(e){
-      // Complex case: selection spans multiple elements
-      const frag=range.extractContents();
+      const frag=savedRange.extractContents();
       span.appendChild(frag);
-      range.insertNode(span);
-      // Restore selection to cover the span
-      const newRange=document.createRange();
-      newRange.selectNodeContents(span);
-      sel.removeAllRanges();
-      sel.addRange(newRange);
+      savedRange.insertNode(span);
     }
+    // Move cursor to after span
+    const newRange=document.createRange();
+    newRange.setStartAfter(span);
+    newRange.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(newRange);
+    savedRange=null;
     save();
   }
 
-  function applyBold(){applyStyle('font-weight:bold');}
-  function applyUnderline(){applyStyle('text-decoration:underline');}
-  function applyHighlight(color){applyStyle('background:'+color);}
-  function applyColor(color){applyStyle('color:'+color);}
+  function applyBold(){applyStyle('fontWeight','bold');}
+  function applyUnderline(){applyStyle('textDecoration','underline');}
+  function applyHighlight(color){applyStyle('background',color);}
+  function applyColor(color){applyStyle('color',color);}
+
   function clearFormat(){
     const el=getEl();if(!el)return;
+    if(!savedRange||savedRange.collapsed)return;
     el.focus();
     const sel=window.getSelection();
-    if(!sel||sel.rangeCount===0)return;
-    const range=sel.getRangeAt(0);
-    if(range.collapsed)return;
-    // Extract text only (strip spans)
-    const text=document.createTextNode(range.toString());
-    range.deleteContents();
-    range.insertNode(text);
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+    const text=document.createTextNode(savedRange.toString());
+    savedRange.deleteContents();
+    savedRange.insertNode(text);
+    savedRange=null;
     save();
   }
 
@@ -1761,6 +1776,7 @@ const NOTES=(function(){
     sel.addRange(range);
     save();
   }
+
   return {save,applyBold,applyUnderline,applyHighlight,applyColor,clearFormat,onPaste};
 })();
 
