@@ -930,15 +930,24 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
     </div>
     <div id="udtab-cost" class="dtab-content">
       <div class="section">
-        <div class="sec-label">ค่าใช้จ่าย</div>
+        <div class="sec-label">ค่าใช้จ่ายหลัก</div>
         <div class="cost-grid" id="u-cost-grid"></div>
-        <div style="background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:14px 16px">
+        <div style="background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:14px 16px;margin-top:16px">
           <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">แก้ไขค่าใช้จ่าย (กดสัญลักษณ์เงินเพื่อเปลี่ยนสกุล)</div>
           <div class="cost-edit-row" id="u-cost-edit-row"></div>
           <div class="thai-prep-note-wrap" style="margin-top:14px">
             <label>Note — ค่าเตรียมตัวในไทย</label>
             <textarea id="thai-prep-note" placeholder="เช่น ค่าแปลเอกสาร, ค่ารับรอง, ค่าตั๋วเครื่องบิน, ค่าวีซ่า..." onblur="UNI.saveThaiPrepNote()"></textarea>
           </div>
+          <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="UNI.saveCosts()">บันทึก</button></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sec-label">ค่าหอพัก</div>
+        <div class="cost-grid" id="u-dorm-grid"></div>
+        <div style="background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:14px 16px;margin-top:16px">
+          <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">แก้ไขตัวเลือกหอพัก</div>
+          <div class="cost-edit-row" id="u-dorm-edit-row"></div>
           <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="UNI.saveCosts()">บันทึก</button></div>
         </div>
         <!-- Quick scholarship summary inline -->
@@ -1673,7 +1682,6 @@ const UNI=(function(){
   const KRW_RATE=36;
   const COST_FIELDS=[
     {key:'tuition',label:'ค่าเทอม',sub:'ต่อภาค'},
-    {key:'dorm',label:'ค่าหอพัก',sub:'ต่อเดือน',hasDormExtra:true},
     {key:'living',label:'ค่าครองชีพ',sub:'ต่อเดือน'},
     {key:'apply',label:'ค่าสมัคร',sub:'ครั้งเดียว'},
     {key:'entrance',label:'ค่าแรกเข้า',sub:'ครั้งเดียว'},
@@ -2143,21 +2151,57 @@ const UNI=(function(){
     renderCosts(){
       const u=getU();if(!u)return;if(!u.currencies)u.currencies=defaultCurrencies();
       if(!u.dormOptions)u.dormOptions=[];
-      // Build display cards
-      const dormOptionsHtml=u.dormOptions.map((d,di)=>{
+      if(u.dormName===undefined)u.dormName='';
+
+      // ── Display cards: non-dorm fields ──
+      const nonDormFields=COST_FIELDS.filter(f=>f.key!=='dorm');
+      const dormCurr=u.currencies['dorm']||'THB';const dormSym=dormCurr==='KRW'?'₩':'฿';
+      // First dorm card
+      const firstDormCard=`<div class="cost-card" style="border-left:2px solid var(--blue-mid)"><div class="cost-card-label">ค่าหอพัก${u.dormName?' — '+u.dormName:''}</div><div class="cost-card-amount">${dormSym}${(u.costs['dorm']||0).toLocaleString()}</div><div class="cost-card-sub">ต่อ${u.dormUnit||'เดือน'} · ${dormCurr}</div></div>`;
+      const extraDormCards=u.dormOptions.map((d,di)=>{
         const sym=(d.currency||'THB')==='KRW'?'₩':'฿';
-        return `<div class="cost-card" style="border-left:2px solid var(--blue-mid)"><div class="cost-card-label">หอพัก ${di+2} — ${d.name||'ตึก '+(di+2)}</div><div class="cost-card-amount">${sym}${(d.amount||0).toLocaleString()}</div><div class="cost-card-sub">${d.unit||'เดือน'} · ${d.currency||'THB'}</div></div>`;
+        return `<div class="cost-card" style="border-left:2px solid var(--blue-mid)"><div class="cost-card-label">ค่าหอพัก${d.name?' — '+d.name:' '+(di+2)}</div><div class="cost-card-amount">${sym}${(d.amount||0).toLocaleString()}</div><div class="cost-card-sub">${d.unit||'เดือน'} · ${d.currency||'THB'}</div></div>`;
       }).join('');
-      document.getElementById('u-cost-grid').innerHTML=COST_FIELDS.map(f=>{
+
+      document.getElementById('u-cost-grid').innerHTML=nonDormFields.map(f=>{
         const raw=u.costs[f.key]||0;const curr=u.currencies[f.key]||'THB';
-        const unit=f.key==='dorm'?(u.dormUnit||'เดือน'):f.sub.split(' ')[1]||'';
         const display=(curr==='KRW'?'₩':'฿')+raw.toLocaleString();
-        return `<div class="cost-card"><div class="cost-card-label">${f.label}</div><div class="cost-card-amount">${display}</div><div class="cost-card-sub">${f.key==='dorm'?('ต่อ'+unit):f.sub} · ${curr}</div></div>`;
-      }).join('')+dormOptionsHtml;
-      // Build edit fields
-      const dormExtrasHtml=u.dormOptions.map((d,di)=>`
+        return `<div class="cost-card"><div class="cost-card-label">${f.label}</div><div class="cost-card-amount">${display}</div><div class="cost-card-sub">${f.sub} · ${curr}</div></div>`;
+      }).join('');
+
+      // Dorm cards in separate grid
+      const dormGrid=document.getElementById('u-dorm-grid');
+      if(dormGrid)dormGrid.innerHTML=firstDormCard+extraDormCards;
+
+      // ── Edit fields: non-dorm ──
+      document.getElementById('u-cost-edit-row').innerHTML=nonDormFields.map(f=>{
+        const curr=u.currencies[f.key]||'THB';
+        return `<div class="cost-inp-group"><label>${f.label}</label><div class="cost-inp-row">
+          <input type="number" id="cinp-${f.key}" value="${u.costs[f.key]||0}" min="0">
+          <button class="cost-currency-btn${curr==='THB'?' active':''}" id="ccbtn-${f.key}-thb" onclick="UNI.toggleCostCurrency('${f.key}','THB')">฿</button>
+          <button class="cost-currency-btn${curr==='KRW'?' active':''}" id="ccbtn-${f.key}-krw" onclick="UNI.toggleCostCurrency('${f.key}','KRW')">₩</button>
+        </div></div>`;
+      }).join('');
+
+      // ── Edit fields: dorm section ──
+      const dormUnitSel=`<select id="cinp-dorm-unit" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);font-family:inherit" onchange="UNI.saveDormUnit(this.value)">
+        <option value="คืน"${(u.dormUnit||'')==='คืน'?' selected':''}>ต่อคืน</option>
+        <option value="เดือน"${(u.dormUnit||'เดือน')==='เดือน'?' selected':''}>ต่อเดือน</option>
+        <option value="เทอม"${(u.dormUnit||'')==='เทอม'?' selected':''}>ต่อเทอม</option>
+        <option value="ปี"${(u.dormUnit||'')==='ปี'?' selected':''}>ต่อปี</option>
+      </select>`;
+      const firstDormEdit=`<div class="cost-inp-group" style="border:0.5px solid var(--blue-light);border-radius:4px;padding:10px">
+        <label>หอพัก 1 — <input type="text" id="dorm-main-name" value="${u.dormName||''}" placeholder="ชื่อตึก/ตัวเลือก" style="font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:3px;width:130px;font-family:inherit"></label>
+        <div class="cost-inp-row">
+          <input type="number" id="cinp-dorm" value="${u.costs['dorm']||0}" min="0">
+          ${dormUnitSel}
+          <button class="cost-currency-btn${dormCurr==='THB'?' active':''}" id="ccbtn-dorm-thb" onclick="UNI.toggleCostCurrency('dorm','THB')">฿</button>
+          <button class="cost-currency-btn${dormCurr==='KRW'?' active':''}" id="ccbtn-dorm-krw" onclick="UNI.toggleCostCurrency('dorm','KRW')">₩</button>
+        </div>
+      </div>`;
+      const extraDormEdits=u.dormOptions.map((d,di)=>`
         <div class="cost-inp-group" style="border:0.5px solid var(--blue-light);border-radius:4px;padding:10px;position:relative">
-          <label>หอพัก ${di+2} — <input type="text" id="dopt-name-${di}" value="${d.name||''}" placeholder="ชื่อตึก/ตัวเลือก" style="font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:3px;width:120px;font-family:inherit"></label>
+          <label>หอพัก ${di+2} — <input type="text" id="dopt-name-${di}" value="${d.name||''}" placeholder="ชื่อตึก/ตัวเลือก" style="font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:3px;width:130px;font-family:inherit"></label>
           <div class="cost-inp-row">
             <input type="number" id="dopt-amt-${di}" value="${d.amount||0}" min="0">
             <select id="dopt-unit-${di}" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);font-family:inherit">
@@ -2171,21 +2215,9 @@ const UNI=(function(){
             <button onclick="UNI.removeDormOption(${di})" style="background:none;border:none;cursor:pointer;font-size:13px;color:#7A1A1A;padding:0 4px">✕</button>
           </div>
         </div>`).join('');
-      document.getElementById('u-cost-edit-row').innerHTML=COST_FIELDS.map(f=>{
-        const curr=u.currencies[f.key]||'THB';
-        const unitSelect=f.key==='dorm'?`<select id="cinp-dorm-unit" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);font-family:inherit" onchange="UNI.saveDormUnit(this.value)">
-          <option value="คืน"${(u.dormUnit||'')==='คืน'?' selected':''}>ต่อคืน</option>
-          <option value="เดือน"${(u.dormUnit||'เดือน')==='เดือน'?' selected':''}>ต่อเดือน</option>
-          <option value="เทอม"${(u.dormUnit||'')==='เทอม'?' selected':''}>ต่อเทอม</option>
-          <option value="ปี"${(u.dormUnit||'')==='ปี'?' selected':''}>ต่อปี</option>
-        </select>`:'';
-        return `<div class="cost-inp-group"><label>${f.label}</label><div class="cost-inp-row">
-          <input type="number" id="cinp-${f.key}" value="${u.costs[f.key]||0}" min="0">
-          ${unitSelect}
-          <button class="cost-currency-btn${curr==='THB'?' active':''}" id="ccbtn-${f.key}-thb" onclick="UNI.toggleCostCurrency('${f.key}','THB')">฿</button>
-          <button class="cost-currency-btn${curr==='KRW'?' active':''}" id="ccbtn-${f.key}-krw" onclick="UNI.toggleCostCurrency('${f.key}','KRW')">₩</button>
-        </div></div>`;
-      }).join('')+dormExtrasHtml+`<div style="margin-top:8px"><button class="add-btn" onclick="UNI.addDormOption()">+ เพิ่มตัวเลือกหอพัก</button></div>`;
+      const dormEditWrap=document.getElementById('u-dorm-edit-row');
+      if(dormEditWrap)dormEditWrap.innerHTML=firstDormEdit+extraDormEdits+`<div style="margin-top:8px"><button class="add-btn" onclick="UNI.addDormOption()">+ เพิ่มตัวเลือกหอพัก</button></div>`;
+
       const noteTA=document.getElementById('thai-prep-note');if(noteTA)noteTA.value=u.thaiPrepNote||'';
     },
     saveDormUnit(v){const u=getU();if(!u)return;u.dormUnit=v;STORAGE.save();},
@@ -2204,8 +2236,13 @@ const UNI=(function(){
       document.getElementById('ccbtn-'+key+'-krw').classList.toggle('active',curr==='KRW');
       this.saveCosts();
     },
-    saveCosts(){const u=getU();COST_FIELDS.forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});
-      // save dorm options
+    saveCosts(){const u=getU();
+      // non-dorm fields
+      COST_FIELDS.filter(f=>f.key!=='dorm').forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});
+      // first dorm
+      const dormInp=document.getElementById('cinp-dorm');if(dormInp)u.costs['dorm']=parseFloat(dormInp.value)||0;
+      const dormNameInp=document.getElementById('dorm-main-name');if(dormNameInp)u.dormName=dormNameInp.value.trim();
+      // extra dorm options
       if(u.dormOptions){u.dormOptions.forEach((d,di)=>{const aInp=document.getElementById('dopt-amt-'+di);const nInp=document.getElementById('dopt-name-'+di);const uSel=document.getElementById('dopt-unit-'+di);if(aInp)d.amount=parseFloat(aInp.value)||0;if(nInp)d.name=nInp.value.trim();if(uSel)d.unit=uSel.value;});}
       this.renderCosts();this.renderCostSummaryInline();const sumEl=document.getElementById('u-summary-content');if(sumEl&&document.getElementById('udtab-summary')&&document.getElementById('udtab-summary').classList.contains('active'))this.renderSummary();STORAGE.save();},
     saveThaiPrepNote(){const u=getU();if(!u)return;const ta=document.getElementById('thai-prep-note');if(ta)u.thaiPrepNote=ta.value;STORAGE.save();},
@@ -2621,6 +2658,7 @@ const STORAGE=(function(){
           notes: '',
           dormOptions: [],
           dormUnit: 'เดือน',
+          dormName: '',
           pdfs: [],
           ...u,
         }));
