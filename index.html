@@ -607,7 +607,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
     <h1 class="hero-title">University<br><em>Application</em><br>Summary</h1>
   </div>
   <div class="home-main-grid">
-    <div class="info-panel">
+    <div class="info-panel" style="grid-column:1/-1">
       <div class="panel-sec">
         <p class="panel-label">Upcoming Deadlines</p>
         <div class="deadline-list" id="home-deadline-list"></div>
@@ -618,7 +618,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
         <div class="status-list" id="home-status-list"></div>
       </div>
     </div>
-    <div class="photo-panel">
+    <div class="photo-panel" style="display:none">
       <p class="photo-panel-label">รูปภาพ</p>
       <div class="photo-carousel-wrap" id="photo-carousel-wrap">
         <div class="photo-gallery-scroll" id="photo-gallery">
@@ -1117,7 +1117,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <div class="help-section-title">🏠 หน้าหลัก (Home)</div>
       <div class="help-item"><span class="help-item-icon">📅</span><span class="help-item-text"><strong>Upcoming Deadlines</strong> — แสดง deadline ที่กำลังจะมาถึงจากทุกมหาลัย กดชื่อมหาลัยเพื่อไปดูรายละเอียด</span></div>
       <div class="help-item"><span class="help-item-icon">🔵</span><span class="help-item-text"><strong>สถานะแต่ละแห่ง</strong> — กดการ์ดมหาลัยเพื่อไปดูหน้ารายละเอียด</span></div>
-      <div class="help-item"><span class="help-item-icon">🖼</span><span class="help-item-text"><strong>รูปภาพ</strong> — กด "+ เพิ่มรูปภาพ" หรือลากรูปมาวางได้เลย รูปสไลด์อัตโนมัติ</span></div>
+
     </div>
 
     <div class="help-section">
@@ -2586,7 +2586,7 @@ const STORAGE=(function(){
     return {
       unis: UNI._unis(),
       events: TL._events(),
-      photos: PHOTO._photos(),
+
       gksCur: {...GKS.cur},
       gksDocs: JSON.parse(JSON.stringify(GKS.docs)),
       gksRoundsData: JSON.parse(JSON.stringify(GKS.roundsData)),
@@ -2627,7 +2627,7 @@ const STORAGE=(function(){
         UNI._setUnis(normalizedUnis);
       }
       if(saved.events != null)    TL._setEvents(saved.events);
-      if(saved.photos && saved.photos.length)    PHOTO._setPhotos(saved.photos);
+
       if(saved.gksCur)                           Object.assign(GKS.cur, saved.gksCur);
       if(saved.gksDocs && saved.gksDocs.length)  GKS.docs.splice(0, GKS.docs.length, ...saved.gksDocs);
       if(saved.gksRoundsData){
@@ -3001,7 +3001,6 @@ const EXPORT=(function(){
         GKS.renderRounds&&(['emb','uni'].forEach(t=>{GKS.renderRounds(t,t+'-round-list');GKS.refreshNextActivity(t);}));
         UNI.renderOverview();
         HOME.refresh();
-        PHOTO.render();
         CMP.render();
         // Push to Firebase
         STORAGE.save();
@@ -3031,7 +3030,6 @@ window._bootApp = function(saved) {
   GKS.initStatusPatch();
   UNI.renderOverview();
   HOME.refresh();
-  PHOTO.render();
   window._appReady = true;
   const lo = document.getElementById('loading-overlay');
   if(lo) lo.style.display = 'none';
