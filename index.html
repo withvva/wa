@@ -2021,8 +2021,10 @@ const UNI=(function(){
       const COST_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',thaiPrep:'thaiPrep',other:null};
       function toTHB(raw,key){return (cu[key]||'THB')==='KRW'?raw/KRW:raw;}
       function fmtAmt(raw,key){const s=(cu[key]||'THB')==='KRW'?'₩':'฿';return s+Math.round(raw).toLocaleString();}
-      // base cost total (THB)
-      const baseTHB=COST_FIELDS.reduce((acc,f)=>acc+toTHB(u.costs[f.key]||0,f.key),0);
+      // base cost total (THB) — รวมค่าหอพักทุกตัวเลือก
+      const dormMain=toTHB(u.costs['dorm']||0,'dorm');
+      const dormExtra=(u.dormOptions||[]).reduce((acc,d)=>{const curr=d.currency||'THB';return acc+(curr==='KRW'?(d.amount||0)/KRW:(d.amount||0));},0);
+      const baseTHB=COST_FIELDS.reduce((acc,f)=>acc+toTHB(u.costs[f.key]||0,f.key),0)+dormMain+dormExtra;
       // per-scholarship net
       const schResults=(u.scholarships||[]).map(s=>{
         if(!s.discounts||!s.discounts.length)return{name:s.name,status:s.status,discounts:[],netTHB:baseTHB,savedTHB:0,rows:[]};
@@ -2051,8 +2053,20 @@ const UNI=(function(){
       const {u,baseTHB,schResults,COST_FIELDS,cu,fmtAmt}=d;
       const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
       const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
-      // base costs block
-      const baseCells=COST_FIELDS.map(f=>{
+      // base costs block — ค่าหอพัก (main + dormOptions)
+      const dormCurr=cu['dorm']||'THB';const dormSym=dormCurr==='KRW'?'₩':'฿';
+      const dormUnit=u.dormUnit||'เดือน';
+      const dormMainCell=`<div class="sum-base-cell" style="border-left:2px solid var(--blue-mid)">
+          <div class="sum-base-label">ค่าหอพัก${u.dormName?' — '+u.dormName:''}</div>
+          <div class="sum-base-val">${dormSym}${Math.round(u.costs['dorm']||0).toLocaleString()}</div>
+          <div class="sum-base-curr">ต่อ${dormUnit} · ${dormCurr}</div>
+        </div>`;
+      const dormExtraCells=(u.dormOptions||[]).map((d,di)=>{const c=d.currency||'THB';const s=c==='KRW'?'₩':'฿';return `<div class="sum-base-cell" style="border-left:2px solid var(--blue-mid)">
+          <div class="sum-base-label">ค่าหอพัก${d.name?' — '+d.name:' '+(di+2)}</div>
+          <div class="sum-base-val">${s}${Math.round(d.amount||0).toLocaleString()}</div>
+          <div class="sum-base-curr">ต่อ${d.unit||'เดือน'} · ${c}</div>
+        </div>`;}).join('');
+      const baseCells=dormMainCell+dormExtraCells+COST_FIELDS.map(f=>{
         const raw=u.costs[f.key]||0;const curr=cu[f.key]||'THB';
         const sym=curr==='KRW'?'₩':'฿';
         return `<div class="sum-base-cell">
