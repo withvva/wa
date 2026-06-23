@@ -337,7 +337,7 @@ tr.total-row .amount-approx{font-size:16px}
 .chart-section{padding:0 48px 40px}
 .bar-group{display:flex;flex-direction:column;gap:10px}
 .bar-row{display:flex;align-items:center;gap:12px}
-.bar-uni-name{font-size:12px;color:var(--text-secondary);width:100px;flex-shrink:0;text-align:right}
+.bar-uni-name{font-size:12px;color:var(--text-secondary);width:100px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-track{flex:1;background:var(--cream-dark);border-radius:2px;height:24px;overflow:hidden}
 .bar-fill{height:100%;border-radius:2px;transition:width .6s ease;display:flex;align-items:center;padding:0 8px;min-width:30px}
 .bar-fill-label{font-size:11px;color:white;font-weight:500;white-space:nowrap}
@@ -384,9 +384,8 @@ tr.total-row .amount-approx{font-size:16px}
 .btn-import{border-color:var(--border);color:var(--text-secondary)}
 #import-file-input{display:none}
 
-/* ── NEW: Home nav button highlight ── */
-#nav-home{color:var(--blue-dark);font-weight:500}
-#nav-home:hover{color:#2d5a88}
+/* ── Nav active highlight ── */
+nav button.nav-active{color:var(--blue-dark);font-weight:500}
 
 @media(max-width:768px){
   /* ── ป้องกัน scroll ขวา ── */
@@ -466,6 +465,96 @@ tr.total-row .amount-approx{font-size:16px}
   .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
 
+/* ── Scholarship Cards (new per-scholarship discount) ── */
+.sch-card{border:0.5px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden}
+.sch-card-header{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--cream);cursor:pointer;user-select:none}
+.sch-card-name{font-size:14px;font-weight:500;color:var(--text-primary);flex:1}
+.sch-card-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.sch-card-tag{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--blue-light);color:var(--blue-dark);white-space:nowrap}
+.sch-card-tag.free{background:#D4EDD8;color:#1A6B3A}
+.sch-card-tag.pct{background:#EDE4F8;color:#5B3A9B}
+.sch-card-chevron{font-size:11px;color:var(--text-muted);transition:transform .2s}
+.sch-card.open .sch-card-chevron{transform:rotate(180deg)}
+.sch-card-body{display:none;padding:14px;border-top:0.5px solid var(--border)}
+.sch-card.open .sch-card-body{display:block}
+.sch-card-discount-list{margin-bottom:12px}
+.sch-card-discount-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px dashed var(--border);font-size:13px}
+.sch-card-discount-row:last-child{border-bottom:none}
+.sch-card-discount-label{flex:1;color:var(--text-primary)}
+.sch-card-discount-sub{font-size:11px;color:var(--text-muted)}
+.sch-card-discount-val{font-size:13px;color:#1A6B3A;font-weight:500;white-space:nowrap}
+.sch-card-calc-btn{font-size:11px;color:var(--blue-dark);background:none;border:0.5px solid var(--blue-dark);border-radius:3px;padding:4px 12px;cursor:pointer;font-family:inherit;letter-spacing:.04em}
+.sch-card-calc-btn:hover{background:var(--blue-dark);color:white}
+.sch-card-result{margin-top:10px;padding:10px 12px;background:#F0F7F3;border-radius:4px;display:none}
+.sch-card-result.show{display:block}
+.sch-card-result-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--text-secondary)}
+.sch-card-result-row.total{font-size:14px;font-weight:600;color:var(--blue-dark);border-top:0.5px solid #B6D9C4;margin-top:4px;padding-top:6px}
+.sch-card-result-saved{font-size:11px;color:#1A6B3A;text-align:right;margin-top:2px}
+.sch-card-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--border);align-items:center}
+.sch-add-form{background:var(--cream);border:0.5px solid var(--border);border-radius:6px;padding:16px;margin-bottom:12px}
+.s-discount-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;padding:3px 8px;border-radius:20px;background:#EDE4F8;color:#5B3A9B;margin:3px 3px 3px 0}
+.s-discount-tag button{background:none;border:none;cursor:pointer;font-size:10px;color:#5B3A9B;padding:0;line-height:1}
+/* ── Scholarship Breakdown ── */
+.sch-breakdown-box{background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:16px 18px;margin-top:16px}
+.sch-breakdown-title{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px}
+.sch-bd-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.sch-bd-row:last-child{border-bottom:none}
+.sch-bd-label{font-size:12px;color:var(--text-secondary)}
+.sch-bd-before{font-size:13px;color:var(--text-muted)}
+.sch-bd-discount{font-size:13px;color:#1A6B3A;font-weight:500}
+.sch-bd-after{font-size:14px;font-weight:500;color:var(--blue-dark)}
+.sch-bd-total{border-top:1.5px solid var(--border);margin-top:6px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
+.sch-bd-total-label{font-size:12px;font-weight:500;color:var(--text-secondary)}
+.sch-bd-total-val{font-family:'Libre Baskerville',serif;font-size:18px;color:var(--blue-dark)}
+.sch-bd-total-saved{font-size:11px;color:#1A6B3A;margin-top:2px;text-align:right}
+.sch-detail-expand{margin-top:8px;padding:12px;background:var(--cream);border:0.5px solid var(--border);border-radius:4px;display:none}
+.sch-detail-expand.open{display:block}
+.sch-items-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:end;margin-bottom:8px}
+.sch-items-grid label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;display:block}
+.sch-items-grid input,.sch-items-grid select{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%}
+.sch-items-grid input:focus,.sch-items-grid select:focus{outline:none;border-color:var(--blue-mid)}
+.sch-item-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:center;padding:6px 0;border-top:0.5px solid var(--border)}
+.sch-item-name{font-size:12px;color:var(--text-primary)}
+.sch-item-val{font-size:12px;color:#1A6B3A;font-weight:500}
+.sch-item-del{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px}
+.sch-item-del:hover{color:#7A1A1A}
+.sch-expand-btn{font-size:11px;color:var(--blue-dark);background:none;border:none;cursor:pointer;padding:4px 0;font-family:'IBM Plex Sans Thai',sans-serif;letter-spacing:.04em;text-decoration:underline;text-underline-offset:2px}
+/* ── Summary Tab ── */
+.sum-block{background:var(--white);border:0.5px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:16px}
+.sum-block-header{background:var(--cream-dark);padding:10px 16px;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted);font-weight:500}
+.sum-base-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0;border-top:0.5px solid var(--border)}
+.sum-base-cell{padding:14px 16px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border)}
+.sum-base-cell:last-child{border-right:none}
+.sum-base-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:5px}
+.sum-base-val{font-size:16px;color:var(--text-primary)}
+.sum-base-curr{font-size:10px;color:var(--text-muted);margin-top:2px}
+.sum-sch-row{display:grid;grid-template-columns:180px 1fr auto;align-items:center;gap:12px;padding:12px 16px;border-bottom:0.5px solid var(--border)}
+.sum-sch-row:last-child{border-bottom:none}
+.sum-sch-name{font-size:13px;font-weight:500}
+.sum-sch-tags{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sum-sch-net{font-size:15px;color:var(--blue-dark);font-weight:500;white-space:nowrap;text-align:right}
+.sum-sch-saved{font-size:11px;color:#1A6B3A;white-space:nowrap;text-align:right}
+.sum-total-bar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--blue-dark);color:white;border-radius:4px;flex-wrap:wrap;gap:8px;margin-top:4px}
+.sum-total-label{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;opacity:.8}
+.sum-total-val{font-family:'Libre Baskerville',serif;font-size:24px}
+.sum-total-saved{font-size:11px;color:var(--blue-light);margin-top:2px}
+.sum-no-sch{font-size:12px;color:var(--text-muted);padding:14px 16px}
+.sum-cost-inline{margin-top:16px;border:0.5px solid var(--border);border-radius:6px;overflow:hidden}
+.sum-cost-inline-header{background:var(--cream-dark);padding:8px 14px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted)}
+.sum-cost-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-top:0.5px solid var(--border);font-size:13px}
+.sum-cost-row-label{color:var(--text-secondary)}
+.sum-cost-row-val{color:var(--text-primary);font-weight:500}
+/* ── Help Modal ── */
+.help-fab{position:fixed;bottom:28px;right:28px;width:44px;height:44px;border-radius:50%;background:var(--blue-dark);color:white;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:300;box-shadow:0 4px 16px rgba(123,87,206,.35);transition:background .2s}
+.help-fab:hover{background:#6245b8}
+.help-modal{max-width:600px}
+.help-section{margin-bottom:20px}
+.help-section-title{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-dark);margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--border)}
+.help-item{display:flex;gap:12px;padding:8px 0;border-bottom:0.5px dashed var(--border)}
+.help-item:last-child{border-bottom:none}
+.help-item-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.help-item-text{font-size:13px;color:var(--text-secondary);line-height:1.7}
+.help-item-text strong{color:var(--text-primary)}
 /* ── Photo Carousel ── */
 .photo-carousel-wrap{position:relative;width:100%;overflow:hidden;border-radius:4px}
 .photo-carousel-track{display:flex;transition:transform 0.4s ease;width:100%}
@@ -491,13 +580,13 @@ tr.total-row .amount-approx{font-size:16px}
 <header>
   <button class="logo" onclick="goPage('home')">Spring Round</button>
   <nav>
-    <button id="nav-home" onclick="goPage('home')">Home</button>
+    <button id="nav-home" class="nav-active" onclick="goPage('home')">Home</button>
     <button id="nav-timeline" onclick="goPage('timeline')">Timeline</button>
     <button id="nav-gks" onclick="goPage('gks')">GKS</button>
     <button id="nav-universities" onclick="goPage('universities')">Universities</button>
     <button id="nav-compare" onclick="goPage('compare')">Compare</button>
     <span id="sync-status" class="synced">● Synced</span>
-    <button class="btn btn-danger btn-sm" onclick="STORAGE.confirmClear()" title="ล้างข้อมูลทั้งหมด" style="margin-left:8px">รีเซ็ต</button>
+    <button class="btn btn-sm" onclick="document.getElementById('reset-modal').classList.add('open')" title="ตั้งค่า" style="margin-left:8px;font-size:13px;padding:4px 10px">⚙</button>
   </nav>
 </header>
 
@@ -548,7 +637,7 @@ tr.total-row .amount-approx{font-size:16px}
   <div class="summary-bar">
     <div class="stat"><span class="num" id="home-stat-count">0</span><span class="lbl">แห่งที่ยื่น</span></div>
     <div class="sdiv"></div>
-    <div class="stat"><span class="num" id="home-stat-rounds">2</span><span class="lbl">รอบที่สมัคร</span></div>
+    <div class="stat"><span class="num" id="home-stat-rounds">0</span><span class="lbl">รอบที่สมัคร</span></div>
     <div class="uni-chips" id="home-chips"></div>
   </div>
   <div class="nav-section">
@@ -582,12 +671,12 @@ tr.total-row .amount-approx{font-size:16px}
   </div>
   <div class="cal-section">
     <div class="cal-controls">
-      <button class="btn" onclick="TL.prev()">← Previous</button>
+      <button class="btn" onclick="TL.prev()">← ย้อน</button>
       <span class="cal-month-label" id="tl-month-label"></span>
-      <button class="btn" onclick="TL.next()">Next →</button>
+      <button class="btn" onclick="TL.next()">ถัดไป →</button>
     </div>
     <div class="calendar">
-      <div class="cal-weekdays"><div class="cal-wd">Sun</div><div class="cal-wd">Mon</div><div class="cal-wd">Tue</div><div class="cal-wd">Wed</div><div class="cal-wd">Thu</div><div class="cal-wd">Fri</div><div class="cal-wd">Sat</div></div>
+      <div class="cal-weekdays"><div class="cal-wd">อา</div><div class="cal-wd">จ</div><div class="cal-wd">อ</div><div class="cal-wd">พ</div><div class="cal-wd">พฤ</div><div class="cal-wd">ศ</div><div class="cal-wd">ส</div></div>
       <div class="cal-grid" id="tl-cal-grid"></div>
     </div>
   </div>
@@ -705,6 +794,12 @@ tr.total-row .amount-approx{font-size:16px}
       <h1 class="page-title">University <em>Round</em></h1>
       <p class="page-sub">รายละเอียดแต่ละมหาวิทยาลัย กดการ์ดเพื่อดูวันสำคัญ เอกสาร ทุน และค่าใช้จ่าย</p>
     </div>
+    <div class="export-strip">
+      <span class="export-strip-label">ข้อมูล</span>
+      <button class="btn-export" onclick="EXPORT.asJSON()" title="สำรองข้อมูลเป็น JSON">⬇ Export JSON</button>
+      <button class="btn-export btn-export-pdf" onclick="EXPORT.asPDF()" title="ส่งออกเป็น PDF">⬇ Export PDF</button>
+      <button class="btn-export btn-import" onclick="document.getElementById('import-file-input').click()" title="นำเข้าไฟล์ JSON">⬆ Import JSON</button>
+    </div>
     <div class="overview-controls">
       <span id="uni-count" style="font-size:12px;color:var(--text-muted)">— มหาวิทยาลัย</span>
       <button class="btn btn-primary" onclick="UNI.openAddModal()">+ เพิ่มมหาวิทยาลัย</button>
@@ -728,7 +823,7 @@ tr.total-row .amount-approx{font-size:16px}
         </div>
       </div>
       <div class="detail-header-actions">
-        <a id="d-apply-link" href="#" target="_blank" class="btn btn-sm btn-primary">เว็บสมัคร ↗</a>
+        <a id="d-apply-link" href="#" target="_blank" class="btn btn-sm btn-primary" style="display:none">เว็บสมัคร ↗</a>
       </div>
     </div>
     <div class="detail-tabs">
@@ -736,6 +831,7 @@ tr.total-row .amount-approx{font-size:16px}
       <button class="dtab" onclick="UNI.switchDTab('docs',this)">เอกสาร</button>
       <button class="dtab" onclick="UNI.switchDTab('schol',this)">ทุน</button>
       <button class="dtab" onclick="UNI.switchDTab('cost',this)">ค่าใช้จ่าย</button>
+      <button class="dtab" onclick="UNI.switchDTab('summary',this);UNI.renderSummary()">สรุป</button>
       <button class="dtab" onclick="UNI.switchDTab('links',this)">ลิงก์</button>
       <button class="dtab" onclick="UNI.switchDTab('notes',this)">Notes</button>
     </div>
@@ -762,23 +858,14 @@ tr.total-row .amount-approx{font-size:16px}
     <div id="udtab-schol" class="dtab-content">
       <div class="section">
         <div class="sec-label">ทุนการศึกษา</div>
-        <div class="sch-table-wrap">
-          <table class="sch-table">
-            <thead><tr><th>ชื่อทุน</th><th>มูลค่า / รายละเอียด</th><th>เงื่อนไข</th><th>Deadline</th><th>สถานะ</th><th></th></tr></thead>
-            <tbody id="u-sch-tbody"></tbody>
-          </table>
-        </div>
-        <div style="margin-top:16px;padding-top:16px;border-top:0.5px solid var(--border)">
-          <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">+ เพิ่มทุน</div>
+        <!-- Scholarship cards list -->
+        <div id="u-sch-cards"></div>
+        <!-- Add scholarship form -->
+        <div class="sch-add-form" id="sch-add-form" style="display:none">
+          <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">ข้อมูลทุน</div>
           <div class="form-row-2" style="margin-bottom:10px">
             <div class="form-group" style="margin:0"><label>ชื่อทุน</label><input type="text" id="s-name" placeholder="เช่น Departmental Scholarship"></div>
-            <div class="form-group" style="margin:0"><label>มูลค่า (ตัวเลข, ถ้ามี)</label><input type="number" id="s-amount" placeholder="0"></div>
-          </div>
-          <div class="form-group"><label>รายละเอียดมูลค่า / สิทธิ์ที่ได้รับ</label><textarea id="s-value-detail" placeholder="เช่น ฟรีค่าเทอม + หอพัก + ค่าใช้จ่ายรายเดือน 200,000 วอน"></textarea></div>
-          <div class="form-row-2" style="margin-bottom:10px">
-            <div class="form-group" style="margin:0"><label>เงื่อนไข</label><textarea id="s-cond" placeholder="เช่น GPA >= 3.5 ต่อเนื่อง 2 ภาคเรียน..." style="min-height:60px"></textarea></div>
             <div class="form-group" style="margin:0">
-              <label>Deadline</label><input type="date" id="s-deadline" style="margin-bottom:8px">
               <label>สถานะ</label>
               <select id="s-status">
                 <option value="prep">กำลังเตรียม</option><option value="applied">สมัครแล้ว</option>
@@ -787,7 +874,59 @@ tr.total-row .amount-approx{font-size:16px}
               </select>
             </div>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="UNI.addScholarship()">+ เพิ่มทุน</button>
+          <div class="form-row-2" style="margin-bottom:10px">
+            <div class="form-group" style="margin:0"><label>เงื่อนไข</label><textarea id="s-cond" placeholder="เช่น GPA >= 3.5 ต่อเนื่อง 2 ภาคเรียน..." style="min-height:56px"></textarea></div>
+            <div class="form-group" style="margin:0"><label>Deadline</label><input type="date" id="s-deadline"></div>
+          </div>
+          <!-- Discount items for this scholarship -->
+          <div style="margin-top:4px;margin-bottom:8px">
+            <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">สิทธิ์ที่ได้รับ (ส่วนลด)</div>
+            <div id="s-discount-preview"></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 70px 90px auto;gap:8px;align-items:end;margin-top:8px">
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">หมวด</label>
+                <select id="sdi-cat" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
+                  <option value="tuition">ค่าเทอม</option><option value="dorm">ค่าหอ</option>
+                  <option value="living">ค่าครองชีพ</option><option value="apply">ค่าสมัคร</option>
+                  <option value="entrance">ค่าแรกเข้า</option><option value="thaiPrep">ค่าเตรียมตัว</option>
+                  <option value="other">อื่นๆ</option>
+                </select>
+              </div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">ประเภท</label>
+                <select id="sdi-type" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
+                  <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="free">ฟรีทั้งหมด</option>
+                </select>
+              </div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">ค่า (% หรือ ฿)</label>
+                <input type="number" id="sdi-val" placeholder="0" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
+              </div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">จำนวน</label>
+                <input type="number" id="sdi-dur" placeholder="1" min="0" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
+              </div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">หน่วย</label>
+                <select id="sdi-durunit" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
+                  <option value="เทอม">เทอม</option><option value="วัน">วัน</option><option value="เดือน">เดือน</option><option value="ปี">ปี</option><option value="ครั้ง">ครั้ง</option><option value="ตลอดหลักสูตร">ตลอด</option>
+                </select>
+              </div>
+              <button class="btn btn-sm" style="height:32px;white-space:nowrap" onclick="UNI.addDiscountToForm()">+ เพิ่ม</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-primary btn-sm" onclick="UNI.addScholarship()">บันทึกทุน</button>
+            <button class="btn btn-sm" onclick="UNI.cancelAddScholarship()">ยกเลิก</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" id="sch-add-btn" style="margin-top:12px" onclick="UNI.openAddScholarship()">+ เพิ่มทุน</button>
+        <!-- Combined breakdown -->
+        <div class="sch-breakdown-box" id="sch-breakdown-box" style="display:none">
+          <div class="sch-breakdown-title">สรุปรวมค่าใช้จ่าย หลังได้ทุน</div>
+          <div id="sch-breakdown-rows"></div>
+          <div class="sch-bd-total">
+            <div>
+              <div class="sch-bd-total-label">ค่าใช้จ่ายสุทธิ (หลังหักทุนทั้งหมด)</div>
+              <div class="sch-bd-total-saved" id="sch-bd-saved"></div>
+            </div>
+            <div class="sch-bd-total-val" id="sch-bd-total-after"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -804,6 +943,15 @@ tr.total-row .amount-approx{font-size:16px}
           </div>
           <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="UNI.saveCosts()">บันทึก</button></div>
         </div>
+        <!-- Quick scholarship summary inline -->
+        <div id="cost-sch-summary" style="margin-top:20px"></div>
+      </div>
+    </div>
+    <!-- ══ NEW: SUMMARY TAB ══ -->
+    <div id="udtab-summary" class="dtab-content">
+      <div class="section" id="u-summary-section">
+        <div class="sec-label">สรุปค่าใช้จ่าย + ทุน</div>
+        <div id="u-summary-content"><div style="font-size:13px;color:var(--text-muted);padding:12px 0">กำลังโหลด…</div></div>
       </div>
     </div>
     <div id="udtab-links" class="dtab-content">
@@ -855,6 +1003,23 @@ tr.total-row .amount-approx{font-size:16px}
             onpaste="NOTES.onPaste(event)"></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div class="modal-overlay" id="reset-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title" style="font-size:16px">ตั้งค่า<button class="modal-close" onclick="document.getElementById('reset-modal').classList.remove('open')">✕</button></div>
+    <div style="background:#FDDEDE;border:0.5px solid #F5C0C0;border-radius:4px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:500;color:#7A1A1A;margin-bottom:4px">รีเซ็ตข้อมูลทั้งหมด</div>
+      <div style="font-size:12px;color:#7A1A1A;line-height:1.7">ข้อมูลทุกอย่างจะถูกลบออกจาก Firebase และทุก device กู้คืนไม่ได้</div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px">พิมพ์ <strong style="color:var(--text-primary)">รีเซ็ต</strong> เพื่อยืนยัน</div>
+    <input type="text" id="reset-confirm-input" placeholder="พิมพ์ รีเซ็ต ที่นี่" style="font-family:inherit;font-size:13px;padding:8px 10px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%;margin-bottom:14px" oninput="document.getElementById('reset-confirm-btn').disabled=this.value!=='รีเซ็ต'">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="document.getElementById('reset-modal').classList.remove('open');document.getElementById('reset-confirm-input').value='';document.getElementById('reset-confirm-btn').disabled=true">ยกเลิก</button>
+      <button id="reset-confirm-btn" class="btn btn-danger btn-sm" disabled onclick="document.getElementById('reset-modal').classList.remove('open');document.getElementById('reset-confirm-input').value='';document.getElementById('reset-confirm-btn').disabled=true;STORAGE.confirmClear()" style="font-size:12px;padding:7px 16px">ยืนยันรีเซ็ต</button>
     </div>
   </div>
 </div>
@@ -931,6 +1096,51 @@ tr.total-row .amount-approx{font-size:16px}
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
       <button class="btn" onclick="document.getElementById('add-cmp-modal').classList.remove('open')">ยกเลิก</button>
       <button class="btn btn-primary" onclick="CMP.addUni()">เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help FAB -->
+<button class="help-fab" onclick="document.getElementById('help-modal-overlay').classList.add('open')" title="วิธีใช้งาน">?</button>
+
+<!-- Help Modal -->
+<div class="modal-overlay" id="help-modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal help-modal">
+    <div class="modal-title">วิธีใช้งาน Spring Round<button class="modal-close" onclick="document.getElementById('help-modal-overlay').classList.remove('open')">✕</button></div>
+
+    <div class="help-section">
+      <div class="help-section-title">🏠 หน้าหลัก (Home)</div>
+      <div class="help-item"><span class="help-item-icon">📅</span><span class="help-item-text"><strong>Upcoming Deadlines</strong> — แสดง deadline ที่กำลังจะมาถึงจากทุกมหาลัย กดชื่อมหาลัยเพื่อไปดูรายละเอียด</span></div>
+      <div class="help-item"><span class="help-item-icon">🔵</span><span class="help-item-text"><strong>สถานะแต่ละแห่ง</strong> — กดการ์ดมหาลัยเพื่อไปดูหน้ารายละเอียด</span></div>
+      <div class="help-item"><span class="help-item-icon">🖼</span><span class="help-item-text"><strong>รูปภาพ</strong> — กด "+ เพิ่มรูปภาพ" หรือลากรูปมาวางได้เลย รูปสไลด์อัตโนมัติ</span></div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">📆 Timeline</div>
+      <div class="help-item"><span class="help-item-icon">📌</span><span class="help-item-text"><strong>กดวันในปฏิทิน</strong> เพื่อดูกิจกรรมในวันนั้น หรือเพิ่มกิจกรรมใหม่</span></div>
+      <div class="help-item"><span class="help-item-icon">←→</span><span class="help-item-text">กดปุ่ม <strong>Previous / Next</strong> เพื่อเลื่อนเดือน</span></div>
+      <div class="help-item"><span class="help-item-icon">➕</span><span class="help-item-text">เพิ่มกิจกรรมได้จากฟอร์มด้านล่าง — ใส่วันที่ มหาลัย ประเภท และชื่อกิจกรรม</span></div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">🏫 Universities</div>
+      <div class="help-item"><span class="help-item-icon">➕</span><span class="help-item-text">กด <strong>"+ เพิ่มมหาวิทยาลัย"</strong> เพื่อเพิ่มมหาลัยใหม่ ตั้งสี ตั้งสถานะได้</span></div>
+      <div class="help-item"><span class="help-item-icon">🖊</span><span class="help-item-text">กดการ์ดมหาลัยเพื่อเข้าหน้ารายละเอียด มี 5 แท็บ: วันสำคัญ / เอกสาร / ทุน / ค่าใช้จ่าย / Note</span></div>
+      <div class="help-item"><span class="help-item-icon">🎓</span><span class="help-item-text"><strong>แท็บ "ทุน"</strong> — เพิ่มทุนได้ และใส่รายละเอียดส่วนลดได้ว่าลดค่าอะไรกี่ % หรือเท่าไหร่ แล้วกด "คำนวณ" เพื่อดูค่าใช้จ่ายจริงหลังได้ทุน</span></div>
+      <div class="help-item"><span class="help-item-icon">💰</span><span class="help-item-text"><strong>แท็บ "ค่าใช้จ่าย"</strong> — กรอกค่าเทอม ค่าหอ ค่าครองชีพ ฯลฯ สามารถเลือกสกุลเงิน ฿ หรือ ₩ ได้</span></div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">📊 Compare</div>
+      <div class="help-item"><span class="help-item-icon">📋</span><span class="help-item-text">ตารางเปรียบค่าใช้จ่ายทุกมหาลัย สีน้ำเงิน = ถูกสุด / สีส้ม = แพงสุด</span></div>
+      <div class="help-item"><span class="help-item-icon">💱</span><span class="help-item-text">ปรับ<strong>อัตราแลกเปลี่ยน</strong> ฿/₩ ได้ที่แถบด้านบน</span></div>
+      <div class="help-item"><span class="help-item-icon">👁</span><span class="help-item-text">กดปุ่มหมวดด้านบนเพื่อ<strong>ซ่อน/แสดงคอลัมน์</strong></span></div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title">💾 บันทึกข้อมูล</div>
+      <div class="help-item"><span class="help-item-icon">☁️</span><span class="help-item-text">ข้อมูลบันทึกอัตโนมัติบน Cloud ทุกครั้งที่แก้ไข ดูสถานะได้ที่มุมขวาบน (● Synced)</span></div>
+      <div class="help-item"><span class="help-item-icon">⬇</span><span class="help-item-text"><strong>Export JSON</strong> — สำรองข้อมูลเป็นไฟล์ / <strong>Import JSON</strong> — นำข้อมูลกลับมา</span></div>
     </div>
   </div>
 </div>
@@ -1038,9 +1248,9 @@ window._isRemoteUpdate = () => isRemoteUpdate;
 function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('nav-active'));
   const nb=document.getElementById('nav-'+id);
-  if(nb) nb.classList.add('active');
+  if(nb) nb.classList.add('nav-active');
   window.scrollTo(0,0);
   if(id==='universities') UNI.renderOverview();
   if(id==='compare') CMP.render();
@@ -1050,9 +1260,15 @@ function goPage(id){
 
 (function(){
   const el=document.getElementById('footer-note');if(!el)return;
-  const d=new Date();
-  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  el.textContent='อัปเดตล่าสุด: '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+  function updateFooterTime(){
+    const d=new Date();
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const hh=String(d.getHours()).padStart(2,'0');
+    const mm=String(d.getMinutes()).padStart(2,'0');
+    el.textContent='อัปเดตล่าสุด: '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+' · '+hh+':'+mm;
+  }
+  updateFooterTime();
+  setInterval(updateFooterTime,60000);
 })();
 
 /* ── SHARED CONSTANTS ── */
@@ -1170,10 +1386,16 @@ const HOME=(function(){
       const dt=new Date(d.val+'T00:00:00');
       const mon=dt.toLocaleString('en',{month:'short'}).toUpperCase();
       const tag=TAG_MAP[d.type]||'tag-apply';const lbl=TAG_LABEL[d.type]||'อื่นๆ';
+      const diffDays=Math.round((dt-today)/(1000*60*60*24));
+      const countdownTxt=diffDays===0?'วันนี้':diffDays===1?'พรุ่งนี้':`อีก ${diffDays} วัน`;
+      const countdownColor=diffDays<=3?'#7A1A1A':diffDays<=7?'#7D3A0A':'var(--text-muted)';
       return `<div class="deadline-item">
         <div class="d-date"><span class="d-day">${dt.getDate()}</span><span class="d-month">${mon}</span></div>
         <div><div class="d-name">${d.name}</div><div class="d-uni" onclick="HOME.openUni(${d.uniId})">${d.uniName}</div></div>
-        <span class="tag ${tag}">${lbl}</span>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="tag ${tag}">${lbl}</span>
+          <div style="font-size:11px;color:${countdownColor};margin-top:3px;font-weight:500">${countdownTxt}</div>
+        </div>
       </div>`;
     }).join('');
   }
@@ -1358,6 +1580,12 @@ const GKS=(function(){
     }).join('');
     const lbl=document.getElementById(track+'-rm-lbl');
     if(lbl)lbl.textContent='ขั้นตอน '+(cur+1)+'/'+steps.length+' — '+steps[Math.min(cur,steps.length-1)];
+    // disable next/prev buttons at boundaries
+    const trackEl=document.getElementById('gtab-'+track)||document.getElementById('gtab-docs');
+    const allBtns=document.querySelectorAll(`[onclick="GKS.setRM('${track}',GKS.cur.${track}+1)"]`);
+    const allPrevBtns=document.querySelectorAll(`[onclick="GKS.setRM('${track}',GKS.cur.${track}-1)"]`);
+    allBtns.forEach(b=>{b.disabled=(cur>=steps.length-1);b.style.opacity=(cur>=steps.length-1)?'0.4':'';});
+    allPrevBtns.forEach(b=>{b.disabled=(cur<=0);b.style.opacity=(cur<=0)?'0.4':'';});
   }
   function renderUniFields(list,containerId){
     const el=document.getElementById(containerId);if(!el)return;el.innerHTML='';
@@ -1537,7 +1765,7 @@ const UNI=(function(){
       const al=document.getElementById('d-apply-link');al.href=u.applyUrl||'#';al.style.display=(u.applyUrl&&u.applyUrl!=='#')?'':'none';
       document.querySelectorAll('.dtab').forEach((t,i)=>t.classList.toggle('active',i===0));
       document.querySelectorAll('.dtab-content').forEach((c,i)=>c.classList.toggle('active',i===0));
-      this.renderDates();this.renderDocs();this.renderScholarships();this.renderCosts();this.renderLinks();this.renderNotes();
+      this.renderDates();this.renderDocs();this.renderScholarships();this.renderCosts();this.renderCostSummaryInline();this.renderLinks();this.renderNotes();
       window.scrollTo(0,0);
     },
     showOverview(){document.getElementById('uview-overview').style.display='block';document.getElementById('uview-detail').style.display='none';this.renderOverview();},
@@ -1590,29 +1818,316 @@ const UNI=(function(){
     renderDocs(){renderDocChecklist(getU().docs,'u-doc-checklist','u');},
     addDocItem(){const n=prompt('ชื่อเอกสาร:');if(n&&n.trim()){getU().docs.push({label:n.trim(),checked:false,status:0,note:''});this.renderDocs();STORAGE.save();}},
     renderScholarships(){
-      const u=getU();if(!u)return;const tbody=document.getElementById('u-sch-tbody');if(!tbody)return;
-      if(!u.scholarships.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px">ยังไม่มีทุน</td></tr>';return;}
-      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const u=getU();if(!u)return;
+      if(!u.scholarships)u.scholarships=[];
+      const el=document.getElementById('u-sch-cards');if(!el)return;
       const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
-      tbody.innerHTML=u.scholarships.map((s,i)=>{
-        const amtText=s.amountTHB?'฿'+s.amountTHB.toLocaleString():'';
-        const display=[amtText,s.valueDetail].filter(Boolean).join(' · ');
-        return `<tr>
-          <td style="font-weight:500">${s.name}</td>
-          <td class="sch-amount">${display||'—'}</td>
-          <td style="font-size:12px;color:var(--text-secondary);max-width:200px;line-height:1.6;white-space:normal">${s.cond||'—'}</td>
-          <td>${s.deadline?fmtDate(s.deadline):'—'}</td>
-          <td><span class="pill sch-badge ${SCH_PILL[s.status]||'pill-prep'}" style="margin-right:6px">${schStatusLabel[s.status]||s.status}</span><select class="check-status-sel" onclick="event.stopPropagation()" onchange="UNI.changeSchStatus(${i},this.value)">${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}</select></td>
-          <td><button class="sch-del" onclick="UNI.delScholarship(${i})">✕</button></td>
-        </tr>`;
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const CAT_ICON={tuition:'🎓',dorm:'🏠',living:'🛒',apply:'📝',entrance:'🚪',thaiPrep:'✈️',other:'📌'};
+      if(!u.scholarships.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0 12px">ยังไม่มีทุน — กด "+ เพิ่มทุน" เพื่อเริ่ม</div>';return;}
+      el.innerHTML=u.scholarships.map((s,i)=>{
+        if(!s.discounts)s.discounts=[];
+        const tags=s.discounts.map(d=>{
+          const cls=d.type==='free'?'free':d.type==='pct'?'pct':'';
+          const val=d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':'฿'+Number(d.val).toLocaleString();
+          const dur=d.dur&&d.dur>0?` ${d.dur}${d.durUnit||'เทอม'}`:'';
+          return `<span class="sch-card-tag ${cls}">${CAT_LABEL[d.cat]||d.cat} ${val}${dur}</span>`;
+        }).join('');
+        const discRows=s.discounts.length
+          ? s.discounts.map((d,di)=>{
+              const durTxt=d.dur&&d.dur>0?` · ${d.dur} ${d.durUnit||'เทอม'}`:'';
+              return `<div class="sch-card-discount-row">
+                <span class="sch-card-discount-label">${CAT_LABEL[d.cat]||d.cat}</span>
+                <span class="sch-card-discount-sub">${durTxt}</span>
+                <span class="sch-card-discount-val">${d.type==='free'?'ฟรี':d.type==='pct'?'ลด '+d.val+'%':'ลด ฿'+Number(d.val).toLocaleString()}</span>
+                <button style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-muted)" onclick="event.stopPropagation();UNI.delDiscount(${i},${di})">✕</button>
+              </div>`;
+            }).join('')
+          : '<div style="font-size:12px;color:var(--text-muted);padding:4px 0">ยังไม่มีส่วนลด — เพิ่มด้านล่าง</div>';
+        return `<div class="sch-card" id="sch-card-${i}">
+          <div class="sch-card-header" onclick="UNI.toggleSchCard(${i})">
+            <div style="flex:1">
+              <div class="sch-card-name">${s.name}</div>
+              <div class="sch-card-tags" style="margin-top:5px">${tags||'<span style="font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลด</span>'}</div>
+            </div>
+            <span class="pill sch-badge ${SCH_PILL[s.status]||'pill-prep'}">${schStatusLabel[s.status]||s.status}</span>
+            <span class="sch-card-chevron">▾</span>
+          </div>
+          <div class="sch-card-body">
+            ${s.cond?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">เงื่อนไข: ${s.cond}</div>`:''}
+            ${s.deadline?`<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Deadline: ${fmtDate(s.deadline)}</div>`:''}
+            <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">สิทธิ์ที่ได้รับ</div>
+            <div class="sch-card-discount-list">${discRows}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px 70px auto;gap:6px;align-items:end;margin:10px 0 8px;padding-top:8px;border-top:0.5px dashed var(--border)">
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">หมวด</label><select id="sdi-cat-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
+                <option value="tuition">ค่าเทอม</option><option value="dorm">ค่าหอ</option>
+                <option value="living">ค่าครองชีพ</option><option value="apply">ค่าสมัคร</option>
+                <option value="entrance">ค่าแรกเข้า</option><option value="thaiPrep">ค่าเตรียมตัว</option>
+                <option value="other">อื่นๆ</option>
+              </select></div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ประเภท</label><select id="sdi-type-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
+                <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="free">ฟรีทั้งหมด</option>
+              </select></div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ค่า (% หรือ ฿)</label><input type="number" id="sdi-val-${i}" placeholder="เช่น 30" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">จำนวน</label><input type="number" id="sdi-dur-${i}" placeholder="เช่น 1" min="0" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">หน่วย</label><select id="sdi-durunit-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
+                <option value="เทอม">เทอม</option><option value="ปี">ปี</option><option value="เดือน">เดือน</option><option value="ครั้ง">ครั้ง</option><option value="ตลอดหลักสูตร">ตลอด</option>
+              </select></div>
+              <button class="btn btn-sm" style="height:30px;white-space:nowrap;align-self:end" onclick="UNI.addDiscountToCard(${i})">+ เพิ่ม</button>
+            </div>
+            <div class="sch-card-actions">
+              <button class="sch-card-calc-btn" onclick="UNI.calcCardBreakdown(${i})">คำนวณค่าใช้จ่ายจริง ›</button>
+              <div style="flex:1"></div>
+              <select class="check-status-sel" onclick="event.stopPropagation()" onchange="UNI.changeSchStatus(${i},this.value)">
+                ${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
+              </select>
+              <button class="sch-del" onclick="UNI.delScholarship(${i})">✕ ลบ</button>
+            </div>
+            <div class="sch-card-result" id="sch-result-${i}"></div>
+          </div>
+        </div>`;
       }).join('');
     },
-    changeSchStatus(i,v){getU().scholarships[i].status=v;this.renderScholarships();STORAGE.save();},
+    toggleSchCard(i){const c=document.getElementById('sch-card-'+i);if(c)c.classList.toggle('open');},
+    openAddScholarship(){
+      document.getElementById('sch-add-form').style.display='block';
+      document.getElementById('sch-add-btn').style.display='none';
+      window._pendingDiscounts=[];
+      document.getElementById('s-discount-preview').innerHTML='';
+    },
+    cancelAddScholarship(){
+      document.getElementById('sch-add-form').style.display='none';
+      document.getElementById('sch-add-btn').style.display='';
+      window._pendingDiscounts=[];
+    },
+    addDiscountToForm(){
+      if(!window._pendingDiscounts)window._pendingDiscounts=[];
+      const cat=document.getElementById('sdi-cat').value;
+      const type=document.getElementById('sdi-type').value;
+      const val=type==='free'?100:parseFloat(document.getElementById('sdi-val').value)||0;
+      const dur=parseFloat(document.getElementById('sdi-dur').value)||0;
+      const durUnit=document.getElementById('sdi-durunit').value;
+      if(type!=='free'&&!val){alert('กรุณาใส่จำนวน');return;}
+      window._pendingDiscounts.push({cat,type,val,dur,durUnit});
+      document.getElementById('sdi-val').value='';
+      document.getElementById('sdi-dur').value='';
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      document.getElementById('s-discount-preview').innerHTML=window._pendingDiscounts.map((d,i)=>`
+        <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
+          <button onclick="window._pendingDiscounts.splice(${i},1);UNI.addDiscountToForm.__refresh&&UNI.addDiscountToForm.__refresh();document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
+        </span>`).join('');
+    },
+    _renderPendingTags(){
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      return (window._pendingDiscounts||[]).map((d,i)=>`
+        <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
+          <button onclick="window._pendingDiscounts.splice(${i},1);document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
+        </span>`).join('');
+    },
+    addDiscountToCard(i){
+      const u=getU();if(!u)return;
+      if(!u.scholarships[i].discounts)u.scholarships[i].discounts=[];
+      const cat=document.getElementById('sdi-cat-'+i).value;
+      const type=document.getElementById('sdi-type-'+i).value;
+      const val=type==='free'?100:parseFloat(document.getElementById('sdi-val-'+i).value)||0;
+      const dur=parseFloat(document.getElementById('sdi-dur-'+i).value)||0;
+      const durUnit=document.getElementById('sdi-durunit-'+i).value;
+      if(type!=='free'&&!val){alert('กรุณาใส่จำนวน');return;}
+      u.scholarships[i].discounts.push({cat,type,val,dur,durUnit});
+      this.renderScholarships();
+      setTimeout(()=>{const c=document.getElementById('sch-card-'+i);if(c)c.classList.add('open');},10);
+      STORAGE.save();
+    },
+    delDiscount(si,di){
+      const u=getU();if(!u)return;
+      u.scholarships[si].discounts.splice(di,1);
+      this.renderScholarships();
+      setTimeout(()=>{const c=document.getElementById('sch-card-'+si);if(c)c.classList.add('open');},10);
+      STORAGE.save();
+    },
+    calcCardBreakdown(i){
+      const u=getU();if(!u)return;
+      const s=u.scholarships[i];if(!s)return;
+      if(!s.discounts||!s.discounts.length){alert('กรุณาเพิ่มส่วนลดในทุนนี้ก่อน');return;}
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const COST_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',thaiPrep:'thaiPrep',other:null};
+      // อัตราแลกเปลี่ยนจาก CMP module (ผู้ใช้ตั้งได้ที่หน้า Compare)
+      const KRW_RATE=(typeof CMP!=='undefined'&&CMP._rate)?CMP._rate():36;
+      const cu=u.currencies||{};
+      // fmt: แสดงตัวเลขพร้อมสกุลเงินของ field นั้น
+      function fmtAmt(raw,key){
+        const curr=cu[key]||'THB';
+        return curr==='KRW'?'₩'+Math.round(raw).toLocaleString():'฿'+Math.round(raw).toLocaleString();
+      }
+      // แปลงค่าใดๆ เป็น THB เพื่อรวม total
+      function toTHB(raw,key){
+        return (cu[key]||'THB')==='KRW'?raw/KRW_RATE:raw;
+      }
+      let totalTHBBefore=0,totalTHBAfter=0;
+      const rows=s.discounts.map(d=>{
+        const key=COST_KEY[d.cat];
+        const rawUnit=(key&&u.costs&&u.costs[key])?Number(u.costs[key]):0;
+        const curr=key?(cu[key]||'THB'):'THB';
+        // before = ค่าในสกุลเดิม (ยังไม่แปลง) คูณ duration
+        const before=d.dur&&d.dur>0&&d.durUnit!=='ตลอดหลักสูตร'?rawUnit*d.dur:rawUnit;
+        // discount amount (ในสกุลเดิม)
+        const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(curr==='KRW'?d.val*KRW_RATE:d.val);
+        const after=Math.max(0,before-disc);
+        // สะสม total เป็น THB
+        totalTHBBefore+=toTHB(before,key);
+        totalTHBAfter+=toTHB(after,key);
+        const sym=curr==='KRW'?'₩':'฿';
+        const discTxt=d.type==='free'?'ฟรีทั้งหมด':d.type==='pct'?'ลด '+d.val+'%':'ลด '+sym+Number(d.val).toLocaleString();
+        const durTxt=d.dur&&d.dur>0?` (${d.dur} ${d.durUnit||'เทอม'})`:d.durUnit==='ตลอดหลักสูตร'?' (ตลอดหลักสูตร)':'';
+        const hint=!rawUnit?'<span style="font-size:10px;color:#C08040"> — ต้องใส่ตัวเลขในแท็บ "ค่าใช้จ่าย" ก่อน</span>':'';
+        const amtDisplay=rawUnit?`${fmtAmt(before,key)} → <b>${fmtAmt(after,key)}</b>`:'—';
+        return `<div class="sch-card-result-row">
+          <span>${CAT_LABEL[d.cat]||d.cat}<span style="color:#1A6B3A;font-size:11px"> ${discTxt}${durTxt}</span>${hint}</span>
+          <span>${amtDisplay}</span>
+        </div>`;
+      }).join('');
+      const savedTHB=totalTHBBefore-totalTHBAfter;
+      const el=document.getElementById('sch-result-'+i);if(!el)return;
+      el.innerHTML=rows+`<div class="sch-card-result-row total"><span>รวมหลังได้ทุนนี้ (≈ THB)</span><span>฿${Math.round(totalTHBAfter).toLocaleString()}</span></div>
+        <div class="sch-card-result-saved">ประหยัดไป ≈ ฿${Math.round(savedTHB).toLocaleString()}</div>`;
+      el.classList.add('show');
+    },
+    // ── shared summary calc ──
+    _buildSummaryData(){
+      const u=getU();if(!u)return null;
+      const KRW=(typeof CMP!=='undefined'&&CMP._rate)?CMP._rate():36;
+      const cu=u.currencies||{};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const COST_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',thaiPrep:'thaiPrep',other:null};
+      function toTHB(raw,key){return (cu[key]||'THB')==='KRW'?raw/KRW:raw;}
+      function fmtAmt(raw,key){const s=(cu[key]||'THB')==='KRW'?'₩':'฿';return s+Math.round(raw).toLocaleString();}
+      // base cost total (THB)
+      const baseTHB=COST_FIELDS.reduce((acc,f)=>acc+toTHB(u.costs[f.key]||0,f.key),0);
+      // per-scholarship net
+      const schResults=(u.scholarships||[]).map(s=>{
+        if(!s.discounts||!s.discounts.length)return{name:s.name,status:s.status,discounts:[],netTHB:baseTHB,savedTHB:0,rows:[]};
+        let tBefore=0,tAfter=0;
+        const rows=s.discounts.map(d=>{
+          const key=COST_KEY[d.cat];
+          const rawUnit=(key&&u.costs[key])?Number(u.costs[key]):0;
+          const before=d.dur&&d.dur>0&&d.durUnit!=='ตลอดหลักสูตร'?rawUnit*d.dur:rawUnit;
+          const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(((cu[key]||'THB')==='KRW'?d.val*KRW:d.val));
+          const after=Math.max(0,before-disc);
+          tBefore+=toTHB(before,key);tAfter+=toTHB(after,key);
+          const sym=(cu[key]||'THB')==='KRW'?'₩':'฿';
+          const discTxt=d.type==='free'?'ฟรี':d.type==='pct'?'-'+d.val+'%':'-'+sym+Number(d.val).toLocaleString();
+          const durTxt=d.dur&&d.dur>0?` ${d.dur}${d.durUnit||'เทอม'}`:d.durUnit==='ตลอดหลักสูตร'?' ตลอดหลักสูตร':'';
+          return{label:CAT_LABEL[d.cat]||d.cat,discTxt,durTxt,before:fmtAmt(before,key),after:fmtAmt(after,key),noData:!rawUnit};
+        });
+        const savedTHB=tBefore-tAfter;
+        const netTHB=baseTHB-savedTHB;
+        return{name:s.name,status:s.status,discounts:s.discounts,netTHB,savedTHB,rows};
+      });
+      return{u,baseTHB,schResults,COST_FIELDS,cu,KRW,fmtAmt,toTHB};
+    },
+    renderSummary(){
+      const d=this._buildSummaryData();
+      const el=document.getElementById('u-summary-content');if(!el||!d)return;
+      const {u,baseTHB,schResults,COST_FIELDS,cu,fmtAmt}=d;
+      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      // base costs block
+      const baseCells=COST_FIELDS.map(f=>{
+        const raw=u.costs[f.key]||0;const curr=cu[f.key]||'THB';
+        const sym=curr==='KRW'?'₩':'฿';
+        return `<div class="sum-base-cell">
+          <div class="sum-base-label">${f.label}</div>
+          <div class="sum-base-val">${sym}${Math.round(raw).toLocaleString()}</div>
+          <div class="sum-base-curr">${f.sub} · ${curr}</div>
+        </div>`;
+      }).join('');
+      // per-scholarship rows
+      const schRows=schResults.length?schResults.map(s=>{
+        const discTags=s.rows.map(r=>`<span class="sch-card-tag${r.noData?' ':' pct'}" style="font-size:10px">${r.label} ${r.discTxt}${r.durTxt}</span>`).join('');
+        const hasDisc=s.rows.length>0;
+        return `<div class="sum-sch-row">
+          <div>
+            <div class="sum-sch-name">${s.name}</div>
+            <span class="pill ${SCH_PILL[s.status]||'pill-prep'}" style="font-size:10px;margin-top:4px;display:inline-block">${schStatusLabel[s.status]||s.status}</span>
+          </div>
+          <div class="sum-sch-tags">${discTags||'<span style="font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลด</span>'}</div>
+          <div style="text-align:right;min-width:110px">
+            ${hasDisc?`<div class="sum-sch-net">฿${Math.round(s.netTHB).toLocaleString()}</div>
+            <div class="sum-sch-saved">ประหยัด ฿${Math.round(s.savedTHB).toLocaleString()}</div>`
+            :'<div style="font-size:11px;color:var(--text-muted)">—</div>'}
+          </div>
+        </div>`;
+      }).join(''):`<div class="sum-no-sch">ยังไม่มีทุน — ไปเพิ่มได้ที่แท็บ "ทุน"</div>`;
+      // best deal
+      const withDisc=schResults.filter(s=>s.savedTHB>0);
+      const best=withDisc.length?withDisc.reduce((a,b)=>a.savedTHB>b.savedTHB?a:b):null;
+      const totalBar=best?`<div class="sum-total-bar">
+          <div><div class="sum-total-label">ค่าใช้จ่ายสุทธิ (ทุนที่ดีที่สุด: ${best.name})</div>
+          <div class="sum-total-val">฿${Math.round(best.netTHB).toLocaleString()}</div>
+          <div class="sum-total-saved">ประหยัดได้ ฿${Math.round(best.savedTHB).toLocaleString()} จากทั้งหมด ฿${Math.round(baseTHB).toLocaleString()}</div></div>
+        </div>`
+        :`<div class="sum-total-bar"><div>
+          <div class="sum-total-label">ค่าใช้จ่ายรวมโดยประมาณ (ไม่มีทุน)</div>
+          <div class="sum-total-val">฿${Math.round(baseTHB).toLocaleString()}</div>
+        </div></div>`;
+      // detail rows for best scholarship
+      const bestDetailRows=best?best.rows.map(r=>`<div class="sum-cost-row">
+          <span class="sum-cost-row-label">${r.label} <span style="color:#1A6B3A;font-size:11px">${r.discTxt}${r.durTxt}</span></span>
+          <span class="sum-cost-row-val">${r.noData?'<span style="color:#C08040;font-size:11px">ต้องใส่ตัวเลขในแท็บ "ค่าใช้จ่าย" ก่อน</span>':r.before+' → '+r.after}</span>
+        </div>`).join(''):'';
+      el.innerHTML=`
+        <div class="sum-block">
+          <div class="sum-block-header">ค่าใช้จ่ายตั้งต้น (ก่อนหักทุน)</div>
+          <div class="sum-base-grid">${baseCells}</div>
+        </div>
+        <div class="sum-block">
+          <div class="sum-block-header">ทุนที่มี — เปรียบค่าใช้จ่ายสุทธิ</div>
+          ${schRows}
+        </div>
+        ${totalBar}
+        ${best&&bestDetailRows?`<div class="sum-cost-inline" style="margin-top:16px">
+          <div class="sum-cost-inline-header">รายละเอียดส่วนลด — ${best.name}</div>
+          ${bestDetailRows}
+        </div>`:''}
+        <p style="font-size:11px;color:var(--text-muted);margin-top:12px">* ตัวเลข ≈ โดยประมาณ · อัตราแลกเปลี่ยนจากหน้า Compare (${d.KRW} ₩/฿)</p>`;
+    },
+    renderCostSummaryInline(){
+      // mini version shown at bottom of cost tab
+      const d=this._buildSummaryData();
+      const el=document.getElementById('cost-sch-summary');if(!el||!d)return;
+      const {schResults,baseTHB}=d;
+      if(!schResults.length){el.innerHTML='';return;}
+      const withDisc=schResults.filter(s=>s.savedTHB>0);
+      if(!withDisc.length){el.innerHTML=`<div style="font-size:12px;color:var(--text-muted);border-top:0.5px dashed var(--border);padding-top:14px">ยังไม่มีทุนที่มีส่วนลด — ไปเพิ่มที่แท็บ "ทุน"</div>`;return;}
+      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const rows=withDisc.map(s=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:0.5px solid var(--border);gap:12px;flex-wrap:wrap">
+          <div>
+            <span style="font-size:13px;font-weight:500">${s.name}</span>
+            <span class="pill ${SCH_PILL[s.status]||'pill-prep'}" style="font-size:10px;margin-left:6px">${schStatusLabel[s.status]||s.status}</span>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:15px;color:var(--blue-dark);font-weight:500">฿${Math.round(s.netTHB).toLocaleString()}</div>
+            <div style="font-size:11px;color:#1A6B3A">ประหยัด ฿${Math.round(s.savedTHB).toLocaleString()}</div>
+          </div>
+        </div>`).join('');
+      el.innerHTML=`<div style="border:0.5px solid var(--border);border-radius:6px;overflow:hidden">
+        <div style="background:var(--cream-dark);padding:8px 14px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted)">สรุปหลังได้ทุน (≈ THB) — <button onclick="(function(){const btn=Array.from(document.querySelectorAll('.dtab')).find(b=>b.textContent.includes('สรุป'));UNI.switchDTab('summary',btn);UNI.renderSummary();})()" style="font-size:11px;color:var(--blue-dark);background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:2px;padding:0">ดูรายละเอียดเพิ่มเติม →</button></div>
+        ${rows}
+      </div>`;
+    },
+    changeSchStatus(i,v){getU().scholarships[i].status=v;this.renderScholarships();setTimeout(()=>{const c=document.getElementById('sch-card-'+i);if(c)c.classList.add('open');},10);STORAGE.save();},
     delScholarship(i){if(!confirm('ลบทุนนี้?'))return;getU().scholarships.splice(i,1);this.renderScholarships();STORAGE.save();},
     addScholarship(){
       const name=document.getElementById('s-name').value.trim();if(!name){alert('กรุณาใส่ชื่อทุน');return;}
-      getU().scholarships.push({name,amountTHB:parseFloat(document.getElementById('s-amount').value)||0,valueDetail:document.getElementById('s-value-detail').value.trim(),cond:document.getElementById('s-cond').value.trim(),deadline:document.getElementById('s-deadline').value,status:document.getElementById('s-status').value});
-      ['s-name','s-amount','s-value-detail','s-cond','s-deadline'].forEach(id=>document.getElementById(id).value='');
+      const discounts=window._pendingDiscounts||[];
+      getU().scholarships.push({name,discounts,cond:document.getElementById('s-cond').value.trim(),deadline:document.getElementById('s-deadline').value,status:document.getElementById('s-status').value});
+      ['s-name','s-cond','s-deadline'].forEach(id=>document.getElementById(id).value='');
+      window._pendingDiscounts=[];
+      document.getElementById('sch-add-form').style.display='none';
+      document.getElementById('sch-add-btn').style.display='';
       this.renderScholarships();STORAGE.save();
     },
     renderCosts(){
@@ -1638,7 +2153,7 @@ const UNI=(function(){
       document.getElementById('ccbtn-'+key+'-krw').classList.toggle('active',curr==='KRW');
       this.saveCosts();
     },
-    saveCosts(){const u=getU();COST_FIELDS.forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});this.renderCosts();STORAGE.save();},
+    saveCosts(){const u=getU();COST_FIELDS.forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});this.renderCosts();this.renderCostSummaryInline();const sumEl=document.getElementById('u-summary-content');if(sumEl&&document.getElementById('udtab-summary')&&document.getElementById('udtab-summary').classList.contains('active'))this.renderSummary();STORAGE.save();},
     saveThaiPrepNote(){const u=getU();if(!u)return;const ta=document.getElementById('thai-prep-note');if(ta)u.thaiPrepNote=ta.value;STORAGE.save();},
     renderLinks(){
       const u=getU();if(!u)return;const area=document.getElementById('u-links-area');if(!area)return;
