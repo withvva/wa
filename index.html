@@ -278,9 +278,10 @@ footer p{font-size:11px;color:var(--text-muted);letter-spacing:.06em}
 .cost-card-amount{font-family:'IBM Plex Sans Thai',sans-serif;font-size:18px;font-weight:400;color:var(--text-primary);line-height:1.2}
 .cost-card-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
 .cost-edit-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:12px;overflow:hidden}
-.cost-inp-group{display:flex;flex-direction:column;gap:4px}
+#u-dorm-edit-row{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.cost-inp-group{display:flex;flex-direction:column;gap:4px;min-width:0}
 .cost-inp-group label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
-.cost-inp-row{display:flex;gap:4px;flex-wrap:wrap}
+.cost-inp-row{display:flex;gap:4px;flex-wrap:wrap;min-width:0;width:100%;box-sizing:border-box}
 .cost-inp-row input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:7px 10px;border:0.5px solid var(--border);border-radius:3px 0 0 3px;background:var(--white);color:var(--text-primary);flex:1;min-width:0;width:0}
 .cost-inp-row input:focus{outline:none;border-color:var(--blue-mid)}
 .cost-currency-btn{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:0 8px;border:0.5px solid var(--border);border-left:none;border-radius:0 3px 3px 0;background:var(--cream);color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:background .15s}
@@ -945,9 +946,9 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <div class="section">
         <div class="sec-label">ค่าหอพัก</div>
         <div class="cost-grid" id="u-dorm-grid"></div>
-        <div style="background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:14px 16px;margin-top:16px">
+        <div style="background:var(--cream);border:0.5px solid var(--border);border-radius:4px;padding:14px 16px;margin-top:16px;overflow:hidden;max-width:100%;box-sizing:border-box">
           <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">แก้ไขตัวเลือกหอพัก</div>
-          <div class="cost-edit-row" id="u-dorm-edit-row"></div>
+          <div id="u-dorm-edit-row"></div>
           <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="UNI.saveCosts()">บันทึก</button></div>
         </div>
         <!-- Quick scholarship summary inline -->
@@ -2195,8 +2196,8 @@ const UNI=(function(){
           <span style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap">หอพัก 1</span>
           <input type="text" id="dorm-main-name" value="${u.dormName||''}" placeholder="ชื่อตึก/ตัวเลือก" style="font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:3px;flex:1;min-width:0;font-family:inherit">
         </div>
-        <div class="cost-inp-row" style="flex-wrap:nowrap">
-          <input type="number" id="cinp-dorm" value="${u.costs['dorm']||0}" min="0" style="min-width:60px">
+        <div class="cost-inp-row" style="flex-wrap:wrap">
+          <input type="number" id="cinp-dorm" value="${u.costs['dorm']||0}" min="0" style="min-width:60px;max-width:120px">
           ${dormUnitSel}
           <button class="cost-currency-btn${dormCurr==='THB'?' active':''}" id="ccbtn-dorm-thb" onclick="UNI.toggleCostCurrency('dorm','THB')">฿</button>
           <button class="cost-currency-btn${dormCurr==='KRW'?' active':''}" id="ccbtn-dorm-krw" onclick="UNI.toggleCostCurrency('dorm','KRW')">₩</button>
@@ -2209,8 +2210,8 @@ const UNI=(function(){
             <input type="text" id="dopt-name-${di}" value="${d.name||''}" placeholder="ชื่อตึก/ตัวเลือก" style="font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:3px;flex:1;min-width:0;font-family:inherit">
             <button onclick="UNI.removeDormOption(${di})" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:13px;color:#7A1A1A;padding:0 2px;line-height:1">✕</button>
           </div>
-          <div class="cost-inp-row" style="flex-wrap:nowrap">
-            <input type="number" id="dopt-amt-${di}" value="${d.amount||0}" min="0" style="min-width:60px">
+          <div class="cost-inp-row" style="flex-wrap:wrap">
+            <input type="number" id="dopt-amt-${di}" value="${d.amount||0}" min="0" style="min-width:60px;max-width:120px">
             <select id="dopt-unit-${di}" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);font-family:inherit">
               <option value="คืน"${(d.unit||'')==='คืน'?' selected':''}>ต่อคืน</option>
               <option value="เดือน"${(d.unit||'เดือน')==='เดือน'?' selected':''}>ต่อเดือน</option>
