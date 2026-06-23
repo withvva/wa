@@ -25,7 +25,7 @@ header{background:var(--white);border-bottom:0.5px solid var(--border);padding:0
 .logo::after{content:"pichamon";font-style:italic;font-size:10px;color:rgba(123,87,206,0.4);margin-left:7px;letter-spacing:0.05em;text-transform:none;font-weight:400;}
 nav{display:flex;gap:28px;align-items:center}
 nav button{font-size:12px;letter-spacing:0.06em;color:var(--text-secondary);text-transform:uppercase;transition:color .2s;background:none;border:none;cursor:pointer;font-family:'IBM Plex Sans Thai',sans-serif;padding:0}
-nav button:hover,nav button.active{color:var(--text-primary)}
+nav button:hover,nav button.active,nav button.nav-active{color:var(--text-primary);font-weight:500}
 .save-indicator{font-size:10px;color:var(--text-muted);letter-spacing:0.08em;transition:opacity .4s;opacity:0}
 .save-indicator.show{opacity:1}
 #sync-status{font-size:10px;letter-spacing:0.07em;padding:2px 9px;border-radius:10px;transition:all .3s;white-space:nowrap}
@@ -47,6 +47,7 @@ nav button:hover,nav button.active{color:var(--text-primary)}
 .sec-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:16px}
 .btn{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;letter-spacing:0.06em;padding:7px 16px;border-radius:3px;border:0.5px solid var(--border);background:var(--white);color:var(--text-primary);cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
 .btn:hover{background:var(--cream);border-color:var(--blue-mid)}
+.btn:disabled,.btn-primary:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
 .btn-primary{background:var(--blue-dark);color:white;border-color:var(--blue-dark)}
 .btn-primary:hover{background:#2d5a88}
 .btn-sm{font-size:11px;padding:5px 11px}
@@ -276,11 +277,11 @@ footer p{font-size:11px;color:var(--text-muted);letter-spacing:.06em}
 .cost-card-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
 .cost-card-amount{font-family:'IBM Plex Sans Thai',sans-serif;font-size:18px;font-weight:400;color:var(--text-primary);line-height:1.2}
 .cost-card-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
-.cost-edit-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.cost-edit-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
 .cost-inp-group{display:flex;flex-direction:column;gap:4px}
 .cost-inp-group label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)}
 .cost-inp-row{display:flex;gap:4px}
-.cost-inp-row input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:7px 10px;border:0.5px solid var(--border);border-radius:3px 0 0 3px;background:var(--white);color:var(--text-primary);flex:1;min-width:0}
+.cost-inp-row input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:7px 10px;border:0.5px solid var(--border);border-radius:3px 0 0 3px;background:var(--white);color:var(--text-primary);flex:1;min-width:80px}
 .cost-inp-row input:focus{outline:none;border-color:var(--blue-mid)}
 .cost-currency-btn{font-family:'IBM Plex Sans Thai',sans-serif;font-size:11px;padding:0 8px;border:0.5px solid var(--border);border-left:none;border-radius:0 3px 3px 0;background:var(--cream);color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:background .15s}
 .cost-currency-btn:hover,.cost-currency-btn.active{background:var(--blue-dark);color:white;border-color:var(--blue-dark)}
@@ -337,7 +338,7 @@ tr.total-row .amount-approx{font-size:16px}
 .chart-section{padding:0 48px 40px}
 .bar-group{display:flex;flex-direction:column;gap:10px}
 .bar-row{display:flex;align-items:center;gap:12px}
-.bar-uni-name{font-size:12px;color:var(--text-secondary);width:100px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-uni-name{font-size:12px;color:var(--text-secondary);width:120px;flex-shrink:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:default;line-height:1.3}
 .bar-track{flex:1;background:var(--cream-dark);border-radius:2px;height:24px;overflow:hidden}
 .bar-fill{height:100%;border-radius:2px;transition:width .6s ease;display:flex;align-items:center;padding:0 8px;min-width:30px}
 .bar-fill-label{font-size:11px;color:white;font-weight:500;white-space:nowrap}
@@ -586,8 +587,8 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
     <button id="nav-universities" onclick="goPage('universities')">Universities</button>
     <button id="nav-compare" onclick="goPage('compare')">Compare</button>
     <span id="sync-status" class="synced">● Synced</span>
-    <button class="btn btn-sm" onclick="document.getElementById('reset-modal').classList.add('open')" title="ตั้งค่า" style="margin-left:8px;font-size:13px;padding:4px 10px">⚙</button>
   </nav>
+  <button class="btn btn-sm" onclick="document.getElementById('reset-modal').classList.add('open')" title="ตั้งค่า / รีเซ็ต" style="font-size:13px;padding:4px 10px;margin-left:20px;border-color:var(--border);color:var(--text-muted)">⚙</button>
 </header>
 
 <!-- HOME PAGE -->
@@ -636,8 +637,6 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
   </div>
   <div class="summary-bar">
     <div class="stat"><span class="num" id="home-stat-count">0</span><span class="lbl">แห่งที่ยื่น</span></div>
-    <div class="sdiv"></div>
-    <div class="stat"><span class="num" id="home-stat-rounds">0</span><span class="lbl">รอบที่สมัคร</span></div>
     <div class="uni-chips" id="home-chips"></div>
   </div>
   <div class="nav-section">
@@ -794,12 +793,6 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <h1 class="page-title">University <em>Round</em></h1>
       <p class="page-sub">รายละเอียดแต่ละมหาวิทยาลัย กดการ์ดเพื่อดูวันสำคัญ เอกสาร ทุน และค่าใช้จ่าย</p>
     </div>
-    <div class="export-strip">
-      <span class="export-strip-label">ข้อมูล</span>
-      <button class="btn-export" onclick="EXPORT.asJSON()" title="สำรองข้อมูลเป็น JSON">⬇ Export JSON</button>
-      <button class="btn-export btn-export-pdf" onclick="EXPORT.asPDF()" title="ส่งออกเป็น PDF">⬇ Export PDF</button>
-      <button class="btn-export btn-import" onclick="document.getElementById('import-file-input').click()" title="นำเข้าไฟล์ JSON">⬆ Import JSON</button>
-    </div>
     <div class="overview-controls">
       <span id="uni-count" style="font-size:12px;color:var(--text-muted)">— มหาวิทยาลัย</span>
       <button class="btn btn-primary" onclick="UNI.openAddModal()">+ เพิ่มมหาวิทยาลัย</button>
@@ -831,8 +824,9 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <button class="dtab" onclick="UNI.switchDTab('docs',this)">เอกสาร</button>
       <button class="dtab" onclick="UNI.switchDTab('schol',this)">ทุน</button>
       <button class="dtab" onclick="UNI.switchDTab('cost',this)">ค่าใช้จ่าย</button>
-      <button class="dtab" onclick="UNI.switchDTab('summary',this);UNI.renderSummary()">สรุป</button>
+      <button class="dtab" onclick="UNI.switchDTab('summary',this);setTimeout(()=>UNI.renderSummary(),0)">สรุป</button>
       <button class="dtab" onclick="UNI.switchDTab('links',this)">ลิงก์</button>
+      <button class="dtab" onclick="UNI.switchDTab('pdfs',this)">PDF Files</button>
       <button class="dtab" onclick="UNI.switchDTab('notes',this)">Notes</button>
     </div>
     <div id="udtab-dates" class="dtab-content active">
@@ -877,6 +871,10 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
           <div class="form-row-2" style="margin-bottom:10px">
             <div class="form-group" style="margin:0"><label>เงื่อนไข</label><textarea id="s-cond" placeholder="เช่น GPA >= 3.5 ต่อเนื่อง 2 ภาคเรียน..." style="min-height:56px"></textarea></div>
             <div class="form-group" style="margin:0"><label>Deadline</label><input type="date" id="s-deadline"></div>
+          </div>
+          <div class="form-row-2" style="margin-bottom:10px">
+            <div class="form-group" style="margin:0"><label>โอกาสได้รับ (เช่น 10-100%, ต้องแข่งขัน)</label><input type="text" id="s-chance" placeholder="เช่น 10–30%, ทุกคนที่สมัครได้รับ"></div>
+            <div class="form-group" style="margin:0"><label>มูลค่าทุน (ข้อความ)</label><input type="text" id="s-value-text" placeholder="เช่น ค่าเทอมฟรี + ค่าครองชีพ 300,000 ₩/เดือน"></div>
           </div>
           <!-- Discount items for this scholarship -->
           <div style="margin-top:4px;margin-bottom:8px">
@@ -970,6 +968,20 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
         </div>
       </div>
     </div>
+    <div id="udtab-pdfs" class="dtab-content">
+      <div class="section">
+        <div class="sec-label">PDF Files</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">อัปโหลดไฟล์ PDF ได้หลายไฟล์ — เก็บไว้ใน browser ของเครื่องนี้</p>
+        <div class="pdfs-area" id="u-pdfs-area"></div>
+        <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label class="btn btn-primary btn-sm" style="cursor:pointer">
+            + เพิ่มไฟล์ PDF
+            <input type="file" id="u-pdf-upload" accept=".pdf,application/pdf" multiple style="display:none" onchange="UNI.handlePdfUpload(event)">
+          </label>
+          <span style="font-size:11px;color:var(--text-muted)">รองรับหลายไฟล์พร้อมกัน · ซิงก์ผ่าน Firebase เหมือนข้อมูลอื่นๆ · ไฟล์ใหญ่มากอาจช้า</span>
+        </div>
+      </div>
+    </div>
     <div id="udtab-notes" class="dtab-content">
       <div class="section">
         <div class="sec-label">Notes</div>
@@ -1048,13 +1060,6 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
     <p class="eyebrow">หน้า 04</p>
     <h1 class="page-title">Cost <em>Comparison</em></h1>
     <p class="page-sub">ค่าเทอม ค่าหอ ค่าครองชีพ และค่าใช้จ่ายอื่นๆ ทุกมหาวิทยาลัยในตารางเดียว</p>
-  </div>
-  <!-- Export/Import strip for Compare page -->
-  <div class="export-strip">
-    <span class="export-strip-label">ข้อมูล</span>
-    <button class="btn-export" onclick="EXPORT.asJSON()" title="สำรองข้อมูลเป็น JSON">⬇ Export JSON</button>
-    <button class="btn-export btn-export-pdf" onclick="EXPORT.asPDF()" title="ส่งออกเป็น PDF">⬇ Export PDF</button>
-    <button class="btn-export btn-import" onclick="document.getElementById('import-file-input').click()" title="นำเข้าไฟล์ JSON">⬆ Import JSON</button>
   </div>
   <div class="controls-bar">
     <span class="cb-label">อัตราแลกเปลี่ยน</span>
@@ -1273,6 +1278,7 @@ function goPage(id){
 
 /* ── SHARED CONSTANTS ── */
 const EN_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const TH_MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const STATUS_OPTIONS=['ยังไม่เริ่ม','เตรียม','แปลแล้ว','รับรองกงสุล','รับรองสถานทูต','พร้อมส่ง'];
 const STATUS_CLASS=['s-0','s-1','s-2','s-3','s-4','s-5'];
 const PILL_MAP={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',result:'pill-result',pass:'pill-pass',fail:'pill-fail'};
@@ -1428,10 +1434,10 @@ const HOME=(function(){
   function renderRounds(){
     const el=document.getElementById('home-stat-rounds');if(!el)return;
     const unis=UNI.getUnis();
-    // GKS Embassy: +1 if there's at least one embUnis entry with a non-empty name
-    const embCount=(GKS._embUnis&&GKS._embUnis().some(n=>n&&n.trim()))?1:0;
-    // GKS University: +1 if there's at least one uniUnis entry with a non-empty name
-    const uniCount=(GKS._uniUnis&&GKS._uniUnis().some(n=>n&&n.trim()))?1:0;
+    // GKS Embassy: count actual universities listed
+    const embCount=(GKS._embUnis&&GKS._embUnis().filter(n=>n&&n.trim()).length)||0;
+    // GKS University: count actual universities listed
+    const uniCount=(GKS._uniUnis&&GKS._uniUnis().filter(n=>n&&n.trim()).length)||0;
     // University rounds: count unis whose status is not 'prep' (เตรียมเอกสาร)
     const submittedCount=unis.filter(u=>u.status&&u.status!=='prep').length;
     el.textContent=embCount+uniCount+submittedCount;
@@ -1581,7 +1587,8 @@ const GKS=(function(){
     const lbl=document.getElementById(track+'-rm-lbl');
     if(lbl)lbl.textContent='ขั้นตอน '+(cur+1)+'/'+steps.length+' — '+steps[Math.min(cur,steps.length-1)];
     // disable next/prev buttons at boundaries
-    const trackEl=document.getElementById('gtab-'+track)||document.getElementById('gtab-docs');
+    const _trackTabId=track==='doc'?'gtab-docs':'gtab-'+track;
+    const trackEl=document.getElementById(_trackTabId);
     const allBtns=document.querySelectorAll(`[onclick="GKS.setRM('${track}',GKS.cur.${track}+1)"]`);
     const allPrevBtns=document.querySelectorAll(`[onclick="GKS.setRM('${track}',GKS.cur.${track}-1)"]`);
     allBtns.forEach(b=>{b.disabled=(cur>=steps.length-1);b.style.opacity=(cur>=steps.length-1)?'0.4':'';});
@@ -1666,13 +1673,14 @@ const UNI=(function(){
   const KRW_RATE=36;
   const COST_FIELDS=[
     {key:'tuition',label:'ค่าเทอม',sub:'ต่อภาค'},
-    {key:'dorm',label:'ค่าหอพัก',sub:'ต่อเดือน'},
+    {key:'dorm',label:'ค่าหอพัก',sub:'ต่อเดือน',hasDormExtra:true},
     {key:'living',label:'ค่าครองชีพ',sub:'ต่อเดือน'},
     {key:'apply',label:'ค่าสมัคร',sub:'ครั้งเดียว'},
     {key:'entrance',label:'ค่าแรกเข้า',sub:'ครั้งเดียว'},
     {key:'thaiPrep',label:'ค่าเตรียมตัวในไทย',sub:'ก่อนเดินทาง'},
   ];
   function defaultCurrencies(){return {tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',thaiPrep:'THB'};}
+  function defaultCosts(){return {apply:0,tuition:0,dorm:0,entrance:0,thaiPrep:0,living:0};}
   let unis=[]
   let activeId=null;
   function getU(){return unis.find(x=>x.id===activeId);}
@@ -1746,7 +1754,7 @@ const UNI=(function(){
     closeAddOverlay(e){if(e.target===document.getElementById('add-uni-modal'))document.getElementById('add-uni-modal').classList.remove('open');},
     addUniversity(){
       const name=document.getElementById('new-name').value.trim();if(!name){alert('กรุณาใส่ชื่อ');return;}
-      unis.push({id:Date.now(),name,eng:document.getElementById('new-eng').value.trim()||name,color:document.getElementById('new-color').value,status:document.getElementById('new-status').value,deadline:'',applyUrl:document.getElementById('new-apply-url').value||'#',notes:'',dates:[],docs:[],scholarships:[],costs:{apply:0,tuition:0,dorm:0,entrance:0,thaiPrep:0,living:0},currencies:defaultCurrencies(),links:[],thaiPrepNote:''});
+      unis.push({id:Date.now(),name,eng:document.getElementById('new-eng').value.trim()||name,color:document.getElementById('new-color').value,status:document.getElementById('new-status').value,deadline:'',applyUrl:document.getElementById('new-apply-url').value.trim()||'',notes:'',dates:[],docs:[],scholarships:[],costs:{apply:0,tuition:0,dorm:0,entrance:0,thaiPrep:0,living:0},currencies:defaultCurrencies(),links:[],pdfs:[],thaiPrepNote:'',dormOptions:[],dormUnit:'เดือน'});
       document.getElementById('add-uni-modal').classList.remove('open');
       ['new-name','new-eng','new-apply-url'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('new-color').value='#BAD5EB';document.getElementById('new-color-preview').style.background='#BAD5EB';
@@ -1762,10 +1770,10 @@ const UNI=(function(){
       if(facInput)facInput.value=u.faculty||'';
       document.getElementById('d-faculty-input-wrap').style.display='none';
       document.getElementById('d-faculty-wrap').style.display='flex';
-      const al=document.getElementById('d-apply-link');al.href=u.applyUrl||'#';al.style.display=(u.applyUrl&&u.applyUrl!=='#')?'':'none';
+      const al=document.getElementById('d-apply-link');const _url=(u.applyUrl||'').trim();al.href=_url||'#';al.style.display=(_url&&_url!=='#'&&_url!=='https://'&&_url.startsWith('http'))?'':'none';
       document.querySelectorAll('.dtab').forEach((t,i)=>t.classList.toggle('active',i===0));
       document.querySelectorAll('.dtab-content').forEach((c,i)=>c.classList.toggle('active',i===0));
-      this.renderDates();this.renderDocs();this.renderScholarships();this.renderCosts();this.renderCostSummaryInline();this.renderLinks();this.renderNotes();
+      this.renderDates();this.renderDocs();this.renderScholarships();this.renderCosts();this.renderCostSummaryInline();this.renderLinks();this.renderPdfs();this.renderNotes();
       window.scrollTo(0,0);
     },
     showOverview(){document.getElementById('uview-overview').style.display='block';document.getElementById('uview-detail').style.display='none';this.renderOverview();},
@@ -1855,7 +1863,9 @@ const UNI=(function(){
             <span class="sch-card-chevron">▾</span>
           </div>
           <div class="sch-card-body">
-            ${s.cond?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">เงื่อนไข: ${s.cond}</div>`:''}
+            ${s.cond?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">เงื่อนไข: ${s.cond}</div>`:''}
+            ${s.chance?`<div style="font-size:12px;color:#7D3A0A;margin-bottom:6px">โอกาสได้รับ: ${s.chance}</div>`:''}
+            ${s.valueText?`<div style="font-size:12px;color:#1A6B3A;margin-bottom:6px">มูลค่า: ${s.valueText}</div>`:''}
             ${s.deadline?`<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">Deadline: ${fmtDate(s.deadline)}</div>`:''}
             <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">สิทธิ์ที่ได้รับ</div>
             <div class="sch-card-discount-list">${discRows}</div>
@@ -2123,8 +2133,8 @@ const UNI=(function(){
     addScholarship(){
       const name=document.getElementById('s-name').value.trim();if(!name){alert('กรุณาใส่ชื่อทุน');return;}
       const discounts=window._pendingDiscounts||[];
-      getU().scholarships.push({name,discounts,cond:document.getElementById('s-cond').value.trim(),deadline:document.getElementById('s-deadline').value,status:document.getElementById('s-status').value});
-      ['s-name','s-cond','s-deadline'].forEach(id=>document.getElementById(id).value='');
+      getU().scholarships.push({name,discounts,cond:document.getElementById('s-cond').value.trim(),deadline:document.getElementById('s-deadline').value,status:document.getElementById('s-status').value,chance:document.getElementById('s-chance').value.trim(),valueText:document.getElementById('s-value-text').value.trim()});
+      ['s-name','s-cond','s-deadline','s-chance','s-value-text'].forEach(id=>document.getElementById(id).value='');
       window._pendingDiscounts=[];
       document.getElementById('sch-add-form').style.display='none';
       document.getElementById('sch-add-btn').style.display='';
@@ -2132,20 +2142,61 @@ const UNI=(function(){
     },
     renderCosts(){
       const u=getU();if(!u)return;if(!u.currencies)u.currencies=defaultCurrencies();
+      if(!u.dormOptions)u.dormOptions=[];
+      // Build display cards
+      const dormOptionsHtml=u.dormOptions.map((d,di)=>{
+        const sym=(d.currency||'THB')==='KRW'?'₩':'฿';
+        return `<div class="cost-card" style="border-left:2px solid var(--blue-mid)"><div class="cost-card-label">หอพัก ${di+2} — ${d.name||'ตึก '+(di+2)}</div><div class="cost-card-amount">${sym}${(d.amount||0).toLocaleString()}</div><div class="cost-card-sub">${d.unit||'เดือน'} · ${d.currency||'THB'}</div></div>`;
+      }).join('');
       document.getElementById('u-cost-grid').innerHTML=COST_FIELDS.map(f=>{
         const raw=u.costs[f.key]||0;const curr=u.currencies[f.key]||'THB';
+        const unit=f.key==='dorm'?(u.dormUnit||'เดือน'):f.sub.split(' ')[1]||'';
         const display=(curr==='KRW'?'₩':'฿')+raw.toLocaleString();
-        return `<div class="cost-card"><div class="cost-card-label">${f.label}</div><div class="cost-card-amount">${display}</div><div class="cost-card-sub">${f.sub} · ${curr}</div></div>`;
-      }).join('');
+        return `<div class="cost-card"><div class="cost-card-label">${f.label}</div><div class="cost-card-amount">${display}</div><div class="cost-card-sub">${f.key==='dorm'?('ต่อ'+unit):f.sub} · ${curr}</div></div>`;
+      }).join('')+dormOptionsHtml;
+      // Build edit fields
+      const dormExtrasHtml=u.dormOptions.map((d,di)=>`
+        <div class="cost-inp-group" style="border:0.5px solid var(--blue-light);border-radius:4px;padding:10px;position:relative">
+          <label>หอพัก ${di+2} — <input type="text" id="dopt-name-${di}" value="${d.name||''}" placeholder="ชื่อตึก/ตัวเลือก" style="font-size:12px;padding:3px 6px;border:0.5px solid var(--border);border-radius:3px;width:120px;font-family:inherit"></label>
+          <div class="cost-inp-row">
+            <input type="number" id="dopt-amt-${di}" value="${d.amount||0}" min="0">
+            <select id="dopt-unit-${di}" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);font-family:inherit">
+              <option value="คืน"${(d.unit||'')==='คืน'?' selected':''}>ต่อคืน</option>
+              <option value="เดือน"${(d.unit||'เดือน')==='เดือน'?' selected':''}>ต่อเดือน</option>
+              <option value="เทอม"${(d.unit||'')==='เทอม'?' selected':''}>ต่อเทอม</option>
+              <option value="ปี"${(d.unit||'')==='ปี'?' selected':''}>ต่อปี</option>
+            </select>
+            <button class="cost-currency-btn${(d.currency||'THB')==='THB'?' active':''}" id="doptbtn-${di}-thb" onclick="UNI.toggleDormOptCurr(${di},'THB')">฿</button>
+            <button class="cost-currency-btn${(d.currency||'THB')==='KRW'?' active':''}" id="doptbtn-${di}-krw" onclick="UNI.toggleDormOptCurr(${di},'KRW')">₩</button>
+            <button onclick="UNI.removeDormOption(${di})" style="background:none;border:none;cursor:pointer;font-size:13px;color:#7A1A1A;padding:0 4px">✕</button>
+          </div>
+        </div>`).join('');
       document.getElementById('u-cost-edit-row').innerHTML=COST_FIELDS.map(f=>{
         const curr=u.currencies[f.key]||'THB';
+        const unitSelect=f.key==='dorm'?`<select id="cinp-dorm-unit" style="font-size:12px;padding:5px 6px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);font-family:inherit" onchange="UNI.saveDormUnit(this.value)">
+          <option value="คืน"${(u.dormUnit||'')==='คืน'?' selected':''}>ต่อคืน</option>
+          <option value="เดือน"${(u.dormUnit||'เดือน')==='เดือน'?' selected':''}>ต่อเดือน</option>
+          <option value="เทอม"${(u.dormUnit||'')==='เทอม'?' selected':''}>ต่อเทอม</option>
+          <option value="ปี"${(u.dormUnit||'')==='ปี'?' selected':''}>ต่อปี</option>
+        </select>`:'';
         return `<div class="cost-inp-group"><label>${f.label}</label><div class="cost-inp-row">
           <input type="number" id="cinp-${f.key}" value="${u.costs[f.key]||0}" min="0">
+          ${unitSelect}
           <button class="cost-currency-btn${curr==='THB'?' active':''}" id="ccbtn-${f.key}-thb" onclick="UNI.toggleCostCurrency('${f.key}','THB')">฿</button>
           <button class="cost-currency-btn${curr==='KRW'?' active':''}" id="ccbtn-${f.key}-krw" onclick="UNI.toggleCostCurrency('${f.key}','KRW')">₩</button>
         </div></div>`;
-      }).join('');
+      }).join('')+dormExtrasHtml+`<div style="margin-top:8px"><button class="add-btn" onclick="UNI.addDormOption()">+ เพิ่มตัวเลือกหอพัก</button></div>`;
       const noteTA=document.getElementById('thai-prep-note');if(noteTA)noteTA.value=u.thaiPrepNote||'';
+    },
+    saveDormUnit(v){const u=getU();if(!u)return;u.dormUnit=v;STORAGE.save();},
+    addDormOption(){const u=getU();if(!u)return;if(!u.dormOptions)u.dormOptions=[];u.dormOptions.push({name:'',amount:0,unit:'เดือน',currency:'THB'});this.renderCosts();STORAGE.save();},
+    removeDormOption(di){const u=getU();if(!u)return;u.dormOptions.splice(di,1);this.saveCosts();},
+    toggleDormOptCurr(di,curr){
+      const u=getU();if(!u)return;if(!u.dormOptions[di])return;
+      u.dormOptions[di].currency=curr;
+      document.getElementById('doptbtn-'+di+'-thb').classList.toggle('active',curr==='THB');
+      document.getElementById('doptbtn-'+di+'-krw').classList.toggle('active',curr==='KRW');
+      this.saveCosts();
     },
     toggleCostCurrency(key,curr){
       const u=getU();if(!u)return;if(!u.currencies)u.currencies={};u.currencies[key]=curr;
@@ -2153,7 +2204,10 @@ const UNI=(function(){
       document.getElementById('ccbtn-'+key+'-krw').classList.toggle('active',curr==='KRW');
       this.saveCosts();
     },
-    saveCosts(){const u=getU();COST_FIELDS.forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});this.renderCosts();this.renderCostSummaryInline();const sumEl=document.getElementById('u-summary-content');if(sumEl&&document.getElementById('udtab-summary')&&document.getElementById('udtab-summary').classList.contains('active'))this.renderSummary();STORAGE.save();},
+    saveCosts(){const u=getU();COST_FIELDS.forEach(f=>{const inp=document.getElementById('cinp-'+f.key);if(inp)u.costs[f.key]=parseFloat(inp.value)||0;});
+      // save dorm options
+      if(u.dormOptions){u.dormOptions.forEach((d,di)=>{const aInp=document.getElementById('dopt-amt-'+di);const nInp=document.getElementById('dopt-name-'+di);const uSel=document.getElementById('dopt-unit-'+di);if(aInp)d.amount=parseFloat(aInp.value)||0;if(nInp)d.name=nInp.value.trim();if(uSel)d.unit=uSel.value;});}
+      this.renderCosts();this.renderCostSummaryInline();const sumEl=document.getElementById('u-summary-content');if(sumEl&&document.getElementById('udtab-summary')&&document.getElementById('udtab-summary').classList.contains('active'))this.renderSummary();STORAGE.save();},
     saveThaiPrepNote(){const u=getU();if(!u)return;const ta=document.getElementById('thai-prep-note');if(ta)u.thaiPrepNote=ta.value;STORAGE.save();},
     renderLinks(){
       const u=getU();if(!u)return;const area=document.getElementById('u-links-area');if(!area)return;
@@ -2168,6 +2222,34 @@ const UNI=(function(){
       u.links.push({name,url});document.getElementById('link-name').value='';document.getElementById('link-url').value='';this.renderLinks();STORAGE.save();
     },
     delLink(i){getU().links.splice(i,1);this.renderLinks();STORAGE.save();},
+    renderPdfs(){
+      const u=getU();if(!u)return;const area=document.getElementById('u-pdfs-area');if(!area)return;
+      if(!u.pdfs)u.pdfs=[];
+      if(!u.pdfs.length){area.innerHTML='<div style="font-size:13px;color:var(--text-muted)">ยังไม่มีไฟล์ PDF</div>';return;}
+      area.innerHTML=u.pdfs.map((p,i)=>`<div class="pdf-row">
+        <span class="pdf-icon">📄</span>
+        <span class="pdf-name"><a href="${p.data}" download="${p.name}">${p.name}</a></span>
+        <span class="pdf-size">${p.size||''}</span>
+        <button class="pdf-del-row" onclick="UNI.delPdf(${i})" title="ลบ">✕</button>
+      </div>`).join('');
+    },
+    handlePdfUpload(e){
+      const u=getU();if(!u)return;if(!u.pdfs)u.pdfs=[];
+      const files=Array.from(e.target.files);let done=0;
+      if(!files.length)return;
+      files.forEach(file=>{
+        const reader=new FileReader();
+        reader.onload=ev=>{
+          const sizeKB=Math.round(file.size/1024);
+          const sizeStr=sizeKB>1024?(Math.round(sizeKB/102.4)/10)+'MB':sizeKB+'KB';
+          u.pdfs.push({name:file.name,data:ev.target.result,size:sizeStr});
+          done++;if(done===files.length){this.renderPdfs();STORAGE.save();}
+        };
+        reader.readAsDataURL(file);
+      });
+      e.target.value='';
+    },
+    delPdf(i){if(!confirm('ลบไฟล์นี้?'))return;const u=getU();if(!u)return;u.pdfs.splice(i,1);this.renderPdfs();STORAGE.save();},
     renderNotes(){
       const u=getU();if(!u)return;
       const el=document.getElementById('u-notes-rich');
@@ -2327,7 +2409,7 @@ const CMP=(function(){
     bg.innerHTML=unis.map((u,i)=>{
       const t=totals[i];const pct=Math.round(t/maxT*100);
       const raw=formatRawBreakdown(rawTotalsByCurrency(u.costs,u.currencies));
-      return `<div class="bar-row"><span class="bar-uni-name">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx">≈ ${convDisplay(t)}</span><span class="amount-raw">${raw} จริง</span></span></div>`;
+      return `<div class="bar-row"><span class="bar-uni-name" title="${u.name}">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx">≈ ${convDisplay(t)}</span><span class="amount-raw">${raw} จริง</span></span></div>`;
     }).join('');
   }
   return {
@@ -2537,6 +2619,9 @@ const STORAGE=(function(){
           currencies: {tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',thaiPrep:'THB'},
           thaiPrepNote: '',
           notes: '',
+          dormOptions: [],
+          dormUnit: 'เดือน',
+          pdfs: [],
           ...u,
         }));
         UNI._setUnis(normalizedUnis);
