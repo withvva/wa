@@ -826,8 +826,6 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <button class="dtab" onclick="UNI.switchDTab('schol',this)">ทุน</button>
       <button class="dtab" onclick="UNI.switchDTab('cost',this)">ค่าใช้จ่าย</button>
       <button class="dtab" onclick="UNI.switchDTab('summary',this);setTimeout(()=>UNI.renderSummary(),0)">สรุป</button>
-      <button class="dtab" onclick="UNI.switchDTab('links',this)">ลิงก์</button>
-      <button class="dtab" onclick="UNI.switchDTab('pdfs',this)">PDF Files</button>
       <button class="dtab" onclick="UNI.switchDTab('notes',this)">Notes</button>
     </div>
     <div id="udtab-dates" class="dtab-content active">
@@ -965,7 +963,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
         <div id="u-summary-content"><div style="font-size:13px;color:var(--text-muted);padding:12px 0">กำลังโหลด…</div></div>
       </div>
     </div>
-    <div id="udtab-links" class="dtab-content">
+    <div id="udtab-notes" class="dtab-content">
       <div class="section">
         <div class="sec-label">ลิงก์สำคัญ</div>
         <div class="uni-email-row">
@@ -980,22 +978,17 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
           <button class="btn btn-primary btn-sm" style="align-self:end;height:36px" onclick="UNI.addLink()">+ เพิ่ม</button>
         </div>
       </div>
-    </div>
-    <div id="udtab-pdfs" class="dtab-content">
       <div class="section">
         <div class="sec-label">PDF Files</div>
-        <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">อัปโหลดไฟล์ PDF ได้หลายไฟล์ — เก็บไว้ใน browser ของเครื่องนี้</p>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">อัปโหลดไฟล์ PDF ได้หลายไฟล์ — ซิงก์ผ่าน Firebase เหมือนข้อมูลอื่นๆ</p>
         <div class="pdfs-area" id="u-pdfs-area"></div>
         <div style="margin-top:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <label class="btn btn-primary btn-sm" style="cursor:pointer">
             + เพิ่มไฟล์ PDF
             <input type="file" id="u-pdf-upload" accept=".pdf,application/pdf" multiple style="display:none" onchange="UNI.handlePdfUpload(event)">
           </label>
-          <span style="font-size:11px;color:var(--text-muted)">รองรับหลายไฟล์พร้อมกัน · ซิงก์ผ่าน Firebase เหมือนข้อมูลอื่นๆ · ไฟล์ใหญ่มากอาจช้า</span>
         </div>
       </div>
-    </div>
-    <div id="udtab-notes" class="dtab-content">
       <div class="section">
         <div class="sec-label">Notes</div>
         <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">จดอะไรก็ได้ — บันทึกอัตโนมัติทุกครั้งที่พิมพ์</p>
@@ -1869,7 +1862,9 @@ const UNI=(function(){
               <div class="sch-card-name">${s.name}</div>
               <div class="sch-card-tags" style="margin-top:5px">${tags||'<span style="font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลด</span>'}</div>
             </div>
-            <span class="pill sch-badge ${SCH_PILL[s.status]||'pill-prep'}">${schStatusLabel[s.status]||s.status}</span>
+            <select id="sch-status-sel-${i}" onclick="event.stopPropagation()" onchange="event.stopPropagation();UNI.changeSchStatus(${i},this.value)" style="font-family:inherit;font-size:11px;padding:3px 7px;border:0.5px solid var(--border);border-radius:10px;background:var(--white);color:var(--text-secondary);cursor:pointer;margin-right:6px">
+              ${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
+            </select>
             <span class="sch-card-chevron">▾</span>
           </div>
           <div class="sch-card-body">
@@ -1883,7 +1878,7 @@ const UNI=(function(){
               <div class="form-group" style="margin-bottom:8px"><label>เงื่อนไข / เกณฑ์คัดเลือก</label><textarea id="sch-edit-cond-${i}" style="min-height:52px" oninput="UNI._autoSaveSchField(${i},'cond',this.value)">${s.cond||''}</textarea></div>
               <div class="form-group" style="margin-bottom:8px"><label>มูลค่า / โอกาสได้รับ</label><input type="text" id="sch-edit-chance-${i}" value="${(s.chance||'').replace(/"/g,'&quot;')}" oninput="UNI._autoSaveSchField(${i},'chance',this.value)" placeholder="เช่น ลดค่าเทอม 50% · โอกาส 10–30%"></div>
               <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">สถานะ</div>
-              <select onchange="UNI.changeSchStatus(${i},this.value)" style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);width:100%">
+              <select id="sch-status-edit-sel-${i}" onchange="UNI.changeSchStatus(${i},this.value)" style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);width:100%">
                 ${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
               </select>
             </div>
@@ -2165,7 +2160,16 @@ const UNI=(function(){
         ${rows}
       </div>`;
     },
-    changeSchStatus(i,v){getU().scholarships[i].status=v;this.renderScholarships();setTimeout(()=>{const c=document.getElementById('sch-card-'+i);if(c)c.classList.add('open');},10);STORAGE.save();},
+    changeSchStatus(i,v){
+      const u=getU();if(!u||!u.scholarships[i])return;
+      u.scholarships[i].status=v;
+      // อัปเดต select ใน header และใน edit block พร้อมกัน
+      const headerSel=document.getElementById('sch-status-sel-'+i);
+      if(headerSel)headerSel.value=v;
+      const editSel=document.getElementById('sch-status-edit-sel-'+i);
+      if(editSel)editSel.value=v;
+      STORAGE.save();
+    },
     _autoSaveSchField(i,field,value){const u=getU();if(!u||!u.scholarships[i])return;u.scholarships[i][field]=value;const badge=document.querySelector(`#sch-card-${i} .sch-badge`);if(badge&&field==='status'){const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};badge.textContent=schStatusLabel[value]||value;}STORAGE.save();},
     setSelectedDorm(idx){const u=getU();if(!u)return;u.selectedDormIdx=idx;STORAGE.save();this.renderSummary();},
     delScholarship(i){if(!confirm('ลบทุนนี้?'))return;getU().scholarships.splice(i,1);this.renderScholarships();STORAGE.save();},
