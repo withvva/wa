@@ -2040,7 +2040,8 @@ const UNI=(function(){
         const rows=s.discounts.map(d=>{
           const key=COST_KEY[d.cat];
           const rawUnit=(key&&u.costs[key])?Number(u.costs[key]):0;
-          const before=d.dur&&d.dur>0&&d.durUnit!=='ตลอดหลักสูตร'?rawUnit*d.dur:rawUnit;
+          // คิดแค่ 1 เทอม เสมอ — dur เป็นแค่ข้อมูล reference ไม่นำมาคูณ
+          const before=rawUnit;
           const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(((cu[key]||'THB')==='KRW'?d.val*KRW:d.val));
           const after=Math.max(0,before-disc);
           tBefore+=toTHB(before,key);tAfter+=toTHB(after,key);
