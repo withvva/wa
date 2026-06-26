@@ -863,7 +863,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
               <select id="s-status">
                 <option value="prep">กำลังเตรียม</option><option value="applied">สมัครแล้ว</option>
                 <option value="waiting">รอผล</option><option value="pass">ได้รับทุน ✓</option>
-                <option value="fail">ไม่ได้รับ</option>
+                <option value="fail">ไม่ได้รับ</option><option value="below">คะแนนไม่ถึงเกณฑ์</option>
               </select>
             </div>
           </div>
@@ -1831,8 +1831,8 @@ const UNI=(function(){
       const u=getU();if(!u)return;
       if(!u.scholarships)u.scholarships=[];
       const el=document.getElementById('u-sch-cards');if(!el)return;
-      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
-      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail',below:'pill-fail'};
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ',below:'คะแนนไม่ถึงเกณฑ์'};
       const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
       const CAT_ICON={tuition:'🎓',dorm:'🏠',living:'🛒',apply:'📝',entrance:'🚪',thaiPrep:'✈️',other:'📌'};
       if(!u.scholarships.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0 12px">ยังไม่มีทุน — กด "+ เพิ่มทุน" เพื่อเริ่ม</div>';return;}
@@ -1862,7 +1862,7 @@ const UNI=(function(){
               <div class="sch-card-tags" style="margin-top:5px">${tags||'<span style="font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลด</span>'}</div>
             </div>
             <select id="sch-status-sel-${i}" onclick="event.stopPropagation()" onchange="event.stopPropagation();UNI.changeSchStatus(${i},this.value)" style="font-family:inherit;font-size:11px;padding:3px 7px;border:0.5px solid var(--border);border-radius:10px;background:var(--white);color:var(--text-secondary);cursor:pointer;margin-right:6px">
-              ${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
+              ${['prep','applied','waiting','pass','fail','below'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
             </select>
             <span class="sch-card-chevron">▾</span>
           </div>
@@ -1878,7 +1878,7 @@ const UNI=(function(){
               <div class="form-group" style="margin-bottom:8px"><label>มูลค่า / โอกาสได้รับ</label><input type="text" id="sch-edit-chance-${i}" value="${(s.chance||'').replace(/"/g,'&quot;')}" oninput="UNI._autoSaveSchField(${i},'chance',this.value)" placeholder="เช่น ลดค่าเทอม 50% · โอกาส 10–30%"></div>
               <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">สถานะ</div>
               <select id="sch-status-edit-sel-${i}" onchange="UNI.changeSchStatus(${i},this.value)" style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);width:100%">
-                ${['prep','applied','waiting','pass','fail'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
+                ${['prep','applied','waiting','pass','fail','below'].map(v=>`<option value="${v}"${s.status===v?' selected':''}>${schStatusLabel[v]}</option>`).join('')}
               </select>
             </div>
             ${s.cond?`<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">เงื่อนไข: ${s.cond}</div>`:''}
@@ -2060,8 +2060,8 @@ const UNI=(function(){
       const d=this._buildSummaryData();
       const el=document.getElementById('u-summary-content');if(!el||!d)return;
       const {u,baseTHB,schResults,COST_FIELDS,cu,fmtAmt}=d;
-      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
-      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail',below:'pill-fail'};
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ',below:'คะแนนไม่ถึงเกณฑ์'};
       // base costs block — ค่าหอพัก (แสดงเฉพาะหอที่เลือก + selector)
       const selIdx=u.selectedDormIdx!=null?u.selectedDormIdx:-1;
       const dormOptions=[{label:u.dormName||'หอ 1 (หลัก)',amount:u.costs['dorm']||0,currency:cu['dorm']||'THB',unit:u.dormUnit||'เดือน'},...(u.dormOptions||[]).map((d,i)=>({label:d.name||'หอ '+(i+2),amount:d.amount||0,currency:d.currency||'THB',unit:d.unit||'เดือน'}))];
@@ -2084,30 +2084,28 @@ const UNI=(function(){
         </div>`;
       }).join('');
       // per-scholarship rows
+      const withDisc=schResults.filter(s=>s.savedTHB>0);
+      const best=withDisc.length?withDisc.reduce((a,b)=>a.savedTHB>b.savedTHB?a:b):null;
       const schRows=schResults.length?schResults.map(s=>{
+        const isBest=best&&s.name===best.name&&s.netTHB===best.netTHB;
         const discTags=s.rows.map(r=>`<span class="sch-card-tag${r.noData?' ':' pct'}" style="font-size:10px">${r.label} ${r.discTxt}${r.durTxt}</span>`).join('');
         const hasDisc=s.rows.length>0;
-        return `<div class="sum-sch-row">
+        return `<div class="sum-sch-row"${isBest?' style="border-left:2px solid #7B57CE;background:var(--blue-light)"':''}>
           <div>
-            <div class="sum-sch-name">${s.name}</div>
+            <div class="sum-sch-name">${isBest?'★ ':''}${s.name}</div>
             <span class="pill ${SCH_PILL[s.status]||'pill-prep'}" style="font-size:10px;margin-top:4px;display:inline-block">${schStatusLabel[s.status]||s.status}</span>
           </div>
           <div class="sum-sch-tags">${discTags||'<span style="font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลด</span>'}</div>
           <div style="text-align:right;min-width:110px">
-            ${hasDisc?`<div class="sum-sch-net">฿${Math.round(s.netTHB).toLocaleString()}</div>
+            ${hasDisc?`<div class="sum-sch-net"${isBest?' style="color:#7B57CE"':''}>฿${Math.round(s.netTHB).toLocaleString()}</div>
             <div class="sum-sch-saved">ประหยัด ฿${Math.round(s.savedTHB).toLocaleString()}</div>`
             :'<div style="font-size:11px;color:var(--text-muted)">—</div>'}
           </div>
         </div>`;
       }).join(''):`<div class="sum-no-sch">ยังไม่มีทุน — ไปเพิ่มได้ที่แท็บ "ทุน"</div>`;
-      // best deal
-      const withDisc=schResults.filter(s=>s.savedTHB>0);
-      const best=withDisc.length?withDisc.reduce((a,b)=>a.savedTHB>b.savedTHB?a:b):null;
-      const totalBar=best?`<div class="sum-total-bar">
-          <div><div class="sum-total-label">ค่าใช้จ่ายสุทธิ (ทุนที่ดีที่สุด: ${best.name})</div>
-          <div class="sum-total-val">฿${Math.round(best.netTHB).toLocaleString()}</div>
-          <div class="sum-total-saved">ประหยัดได้ ฿${Math.round(best.savedTHB).toLocaleString()} จากทั้งหมด ฿${Math.round(baseTHB).toLocaleString()}</div></div>
-        </div>`
+      // total bar (hidden — ★ in table already highlights best)
+      const totalBar=best
+        ?''
         :`<div class="sum-total-bar"><div>
           <div class="sum-total-label">ค่าใช้จ่ายรวมโดยประมาณ (ไม่มีทุน)</div>
           <div class="sum-total-val">฿${Math.round(baseTHB).toLocaleString()}</div>
@@ -2142,8 +2140,8 @@ const UNI=(function(){
       if(!schResults.length){el.innerHTML='';return;}
       const withDisc=schResults.filter(s=>s.savedTHB>0);
       if(!withDisc.length){el.innerHTML=`<div style="font-size:12px;color:var(--text-muted);border-top:0.5px dashed var(--border);padding-top:14px">ยังไม่มีทุนที่มีส่วนลด — ไปเพิ่มที่แท็บ "ทุน"</div>`;return;}
-      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail'};
-      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};
+      const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail',below:'pill-fail'};
+      const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ',below:'คะแนนไม่ถึงเกณฑ์'};
       const rows=withDisc.map(s=>`
         <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:0.5px solid var(--border);gap:12px;flex-wrap:wrap">
           <div>
