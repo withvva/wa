@@ -2123,7 +2123,7 @@ const UNI=(function(){
         const isBest=best&&s.name===best.name&&s.netTHB===best.netTHB;
         const discTags=s.rows.map(r=>`<span class="sch-card-tag${r.noData?' ':' pct'}" style="font-size:10px">${r.label} ${r.discTxt}${r.durTxt}</span>`).join('');
         const stipendRows=s.discounts.filter(d=>d.type==='stipend');
-        const stipendInfo=stipendRows.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">${stipendRows.map(d=>{const sym=(d.cat&&(getU()||{}).currencies&&((getU()||{}).currencies[d.cat]||'THB')==='KRW'?'₩':'฿';return`<span style="font-size:10px;background:#D5F0E0;color:#1A6B3A;padding:2px 7px;border-radius:10px;display:inline-flex;align-items:center;gap:3px">💰 stipend ${sym}${Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' × '+d.dur+(d.durUnit||'เทอม'):''}  <span style="color:#5A9A6A;font-size:9px">(แสดงข้อมูลเท่านั้น — ไม่หักยอดรวม)</span></span>`}).join('')}</div>`:'';
+        const stipendInfo=stipendRows.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">${stipendRows.map(d=>{const sym=(d.cat&&(getU()||{}).currencies&&((getU()||{}).currencies[d.cat]||'THB')==='KRW')?'₩':'฿';return`<span style="font-size:10px;background:#D5F0E0;color:#1A6B3A;padding:2px 7px;border-radius:10px;display:inline-flex;align-items:center;gap:3px">💰 stipend ${sym}${Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' × '+d.dur+(d.durUnit||'เทอม'):''}  <span style="color:#5A9A6A;font-size:9px">(แสดงข้อมูลเท่านั้น — ไม่หักยอดรวม)</span></span>`}).join('')}</div>`:'';
         const hasDisc=s.rows.length>0;
         return `<div class="sum-sch-row"${isBest?' style="border-left:2px solid #7B57CE;background:var(--blue-light)"':''}>
           <div>
