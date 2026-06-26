@@ -921,7 +921,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
                   <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="fixed_krw">จำนวน ₩ (ลด KRW)</option><option value="free">ฟรีทั้งหมด</option><option value="stipend">เงินให้ (stipend)</option>
                 </select>
               </div>
-              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">ค่า (% หรือ ฿)</label>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">ค่า (%, ฿ หรือ ₩)</label>
                 <input type="number" id="sdi-val" placeholder="0" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
               </div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">จำนวน</label>
@@ -1923,7 +1923,7 @@ const UNI=(function(){
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ประเภท</label><select id="sdi-type-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
                 <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="fixed_krw">จำนวน ₩ (ลด KRW)</option><option value="free">ฟรีทั้งหมด</option><option value="stipend">เงินให้ (stipend)</option>
               </select></div>
-              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ค่า (% หรือ ฿)</label><input type="number" id="sdi-val-${i}" placeholder="เช่น 30" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
+              <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ค่า (%, ฿ หรือ ₩)</label><input type="number" id="sdi-val-${i}" placeholder="เช่น 30" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">จำนวน</label><input type="number" id="sdi-dur-${i}" placeholder="เช่น 1" min="0" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">หน่วย</label><select id="sdi-durunit-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
                 <option value="เทอม">เทอม</option><option value="ปี">ปี</option><option value="เดือน">เดือน</option><option value="ครั้ง">ครั้ง</option><option value="ตลอดหลักสูตร">ตลอด</option>
@@ -1974,7 +1974,7 @@ const UNI=(function(){
     _renderPendingTags(){
       const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
       return (window._pendingDiscounts||[]).map((d,i)=>`
-        <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
+        <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'💰 ฿'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
           <button onclick="window._pendingDiscounts.splice(${i},1);document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
         </span>`).join('');
     },
@@ -2027,9 +2027,11 @@ const UNI=(function(){
         // discount amount (ในสกุลเดิม)
         const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):d.type==='stipend'?(curr==='KRW'?d.val:d.val):d.type==='fixed_krw'?(curr==='KRW'?d.val:(d.val/KRW_RATE)):(curr==='KRW'?d.val*KRW_RATE:d.val);
         const after=Math.max(0,before-disc);
+        // stipend ไม่หักจาก before (ไม่ใช่ส่วนลด) แต่นับเป็น "ได้รับ" แยกต่างหาก
+        const stipendAmt=d.type==='stipend'?(curr==='KRW'?d.val/KRW_RATE:d.val):0;
         // สะสม total เป็น THB
         totalTHBBefore+=toTHB(before,key);
-        totalTHBAfter+=toTHB(after,key);
+        totalTHBAfter+=toTHB(after,key)-stipendAmt;
         const sym=curr==='KRW'?'₩':'฿';
         const discTxt=d.type==='free'?'ฟรีทั้งหมด':d.type==='pct'?'ลด '+d.val+'%':d.type==='stipend'?'💰 ได้รับ '+sym+Number(d.val).toLocaleString()+'/เทอม':d.type==='fixed_krw'?'ลด ₩'+Number(d.val).toLocaleString():'ลด '+sym+Number(d.val).toLocaleString();
         const durTxt=d.dur&&d.dur>0?` (${d.dur} ${d.durUnit||'เทอม'})`:d.durUnit==='ตลอดหลักสูตร'?' (ตลอดหลักสูตร)':'';
