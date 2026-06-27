@@ -367,6 +367,29 @@ tr.total-row .amount-approx{font-size:16px}
 .bar-rank-high{background:var(--tag-inter-bg);color:var(--tag-inter-fg)}
 #cmp-sticky-bar{position:sticky;bottom:0;z-index:100;background:var(--white);border-top:1px solid var(--border);padding:10px 48px;display:none;align-items:center;gap:0;flex-wrap:wrap}
 #cmp-sticky-bar.visible{display:flex}
+/* ── Compare Step Bar ── */
+.cmp-step-bar{display:flex;align-items:center;gap:0;padding:20px 48px;background:var(--white);border-bottom:0.5px solid var(--border)}
+.cmp-step{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cmp-step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;background:var(--cream-dark);color:var(--text-muted);border:0.5px solid var(--border)}
+.cmp-step-text{display:flex;flex-direction:column;gap:1px}
+.cmp-step-label{font-size:12px;font-weight:500;color:var(--text-primary);letter-spacing:0.02em}
+.cmp-step-sub{font-size:10px;color:var(--text-muted);letter-spacing:0.03em}
+.cmp-step-line{flex:1;height:0.5px;background:var(--border);margin:0 16px;min-width:24px}
+/* ── Compare Section Headers ── */
+.cmp-section-header{display:flex;align-items:center;gap:12px;padding:28px 48px 0}
+.cmp-section-num{width:22px;height:22px;border-radius:50%;background:var(--blue-dark);color:white;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cmp-section-title{font-family:'IBM Plex Sans Thai',sans-serif;font-size:16px;font-weight:600;color:var(--text-primary);letter-spacing:0.01em}
+.cmp-section-sub{font-size:12px;color:var(--text-muted);margin-top:3px;font-weight:400}
+.cmp-section-divider{margin:0 48px;height:0.5px;background:var(--border)}
+/* ── Compare section spacing ── */
+.cmp-section-body{padding:20px 48px 32px}
+/* ── Result summary strip ── */
+.cmp-result-strip{display:flex;gap:20px;flex-wrap:wrap;padding:20px 48px 32px}
+.cmp-result-card{background:var(--white);border:0.5px solid var(--border);border-radius:6px;padding:16px 20px;flex:1;min-width:160px}
+.cmp-result-card-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px}
+.cmp-result-card-value{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:400;color:var(--text-primary)}
+.cmp-result-card-sub{font-size:11px;color:var(--text-muted);margin-top:3px}
+.cmp-result-card.highlight{border-color:var(--blue-mid);background:var(--blue-light)}
 .sticky-bar-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-right:20px;white-space:nowrap;flex-shrink:0}
 .sticky-bar-uni{display:flex;align-items:center;gap:6px;padding:0 16px}
 .sticky-bar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
@@ -1095,41 +1118,113 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
 
 <!-- COMPARE PAGE -->
 <div id="page-compare" class="page">
+  <!-- Page Header -->
   <div class="page-header">
     <p class="eyebrow">หน้า 04</p>
     <h1 class="page-title">Cost <em>Comparison</em></h1>
-    <p class="page-sub">ค่าเทอม ค่าหอ และค่าใช้จ่ายอื่นๆ ทุกมหาวิทยาลัยในตารางเดียว</p>
+    <p class="page-sub">เปรียบเทียบค่าใช้จ่ายทุกมหาวิทยาลัยในที่เดียว — เลื่อนลงดูทีละขั้นได้เลย</p>
   </div>
-  <div class="controls-bar">
-    <span class="cb-label">อัตราแลกเปลี่ยน</span>
-    <div class="rate-input-group" title="ใช้คำนวณยอด ≈ โดยประมาณเท่านั้น ไม่กระทบยอดดิบที่กรอกไว้">
-      <span>1฿ =</span>
-      <input type="number" id="cmp-rate-input" value="36" min="0.01" step="0.01" onchange="CMP.setRate(this.value)">
-      <span>₩</span>
+
+  <!-- Step Progress Bar -->
+  <div class="cmp-step-bar">
+    <div class="cmp-step">
+      <div class="cmp-step-num">1</div>
+      <div class="cmp-step-text">
+        <div class="cmp-step-label">ตารางค่าใช้จ่าย</div>
+        <div class="cmp-step-sub">ขั้น 1</div>
+      </div>
     </div>
-    <span class="cb-label" style="margin-left:8px">คอลัมน์</span>
-    <div class="col-toggles" id="col-toggles"></div>
-    <div style="margin-left:auto"><button class="btn btn-sm" onclick="CMP.openAddModal()">+ เพิ่มมหาวิทยาลัย</button></div>
+    <div class="cmp-step-line"></div>
+    <div class="cmp-step">
+      <div class="cmp-step-num">2</div>
+      <div class="cmp-step-text">
+        <div class="cmp-step-label">ค่าครองชีพ + ทุน</div>
+        <div class="cmp-step-sub">ขั้น 2</div>
+      </div>
+    </div>
+    <div class="cmp-step-line"></div>
+    <div class="cmp-step">
+      <div class="cmp-step-num">3</div>
+      <div class="cmp-step-text">
+        <div class="cmp-step-label">ผลลัพธ์สรุป</div>
+        <div class="cmp-step-sub">ขั้น 3</div>
+      </div>
+    </div>
   </div>
-  <div class="table-section"><div class="table-wrap"><table class="compare-table" id="compare-table"></table></div></div>
-  <!-- ── บล็อกกรอก living & preTravelCost ── -->
-  <div class="section" id="cmp-extra-inputs" style="padding:24px 48px;background:var(--white);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border)">
-    <div class="sec-label" style="margin-bottom:4px">ค่าใช้จ่ายเพิ่มเติม + ทุน</div>
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">กรอกค่าครองชีพ (₩) ค่าเตรียมตัวก่อนไป และเลือกทุนที่ได้ — ใช้คำนวณกราฟด้านล่าง ไม่บันทึกลง Firebase</div>
-    <div id="cmp-extra-table">
+
+  <!-- ── ขั้น 1 : ตารางค่าติด ── -->
+  <div class="cmp-section-header">
+    <div class="cmp-section-num">1</div>
+    <div>
+      <div class="cmp-section-title">ตารางค่าใช้จ่าย</div>
+      <div class="cmp-section-sub">ค่าเทอม · ค่าหอ · ค่าสมัคร · ค่าแรกเข้า · ค่าเอกสาร ตามที่กรอกในหน้า Universities</div>
+    </div>
+  </div>
+
+  <!-- Controls bar inside section -->
+  <div class="cmp-section-body" style="padding-bottom:16px">
+    <div class="controls-bar" style="margin-bottom:16px;border:0.5px solid var(--border);border-radius:4px;background:var(--cream);padding:12px 16px">
+      <span class="cb-label">อัตราแลกเปลี่ยน</span>
+      <div class="rate-input-group" title="ใช้คำนวณยอด ≈ โดยประมาณเท่านั้น ไม่กระทบยอดดิบที่กรอกไว้">
+        <span>1฿ =</span>
+        <input type="number" id="cmp-rate-input" value="36" min="0.01" step="0.01" onchange="CMP.setRate(this.value)">
+        <span>₩</span>
+      </div>
+      <span class="cb-label" style="margin-left:8px">คอลัมน์</span>
+      <div class="col-toggles" id="col-toggles"></div>
+      <div style="margin-left:auto"><button class="btn btn-sm" onclick="CMP.openAddModal()">+ เพิ่มมหาวิทยาลัย</button></div>
+    </div>
+    <div class="table-wrap"><table class="compare-table" id="compare-table"></table></div>
+  </div>
+
+  <div class="cmp-section-divider"></div>
+
+  <!-- ── ขั้น 2 : ปรับตัวแปร (ไม่บันทึก) ── -->
+  <div class="cmp-section-header" style="margin-top:28px">
+    <div class="cmp-section-num">2</div>
+    <div>
+      <div class="cmp-section-title">ค่าครองชีพ + ทุนที่ได้รับ <span style="font-size:11px;color:var(--text-muted);font-weight:400;background:var(--cream-dark);padding:2px 7px;border-radius:10px;margin-left:6px">ไม่บันทึก</span></div>
+      <div class="cmp-section-sub">กรอกค่าครองชีพและเลือกทุน — ใช้คำนวณกราฟด้านล่างเท่านั้น ไม่บันทึกลง Firebase</div>
+    </div>
+  </div>
+
+  <div id="cmp-extra-inputs">
+    <div id="cmp-extra-table" style="padding:20px 48px 32px">
       <!-- rendered by CMP.renderExtraInputs() -->
     </div>
   </div>
-  <div id="cmp-sticky-bar"></div>
-  <div class="chart-section">
-    <div class="sec-label" id="cmp-chart-lbl">Total Estimated Cost (THB)</div>
-    <div class="bar-group" id="bar-group"></div>
-    <div style="margin-top:12px;font-size:11px;color:var(--text-muted);line-height:1.6">
-      * Est. Cost per Semester = ค่าเทอม + ค่าหอ + ค่าสมัคร + ค่าแรกเข้า + ค่าเอกสาร + ค่าครองชีพรวม (₩ → ฿) + ค่าเตรียมตัวก่อนไป − ส่วนลดทุนที่เลือก<br>
-      * ตัวเลขตัวใหญ่ที่มี "≈" คือยอดประมาณการรวมเป็นสกุลเดียวเพื่อใช้เทียบขนาด/จัดอันดับเท่านั้น คำนวณด้วยอัตราที่ตั้งไว้ด้านบน (ตอนนี้ 1฿ = <span id="cmp-rate-note">36</span>₩) — <strong>ปรับเลขอัตราด้านบนให้ตรงกับวันนี้เพื่อความแม่นยำ</strong><br>
-      * ตัวเลขเล็กบรรทัดล่าง (เช่น ฿120,000 + ₩3,000,000) คือยอดดิบตามที่กรอกจริง ไม่มีการแปลงค่าเงินใดๆ
+
+  <div class="cmp-section-divider"></div>
+
+  <!-- ── ขั้น 3 : ผลลัพธ์สุทธิ ── -->
+  <div class="cmp-section-header" style="margin-top:28px">
+    <div class="cmp-section-num">3</div>
+    <div>
+      <div class="cmp-section-title">ผลลัพธ์สุทธิ</div>
+      <div class="cmp-section-sub">ค่าใช้จ่ายรวมต่อเทอม หลังหักทุนและรวมค่าครองชีพแล้ว</div>
     </div>
   </div>
+
+  <!-- Result summary cards (rendered by JS) -->
+  <div id="cmp-result-strip" class="cmp-result-strip"></div>
+
+  <!-- Bar Chart -->
+  <div class="chart-section" style="padding-top:0">
+    <div class="sec-label" id="cmp-chart-lbl">Est. Cost per Semester</div>
+    <div class="bar-group" id="bar-group"></div>
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-sm" onclick="CMP.openAddModal()">+ เพิ่มมหาวิทยาลัย</button>
+      <button class="btn btn-sm" onclick="CMP.showFullResult()">📊 ดูผลลัพธ์เต็ม</button>
+    </div>
+    <div style="margin-top:16px;font-size:11px;color:var(--text-muted);line-height:1.7;border-top:0.5px solid var(--border);padding-top:12px">
+      * Est. Cost per Semester = ค่าเทอม + ค่าหอ + ค่าสมัคร + ค่าแรกเข้า + ค่าเอกสาร + ค่าครองชีพรวม (₩ → ฿) + ค่าเตรียมตัวก่อนไป − ส่วนลดทุนที่เลือก<br>
+      * ตัวเลขตัวใหญ่ที่มี "≈" คือยอดประมาณการ คำนวณด้วยอัตราที่ตั้งไว้ด้านบน (ตอนนี้ 1฿ = <span id="cmp-rate-note">36</span>₩) — <strong>ปรับเลขอัตราด้านบนให้ตรงกับวันนี้เพื่อความแม่นยำ</strong><br>
+      * ตัวเลขเล็กบรรทัดล่าง คือยอดดิบตามที่กรอกจริง ไม่มีการแปลงค่าเงินใดๆ
+    </div>
+  </div>
+
+  <div id="cmp-sticky-bar"></div>
 </div>
 
 <!-- Add Compare Modal -->
@@ -2562,6 +2657,33 @@ const CMP=(function(){
     html+='</tr>';
     html+='</tbody>';table.innerHTML=html;
   }
+  function renderResultStrip(){
+    const strip=document.getElementById('cmp-result-strip');if(!strip)return;
+    const unis=getUnis();if(!unis.length){strip.innerHTML='';return;}
+    const totals=unis.map(u=>calcTotal(u.costs,u.currencies,u.id));
+    const minT=Math.min(...totals);const maxT=Math.max(...totals);
+    const bestUni=unis[totals.indexOf(minT)];
+    const saving=totals.length>1?maxT-minT:null;
+    const cards=[];
+    cards.push(`<div class="cmp-result-card highlight">
+      <div class="cmp-result-card-label">ถูกสุดหลังทุน</div>
+      <div class="cmp-result-card-value" style="color:var(--blue-dark)">${bestUni.name}</div>
+      <div class="cmp-result-card-sub">≈ ${convDisplay(minT)} / เทอม</div>
+    </div>`);
+    if(saving&&saving>0){
+      cards.push(`<div class="cmp-result-card">
+        <div class="cmp-result-card-label">ประหยัดกว่า</div>
+        <div class="cmp-result-card-value">${convDisplay(saving)}</div>
+        <div class="cmp-result-card-sub">ต่อเทอม เทียบกับแพงสุด</div>
+      </div>`);
+    }
+    cards.push(`<div class="cmp-result-card">
+      <div class="cmp-result-card-label">อัตราแลกเปลี่ยนที่ใช้</div>
+      <div class="cmp-result-card-value">${KRW_RATE} <span style="font-size:14px;font-family:'IBM Plex Sans Thai',sans-serif">₩/฿</span></div>
+      <div class="cmp-result-card-sub">ประมาณการเท่านั้น</div>
+    </div>`);
+    strip.innerHTML=cards.join('');
+  }
   function renderBars(){
     const unis=getUnis();
     const el=document.getElementById('cmp-chart-lbl');if(el)el.textContent='Est. Cost per Semester';
@@ -2578,6 +2700,7 @@ const CMP=(function(){
       return `<div class="bar-row"><span class="bar-uni-name" title="${u.name}">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx${isMin?' lowest':isMax?' highest':''}">≈ ${convDisplay(t)}</span>${rankBadge}<span class="amount-raw">${raw} จริง</span></span></div>`;
     }).join('');
     renderStickyBar(unis,totals,minT);
+    renderResultStrip();
   }
   function renderStickyBar(unis,totals,minT){
     const el=document.getElementById('cmp-sticky-bar');if(!el)return;
@@ -2740,6 +2863,10 @@ const CMP=(function(){
     },
     openAddModal(){document.getElementById('add-cmp-modal').classList.add('open');},
     closeAddOverlay(e){if(e.target===document.getElementById('add-cmp-modal'))document.getElementById('add-cmp-modal').classList.remove('open');},
+    showFullResult(){
+      const el=document.getElementById('cmp-result-strip');
+      if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+    },
     addUni(){
       const name=document.getElementById('cn-name').value.trim();if(!name){alert('กรุณาใส่ชื่อ');return;}
       const g=id=>parseFloat(document.getElementById(id).value)||0;
