@@ -287,7 +287,7 @@ footer p{font-size:11px;color:var(--text-muted);letter-spacing:.06em}
 .dr-name{font-size:13px;font-weight:500}
 .dr-del{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px}
 .dr-del:hover{color:#7A1A1A}
-.date-add-row{display:grid;grid-template-columns:140px 1fr 120px auto;gap:10px;align-items:end;margin-top:14px}
+.date-add-row{display:grid;grid-template-columns:148px 148px 1fr 130px auto;gap:10px;align-items:end;margin-top:14px}
 .cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin-bottom:20px}
 .cost-card{background:var(--white);border:0.5px solid var(--border);border-radius:4px;padding:16px 18px}
 .cost-card-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
@@ -1602,7 +1602,7 @@ const TL=(function(){
   const now=new Date();
   let year=now.getFullYear(),month=now.getMonth(),curModalDate='';
   function uniLabel(uniId){if(uniId==='gks')return 'GKS';if(uniId==='personal')return 'Personal';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.name:'Unknown';}
-  function uniColor(uniId){if(uniId==='gks')return '#3A6FA0';if(uniId==='personal')return '#7B8FA8';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.color:'#7B8FA8';}
+  function uniColor(uniId){if(uniId==='gks')return '#3A6FA0';if(uniId==='personal')return '#00BCD4';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.color:'#00BCD4';}
   // วันสำคัญที่กรอกไว้ในหน้า University (u.dates) — แปลงให้อยู่ในรูปแบบเดียวกับ event ของปฏิทิน
   // ไม่ได้ copy ข้อมูลมาเก็บซ้ำ แค่ "มอง" ข้อมูลเดิมในรูปแบบใหม่ตอน render ทุกครั้ง
   // จึงไม่มีปัญหาข้อมูลไม่ตรงกัน (out of sync) ระหว่าง 2 หน้า
@@ -1623,7 +1623,7 @@ const TL=(function(){
     const unis=UNI.getUnis();
     el.innerHTML='<span class="legend-item"><span class="legend-dot" style="background:#7B57CE"></span>GKS</span>'
       +unis.map(u=>`<span class="legend-item"><span class="legend-dot" style="background:${u.color}"></span><span class="legend-uni-link" onclick="TL.goToUni(${u.id})">${u.name}</span></span>`).join('')
-      +'<span class="legend-item"><span class="legend-dot" style="background:#7B8FA8"></span>Personal</span>';
+      +'<span class="legend-item"><span class="legend-dot" style="background:#00BCD4"></span>Personal</span>';
   }
   function render(){
     const label=document.getElementById('tl-month-label');const grid=document.getElementById('tl-cal-grid');if(!label||!grid)return;
