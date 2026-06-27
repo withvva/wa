@@ -362,6 +362,18 @@ tr.total-row .amount-approx{font-size:16px}
 .bar-amount{font-size:11px;color:var(--text-secondary);width:160px;flex-shrink:0;line-height:1.4;white-space:normal}
 .bar-amount .amount-approx{font-size:13px;display:block}
 .bar-amount .amount-raw{display:block}
+.bar-rank-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-left:5px;font-weight:500;vertical-align:middle}
+.bar-rank-low{background:var(--tag-doc-bg);color:var(--tag-doc-fg)}
+.bar-rank-high{background:var(--tag-inter-bg);color:var(--tag-inter-fg)}
+#cmp-sticky-bar{position:sticky;bottom:0;z-index:100;background:var(--white);border-top:1px solid var(--border);padding:10px 48px;display:none;align-items:center;gap:0;flex-wrap:wrap}
+#cmp-sticky-bar.visible{display:flex}
+.sticky-bar-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-right:20px;white-space:nowrap;flex-shrink:0}
+.sticky-bar-uni{display:flex;align-items:center;gap:6px;padding:0 16px}
+.sticky-bar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.sticky-bar-name{font-size:12px;color:var(--text-secondary);white-space:nowrap}
+.sticky-bar-val{font-size:14px;font-weight:500;color:var(--text-primary);white-space:nowrap}
+.sticky-bar-best{color:var(--blue-dark)}
+.sticky-bar-sep{width:0.5px;height:28px;background:var(--border);flex-shrink:0}
 .currency-toggle{display:flex;border:0.5px solid var(--border);border-radius:3px;overflow:hidden}
 .rate-input-group{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-secondary)}
 .rate-input-group input{font-family:'IBM Plex Sans Thai',sans-serif;font-size:12px;width:64px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary)}
@@ -1108,6 +1120,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <!-- rendered by CMP.renderExtraInputs() -->
     </div>
   </div>
+  <div id="cmp-sticky-bar"></div>
   <div class="chart-section">
     <div class="sec-label" id="cmp-chart-lbl">Total Estimated Cost (THB)</div>
     <div class="bar-group" id="bar-group"></div>
@@ -2487,7 +2500,7 @@ const CMP=(function(){
     // preTravelCost — shared ทุกมหาลัย
     const preTravel=cmpPreTravel||0;
     // ทุนที่เลือก
-    const schSaving=calcScholarshipSaving({id:uniId,_isReal:true},cmpSchIdx[String(uniId)]);
+    const schSaving=calcScholarshipSaving(uniId,cmpSchIdx[String(uniId)]);
     return Math.max(0,baseCost+livTHB+preTravel-schSaving);
   }
   function rawTotalsByCurrency(costs,currencies){
@@ -2554,11 +2567,24 @@ const CMP=(function(){
     const el=document.getElementById('cmp-chart-lbl');if(el)el.textContent='Est. Cost per Semester';
     const totals=unis.map(u=>calcTotal(u.costs,u.currencies,u.id));const maxT=Math.max(...totals)||1;
     const bg=document.getElementById('bar-group');if(!bg)return;
+    const sorted=[...totals].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
+    const minT=sorted[0],maxT2=sorted[sorted.length-1];
     bg.innerHTML=unis.map((u,i)=>{
       const t=totals[i];const pct=Math.round(t/maxT*100);
       const raw=formatRawBreakdown(rawTotalsByCurrency(u.costs,u.currencies));
-      return `<div class="bar-row"><span class="bar-uni-name" title="${u.name}">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx">≈ ${convDisplay(t)}</span><span class="amount-raw">${raw} จริง</span></span></div>`;
+      const isMin=unis.length>1&&t===minT;
+      const isMax=unis.length>1&&t===maxT2&&t!==minT;
+      const rankBadge=isMin?'<span class="bar-rank-badge bar-rank-low">ถูกสุด</span>':isMax?'<span class="bar-rank-badge bar-rank-high">แพงสุด</span>':'';
+      return `<div class="bar-row"><span class="bar-uni-name" title="${u.name}">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx${isMin?' lowest':isMax?' highest':''}">≈ ${convDisplay(t)}</span>${rankBadge}<span class="amount-raw">${raw} จริง</span></span></div>`;
     }).join('');
+    renderStickyBar(unis,totals,minT);
+  }
+  function renderStickyBar(unis,totals,minT){
+    const el=document.getElementById('cmp-sticky-bar');if(!el)return;
+    el.innerHTML='<span class="sticky-bar-label">Net / เทอม</span>'+unis.map((u,i)=>{
+      const t=totals[i];const isBest=unis.length>1&&t===minT;
+      return `<span class="sticky-bar-uni"><span class="sticky-bar-dot" style="background:${u.color}"></span><span class="sticky-bar-name">${u.name}</span><span class="sticky-bar-val${isBest?' sticky-bar-best':''}">${convDisplay(t)}${isBest?' ✓':''}</span></span>`;
+    }).join('<span class="sticky-bar-sep"></span>');
   }
   // helpers สำหรับ scholarship ใน compare
   function getUniScholarships(u){
@@ -2566,10 +2592,11 @@ const CMP=(function(){
     const realU=UNI.getUnis().find(x=>String(x.id)===String(u.id));
     return realU?(realU.scholarships||[]):[];
   }
-  function calcScholarshipSaving(u,schIdx){
-    // คืนยอดที่ประหยัดได้ (THB) จากทุนที่เลือก — ดึงจาก _buildSummaryData ถ้ามี
+  function calcScholarshipSaving(uOrId,schIdx){
+    // คืนยอดที่ประหยัดได้ (THB) จากทุนที่เลือก
     if(schIdx==null||schIdx<0)return 0;
-    const realU=UNI.getUnis().find(x=>String(x.id)===String(u.id));if(!realU)return 0;
+    const lookupId=typeof uOrId==='object'?uOrId.id:uOrId;
+    const realU=UNI.getUnis().find(x=>String(x.id)===String(lookupId));if(!realU)return 0;
     const sch=(realU.scholarships||[])[schIdx];if(!sch||!sch.discounts||!sch.discounts.length)return 0;
     const cu=realU.currencies||{};
     const CAT_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',deposit:'deposit',thaiPrep:'thaiPrep',other:null};
@@ -2623,7 +2650,7 @@ const CMP=(function(){
           </div>
           <div style="background:var(--cream);border-radius:3px;padding:5px 10px;font-size:12px;display:flex;justify-content:space-between;align-items:center;margin-top:6px">
             <span style="color:var(--text-muted)">รวม ≈</span>
-            <span style="font-weight:500;color:var(--blue-dark)">฿${livTotalTHB.toLocaleString()}</span>
+            <span id="cmp-living-total" style="font-weight:500;color:var(--blue-dark)">฿${livTotalTHB.toLocaleString()}</span>
           </div>
         </div>
         <!-- ค่าเตรียมตัวก่อนไป -->
@@ -2644,7 +2671,7 @@ const CMP=(function(){
       // scholarship section (only real unis)
       const schs=getUniScholarships(u);
       const selSchIdx=cmpSchIdx[key]!=null?cmpSchIdx[key]:-1;
-      const savedTHB=calcScholarshipSaving(u,selSchIdx);
+      const savedTHB=calcScholarshipSaving(u.id,selSchIdx);
 
       const schSection=u._isReal?(schs.length?`
         <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ทุนที่ใช้คำนวณ</div>
@@ -2668,10 +2695,14 @@ const CMP=(function(){
 
     el.innerHTML=sharedBlock+`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">${cards}</div>`;
   }
+  function updateLivingTotal(){
+    const el=document.getElementById('cmp-living-total');
+    if(el)el.textContent='฿'+Math.round((cmpLiving.monthly||0)*(cmpLiving.months||0)/KRW_RATE).toLocaleString();
+  }
   return {
     setLiving(field,val){
       cmpLiving[field]=parseFloat(val)||0;
-      renderExtraInputs();renderBars();renderTable();
+      updateLivingTotal();renderBars();renderTable();
     },
     setPreTravel(val){
       cmpPreTravel=parseFloat(val)||0;
@@ -2722,6 +2753,10 @@ const CMP=(function(){
     _setExtraUnis(a){extraUnis=[...a];},
     _rate:()=>KRW_RATE,
     _setRate(v){KRW_RATE=parseFloat(v)||36;},
+    _living:()=>({...cmpLiving}),
+    _setLiving(v){if(v&&typeof v==='object'){cmpLiving.monthly=parseFloat(v.monthly)||0;cmpLiving.months=parseFloat(v.months)||0;}},
+    _preTravel:()=>cmpPreTravel,
+    _setPreTravel(v){cmpPreTravel=parseFloat(v)||0;},
   };
 })();
 
@@ -2870,6 +2905,8 @@ const STORAGE=(function(){
       gksUniUnis: [...GKS._uniUnis()],
       extraUnis: [...CMP._extraUnis()],
       exchangeRate: CMP._rate(),
+      cmpLiving: CMP._living(),
+      cmpPreTravel: CMP._preTravel(),
     };
   }
 
@@ -2915,6 +2952,8 @@ const STORAGE=(function(){
       if(saved.gksUniUnis && saved.gksUniUnis.length) GKS._setUniUnis(saved.gksUniUnis);
       if(saved.extraUnis && saved.extraUnis.length)   CMP._setExtraUnis(saved.extraUnis);
       if(saved.exchangeRate)                          CMP._setRate(saved.exchangeRate);
+      if(saved.cmpLiving)                             CMP._setLiving(saved.cmpLiving);
+      if(saved.cmpPreTravel!=null)                    CMP._setPreTravel(saved.cmpPreTravel);
     }catch(e){
       console.warn('applyData error', e);
     }
@@ -3391,6 +3430,22 @@ const LOCKMODE=(function(){
 
 // Always boot in locked (view-only) mode — never persisted, never remembered across reloads.
 LOCKMODE.lock();
+
+// Sticky bar visibility — show when chart-section scrolls out of view
+(function(){
+  const obs=new IntersectionObserver(entries=>{
+    const bar=document.getElementById('cmp-sticky-bar');if(!bar)return;
+    const visible=document.getElementById('page-compare')&&document.getElementById('page-compare').classList.contains('active');
+    if(!visible)return;
+    bar.classList.toggle('visible',!entries[0].isIntersecting);
+  },{threshold:0});
+  function attachObs(){
+    const target=document.querySelector('.chart-section');
+    if(target)obs.observe(target);
+    else setTimeout(attachObs,500);
+  }
+  attachObs();
+})();
 
 
 </script>
