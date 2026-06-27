@@ -695,6 +695,8 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
   </div>
   <div class="summary-bar">
     <div class="stat"><span class="num" id="home-stat-count">0</span><span class="lbl">แห่งที่ยื่น</span></div>
+    <div class="sdiv"></div>
+    <div class="stat"><span class="num" id="home-stat-rounds">0</span><span class="lbl">รอบที่สมัคร</span></div>
     <div class="uni-chips" id="home-chips"></div>
   </div>
   <div class="nav-section">
@@ -1594,13 +1596,16 @@ const TL=(function(){
   const TYPE_COLOR={apply:'#1A5276',doc:'#1A6B3A',inter:'#7D3A0A',result:'#4A2D8A',other:'#6B6B6B'};
   const TYPE_BG={apply:'#D4E8F7',doc:'#D5F0E0',inter:'#FDE8D0',result:'#EDE8F7',other:'#E8E8E8'};
   const TYPE_LABEL={apply:'สมัคร',doc:'เอกสาร',inter:'สัมภาษณ์',result:'ประกาศผล',other:'อื่นๆ'};
-  let events=[
+  // default events จะใช้แค่ตอน Firebase ไม่มีข้อมูล (first-time user) และจะถูกแทนที่เมื่อ _setEvents ถูกเรียก
+  const DEFAULT_EVENTS=[
     {date:'2026-01-15',uniId:'gks',type:'apply',title:'ปิดรับสมัคร Online',step:'Embassy Track'},
     {date:'2026-01-20',uniId:'gks',type:'doc',title:'ส่งเอกสารตัวจริง',step:'Embassy Track'},
     {date:'2026-02-03',uniId:2,type:'inter',title:'วันสัมภาษณ์',step:'รอบคัดเลือก'},
     {date:'2026-02-10',uniId:3,type:'apply',title:'ปิดรับสมัคร',step:''},
     {date:'2026-03-01',uniId:'gks',type:'result',title:'ประกาศผล NIIED',step:'Final Result'},
   ];
+  let _eventsLoaded=false; // true เมื่อ Firebase ส่งข้อมูลมาแล้ว
+  let events=[...DEFAULT_EVENTS];
   const now=new Date();
   let year=now.getFullYear(),month=now.getMonth(),curModalDate='';
   function uniLabel(uniId){if(uniId==='gks')return 'GKS';if(uniId==='personal')return 'Personal';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.name:'Unknown';}
@@ -1728,7 +1733,7 @@ const TL=(function(){
     },
     goToUni,refreshUniSelects,render,
     _events:()=>events,
-    _setEvents(a){events=[...a];render();},
+    _setEvents(a){_eventsLoaded=true;events=[...a];render();},
     init(){refreshUniSelects();render();}
   };
 })();
@@ -2362,7 +2367,16 @@ const UNI=(function(){
       STORAGE.save();
     },
     _autoSaveSchField(i,field,value){const u=getU();if(!u||!u.scholarships[i])return;u.scholarships[i][field]=value;const badge=document.querySelector(`#sch-card-${i} .sch-badge`);if(badge&&field==='status'){const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};badge.textContent=schStatusLabel[value]||value;}STORAGE.save();},
-    setSelectedDorm(idx){const u=getU();if(!u)return;u.selectedDormIdx=idx;if(!document.body.classList.contains('locked'))STORAGE.save();this.renderSummary();},
+    setSelectedDorm(idx){
+      const u=getU();if(!u)return;
+      if(document.body.classList.contains('locked')){
+        // แจ้งเตือน user ว่าอยู่ใน lock mode — การเลือกหอจะไม่บันทึก
+        const banner=document.getElementById('lock-banner');
+        if(banner){banner.classList.add('lockmode-shake');setTimeout(()=>banner.classList.remove('lockmode-shake'),300);}
+        return;
+      }
+      u.selectedDormIdx=idx;STORAGE.save();this.renderSummary();
+    },
     delScholarship(i){if(!confirm('ลบทุนนี้?'))return;getU().scholarships.splice(i,1);this.renderScholarships();STORAGE.save();},
     addScholarship(){
       const name=document.getElementById('s-name').value.trim();if(!name){alert('กรุณาใส่ชื่อทุน');return;}
@@ -2901,7 +2915,7 @@ const CMP=(function(){
     },
     toggleCol(i){COST_COLS[i].visible=!COST_COLS[i].visible;renderColToggles();renderTable();},
     setCurrency(c){
-      currency='THB';renderTable();renderBars();
+      currency=c||'THB';renderTable();renderBars();
     },
     getRate(){return KRW_RATE;},
     setUniDorm(uniId,idx){
@@ -3037,12 +3051,21 @@ GKS.refreshNextActivity=function(track){
 (function wrapGKSChecklist(){
   const origToggle=GKS.toggleCheck.bind(GKS);
   const origChange=GKS.changeStatus.bind(GKS);
+  let _inToggle=false;
   GKS.toggleCheck=function(i,v){
+    if(_inToggle)return;_inToggle=true;
     origToggle(i,v);
-    const newStatus=v?5:1;GKS.changeStatus(i,newStatus);
+    const newStatus=v?5:1;
+    origChange(i,newStatus);
+    const checkbox=document.querySelector(`#gci-${i} input[type="checkbox"]`);
+    const label=document.getElementById('glbl-'+i);const ready=(newStatus===5);
+    if(checkbox)checkbox.checked=ready;if(label)ready?label.classList.add('done'):label.classList.remove('done');
+    GKS.docs[i]&&(GKS.docs[i].checked=ready);
     const sel=document.querySelector(`#gci-${i} .check-status-sel`);if(sel)sel.value=newStatus;
+    _inToggle=false;
   };
   GKS.changeStatus=function(i,v){
+    if(_inToggle)return;
     origChange(i,v);v=parseInt(v);
     const checkbox=document.querySelector(`#gci-${i} input[type="checkbox"]`);
     const label=document.getElementById('glbl-'+i);const ready=(v===5);
@@ -3053,11 +3076,19 @@ GKS.refreshNextActivity=function(track){
 
 (function wrapUNIChecklist(){
   const origChk=window.uchk;const origCst=window.ucst;
+  let _inToggle=false;
   window.uchk=function(i,v){
-    origChk(i,v);const newStatus=v?5:1;window.ucst(i,newStatus);
+    if(_inToggle)return;_inToggle=true;
+    origChk(i,v);const newStatus=v?5:1;
+    origCst(i,newStatus);
+    const checkbox=document.querySelector(`#uci-${i} input[type="checkbox"]`);
+    const label=document.getElementById('ulbl-'+i);const ready=(newStatus===5);
+    if(checkbox)checkbox.checked=ready;if(label)ready?label.classList.add('done'):label.classList.remove('done');
     const sel=document.querySelector(`#uci-${i} .check-status-sel`);if(sel)sel.value=newStatus;
+    _inToggle=false;
   };
   window.ucst=function(i,v){
+    if(_inToggle)return;
     origCst(i,v);v=parseInt(v);
     const checkbox=document.querySelector(`#uci-${i} input[type="checkbox"]`);
     const label=document.getElementById('ulbl-'+i);const ready=(v===5);
@@ -3181,8 +3212,12 @@ const EXPORT=(function(){
   /* ── Export JSON (full backup) ── */
   function asJSON(){
     const data=STORAGE.buildData();
-    // Exclude photos from JSON to keep file size reasonable (they are base64 images)
+    const photos=PHOTO._photos();
     const exportData={...data};
+    if(photos&&photos.length){
+      // include photos in export
+      exportData.photos=photos;
+    }
     const json=JSON.stringify(exportData,null,2);
     downloadBlob(json,'spring-round-backup-'+timestamp()+'.json','application/json');
   }
@@ -3501,6 +3536,10 @@ const EXPORT=(function(){
       try{
         const data=JSON.parse(e.target.result);
         STORAGE.applyData(data);
+        // Restore photos if present in backup
+        if(data.photos&&Array.isArray(data.photos)&&data.photos.length){
+          PHOTO._setPhotos(data.photos);
+        }
         // Re-render all modules
         TL.init();
         GKS.init();
