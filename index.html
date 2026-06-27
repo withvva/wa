@@ -2569,7 +2569,7 @@ const CMP=(function(){
   function calcScholarshipSaving(u,schIdx){
     // คืนยอดที่ประหยัดได้ (THB) จากทุนที่เลือก — ดึงจาก _buildSummaryData ถ้ามี
     if(schIdx==null||schIdx<0)return 0;
-    const realU=UNI.getUnis().find(x=>x.id===u.id);if(!realU)return 0;
+    const realU=UNI.getUnis().find(x=>String(x.id)===String(u.id));if(!realU)return 0;
     const sch=(realU.scholarships||[])[schIdx];if(!sch||!sch.discounts||!sch.discounts.length)return 0;
     const cu=realU.currencies||{};
     const CAT_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',deposit:'deposit',thaiPrep:'thaiPrep',other:null};
@@ -2648,7 +2648,7 @@ const CMP=(function(){
 
       const schSection=u._isReal?(schs.length?`
         <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ทุนที่ใช้คำนวณ</div>
-        <select style="font-family:inherit;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%" onchange="CMP.setSchIdx('${key}',parseInt(this.value))">
+        <select class="view-safe-select" style="font-family:inherit;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%" onchange="CMP.setSchIdx('${key}',parseInt(this.value))">
           <option value="-1"${selSchIdx===-1?' selected':''}>— ไม่ใช้ทุน</option>
           ${schs.map((s,i)=>`<option value="${i}"${selSchIdx===i?' selected':''}>${s.name}</option>`).join('')}
         </select>
