@@ -2442,8 +2442,26 @@ const CMP=(function(){
     {key:'thaiPrep',label:'ค่าเตรียมตัว',sub:'ก่อนเดินทาง',visible:true},
   ];
   let extraUnis=[];let currency='THB';let KRW_RATE=36;
+  // คืนรายการหอทั้งหมดของมหาวิทยาลัยหนึ่ง ในรูปแบบเดียวกับหน้า Universities > สรุป
+  function getDormOptions(u){
+    const cu=u.currencies||{};
+    return [{label:u.dormName||'หอ 1 (หลัก)',amount:(u.costs&&u.costs['dorm'])||0,currency:cu['dorm']||'THB',unit:u.dormUnit||'เดือน'},
+      ...(u.dormOptions||[]).map((d,i)=>({label:d.name||'หอ '+(i+2),amount:d.amount||0,currency:d.currency||'THB',unit:d.unit||'เดือน'}))];
+  }
+  // คืนหอที่ถูกเลือกไว้ (sync กับ selectedDormIdx ของหน้า Universities)
+  function getSelectedDorm(u){
+    const opts=getDormOptions(u);
+    const selIdx=u.selectedDormIdx!=null?u.selectedDormIdx:-1;
+    return opts[selIdx+1]||opts[0];
+  }
   function getUnis(){
-    const base=UNI.getUnis().map(u=>({id:u.id,name:u.name,color:u.color,costs:u.costs,currencies:u.currencies||{}}));
+    const base=UNI.getUnis().map(u=>{
+      const dorm=getSelectedDorm(u);
+      return {id:u.id,name:u.name,color:u.color,
+        costs:{...u.costs,dorm:dorm.amount},
+        currencies:{...(u.currencies||{}),dorm:dorm.currency},
+        _isReal:true,_dormOptions:getDormOptions(u),_selectedDormIdx:u.selectedDormIdx!=null?u.selectedDormIdx:-1};
+    });
     return [...base,...extraUnis];
   }
   function toTHB(raw,curr){return curr==='KRW'?Math.round(raw/KRW_RATE):raw;}
@@ -2479,7 +2497,16 @@ const CMP=(function(){
     const totals=unis.map(u=>calcTotal(u.costs,u.currencies));const minT=Math.min(...totals);const maxT=Math.max(...totals);
     let html='<thead><tr class="uni-row"><th>รายการ</th>';
     unis.forEach(u=>{html+=`<th><span class="uni-th-dot" style="background:${u.color}"></span><span class="uni-th-name">${u.name}</span></th>`;});
-    html+='</tr><tr><th></th>';unis.forEach(()=>html+='<th></th>');html+='</tr></thead><tbody>';
+    html+='</tr><tr><th></th>';
+    unis.forEach(u=>{
+      if(u._isReal&&u._dormOptions&&u._dormOptions.length>1){
+        const opts=u._dormOptions.map((d,i)=>`<option value="${i-1}"${u._selectedDormIdx===(i-1)?' selected':''}>${d.label}</option>`).join('');
+        html+=`<th><select class="view-safe-select cmp-dorm-select" style="font-family:inherit;font-size:10px;padding:2px 4px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);max-width:100%" onchange="CMP.setUniDorm('${u.id}',parseInt(this.value))">${opts}</select></th>`;
+      } else {
+        html+='<th></th>';
+      }
+    });
+    html+='</tr></thead><tbody>';
     vis.forEach(c=>{
       html+=`<tr><td><div class="row-label">${c.label}</div><div class="row-sub">${c.sub}</div></td>`;
       unis.forEach(u=>{
@@ -2520,6 +2547,14 @@ const CMP=(function(){
       currency='THB';renderTable();renderBars();
     },
     getRate(){return KRW_RATE;},
+    setUniDorm(uniId,idx){
+      const unis=UNI.getUnis();
+      const u=unis.find(x=>String(x.id)===String(uniId));
+      if(!u)return;
+      u.selectedDormIdx=idx;
+      if(!document.body.classList.contains('locked'))STORAGE.save();
+      this.render();
+    },
     setRate(v){
       const n=parseFloat(v);
       const inp=document.getElementById('cmp-rate-input');
