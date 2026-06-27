@@ -31,9 +31,11 @@ nav button:hover,nav button.active,nav button.nav-active{color:var(--text-primar
 /* ── Lock Mode Banner ── */
 /* ── Elements hidden in lock mode ── */
 body.locked .edit-only{display:none!important}
-body.locked input:not([readonly]):not([disabled]),
+body.locked input:not([readonly]):not([disabled]):not(.cmp-live-input),
 body.locked select:not([disabled]):not(.view-safe-select),
 body.locked textarea:not([readonly]){pointer-events:none;background:transparent!important;border-color:transparent!important;-webkit-appearance:none;appearance:none}
+/* inputs ใน Compare extra block ยังใช้งานได้ในโหมดล็อก เพราะไม่ได้บันทึก Firebase */
+body.locked #cmp-extra-inputs input{pointer-events:auto!important;background:var(--white)!important;border-color:var(--border)!important;-webkit-appearance:auto!important;appearance:auto!important}
 body.locked .export-strip{display:none!important}
 body.locked .lock-banner{display:flex}
 .lock-banner{display:none;align-items:center;gap:7px;justify-content:center;background:var(--cream-dark);color:var(--text-secondary);font-size:11.5px;letter-spacing:0.03em;padding:6px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .15s}
@@ -906,7 +908,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
                 <select id="sdi-cat" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
                   <option value="tuition">ค่าเทอม</option><option value="dorm">ค่าหอ</option>
                   <option value="living">ค่าครองชีพ</option><option value="apply">ค่าสมัคร</option>
-                  <option value="entrance">ค่าแรกเข้า</option><option value="deposit">ค่าประกันหอพัก</option><option value="thaiPrep">ค่าเตรียมตัว</option>
+                  <option value="entrance">ค่าแรกเข้า</option><option value="deposit">ค่าประกันหอพัก</option><option value="thaiPrep">ค่าเอกสาร</option>
                   <option value="other">อื่นๆ</option>
                 </select>
               </div>
@@ -957,7 +959,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
           <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">แก้ไขค่าใช้จ่าย (กดสัญลักษณ์เงินเพื่อเปลี่ยนสกุล)</div>
           <div class="cost-edit-row" id="u-cost-edit-row"></div>
           <div class="thai-prep-note-wrap" style="margin-top:14px">
-            <label>Note — ค่าเตรียมตัวในไทย</label>
+            <label>Note — ค่าเอกสาร</label>
             <textarea id="thai-prep-note" placeholder="เช่น ค่าแปลเอกสาร, ค่ารับรอง, ค่าตั๋วเครื่องบิน, ค่าวีซ่า..." onblur="UNI.saveThaiPrepNote()"></textarea>
           </div>
           <div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="UNI.saveCosts()">บันทึก</button></div>
@@ -1098,11 +1100,21 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
     <div style="margin-left:auto"><button class="btn btn-sm" onclick="CMP.openAddModal()">+ เพิ่มมหาวิทยาลัย</button></div>
   </div>
   <div class="table-section"><div class="table-wrap"><table class="compare-table" id="compare-table"></table></div></div>
+  <!-- ── บล็อกกรอก living & preTravelCost ── -->
+  <div class="section" id="cmp-extra-inputs" style="padding:24px 48px;background:var(--white);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border)">
+    <div class="sec-label" style="margin-bottom:14px">ค่าใช้จ่ายเพิ่มเติม — กรอกต่อมหาวิทยาลัย</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;line-height:1.7">
+      ค่าครองชีพและค่าเตรียมตัวก่อนไป (วีซ่า ฯลฯ) ที่ยังไม่แน่ใจ — กรอกที่นี่เพื่อใช้คำนวณกราฟด้านล่าง ไม่บันทึกลงข้อมูลมหาลัย
+    </div>
+    <div id="cmp-extra-table" style="overflow-x:auto">
+      <!-- rendered by CMP.renderExtraInputs() -->
+    </div>
+  </div>
   <div class="chart-section">
     <div class="sec-label" id="cmp-chart-lbl">Total Estimated Cost (THB)</div>
     <div class="bar-group" id="bar-group"></div>
     <div style="margin-top:12px;font-size:11px;color:var(--text-muted);line-height:1.6">
-      * Est. Cost per Semester = ค่าเทอม + ค่าหอ + ค่าสมัคร + ค่าแรกเข้า + ค่าเตรียมตัวในไทย<br>
+      * Est. Cost per Semester = ค่าเทอม + ค่าหอ + ค่าสมัคร + ค่าแรกเข้า + ค่าเอกสาร + ค่าครองชีพรวม + ค่าเตรียมตัวก่อนไป (กรอกได้ในบล็อกด้านบน)<br>
       * ตัวเลขตัวใหญ่ที่มี "≈" คือยอดประมาณการรวมเป็นสกุลเดียวเพื่อใช้เทียบขนาด/จัดอันดับเท่านั้น คำนวณด้วยอัตราที่ตั้งไว้ด้านบน (ตอนนี้ 1฿ = <span id="cmp-rate-note">36</span>₩) — <strong>ปรับเลขอัตราด้านบนให้ตรงกับวันนี้เพื่อความแม่นยำ</strong><br>
       * ตัวเลขเล็กบรรทัดล่าง (เช่น ฿120,000 + ₩3,000,000) คือยอดดิบตามที่กรอกจริง ไม่มีการแปลงค่าเงินใดๆ
     </div>
@@ -1120,7 +1132,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <div class="form-group"><label>ค่าเทอม (฿)</label><input type="number" id="cn-tuition" placeholder="0"></div>
       <div class="form-group"><label>ค่าหอ/เทอม (฿)</label><input type="number" id="cn-dorm" placeholder="0"></div>
       <div class="form-group"><label>ค่าแรกเข้า (฿)</label><input type="number" id="cn-entrance" placeholder="0"></div>
-      <div class="form-group"><label>ค่าเตรียมตัวในไทย (฿)</label><input type="number" id="cn-thaiprep" placeholder="0"></div>
+      <div class="form-group"><label>ค่าเอกสาร (฿)</label><input type="number" id="cn-thaiprep" placeholder="0"></div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
       <button class="btn" onclick="document.getElementById('add-cmp-modal').classList.remove('open')">ยกเลิก</button>
@@ -1160,7 +1172,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
     <div class="help-section">
       <div class="help-section-title">Compare</div>
       <div class="help-item"><span class="help-item-icon">›</span><span class="help-item-text">ตารางเปรียบค่าใช้จ่ายทุกมหาวิทยาลัย — สีน้ำเงิน = ถูกสุด, สีส้ม = แพงสุด</span></div>
-      <div class="help-item"><span class="help-item-icon">›</span><span class="help-item-text"><strong>Est. Cost per Semester</strong> = ค่าเทอม + ค่าหอ + ค่าสมัคร + ค่าแรกเข้า + ค่าเตรียมตัว (ไม่รวมค่าครองชีพ)</span></div>
+      <div class="help-item"><span class="help-item-icon">›</span><span class="help-item-text"><strong>Est. Cost per Semester</strong> = ค่าเทอม + ค่าหอ + ค่าสมัคร + ค่าแรกเข้า + ค่าเอกสาร (ไม่รวมค่าครองชีพ)</span></div>
       <div class="help-item"><span class="help-item-icon">›</span><span class="help-item-text">ปรับอัตราแลกเปลี่ยน ฿/₩ ได้ที่แถบด้านบน กดปุ่มหมวดเพื่อซ่อน/แสดงคอลัมน์</span></div>
     </div>
 
@@ -1695,14 +1707,13 @@ const UNI=(function(){
   const KRW_RATE=36;
   const COST_FIELDS=[
     {key:'tuition',label:'ค่าเทอม',sub:'ต่อภาค'},
-    {key:'living',label:'ค่าครองชีพ',sub:'ต่อเดือน'},
     {key:'apply',label:'ค่าสมัคร',sub:'ครั้งเดียว'},
     {key:'entrance',label:'ค่าแรกเข้า',sub:'ครั้งเดียว'},
     {key:'deposit',label:'ค่าประกันหอพัก',sub:'จ่ายครั้งเดียว (อาจได้คืน)'},
-    {key:'thaiPrep',label:'ค่าเตรียมตัวในไทย',sub:'ก่อนเดินทาง'},
-  ];
+    {key:'thaiPrep',label:'ค่าเอกสาร',sub:'ก่อนเดินทาง'},
+  ]; // living ยังเก็บอยู่ใน costs{} แต่ไม่แสดงใน cost tab — กรอกได้ในหน้า Compare
   function defaultCurrencies(){return {tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',deposit:'THB',thaiPrep:'THB'};}
-  function defaultCosts(){return {apply:0,tuition:0,dorm:0,entrance:0,deposit:0,thaiPrep:0,living:0};}
+  function defaultCosts(){return {apply:0,tuition:0,dorm:0,entrance:0,deposit:0,thaiPrep:0,living:0,preTravelCost:0};}
   let unis=[]
   let activeId=null;
   function getU(){return unis.find(x=>x.id===activeId);}
@@ -1776,7 +1787,7 @@ const UNI=(function(){
     closeAddOverlay(e){if(e.target===document.getElementById('add-uni-modal'))document.getElementById('add-uni-modal').classList.remove('open');},
     addUniversity(){
       const name=document.getElementById('new-name').value.trim();if(!name){alert('กรุณาใส่ชื่อ');return;}
-      unis.push({id:Date.now(),name,eng:document.getElementById('new-eng').value.trim()||name,color:document.getElementById('new-color').value,status:document.getElementById('new-status').value,deadline:'',applyUrl:document.getElementById('new-apply-url').value.trim()||'',notes:'',dates:[],docs:[],scholarships:[],costs:{apply:0,tuition:0,dorm:0,entrance:0,deposit:0,thaiPrep:0,living:0},currencies:defaultCurrencies(),links:[],pdfs:[],thaiPrepNote:'',dormOptions:[],dormUnit:'เดือน'});
+      unis.push({id:Date.now(),name,eng:document.getElementById('new-eng').value.trim()||name,color:document.getElementById('new-color').value,status:document.getElementById('new-status').value,deadline:'',applyUrl:document.getElementById('new-apply-url').value.trim()||'',notes:'',dates:[],docs:[],scholarships:[],costs:{apply:0,tuition:0,dorm:0,entrance:0,deposit:0,thaiPrep:0,living:0,preTravelCost:0},currencies:defaultCurrencies(),links:[],pdfs:[],thaiPrepNote:'',dormOptions:[],dormUnit:'เดือน'});
       document.getElementById('add-uni-modal').classList.remove('open');
       ['new-name','new-eng','new-apply-url'].forEach(id=>document.getElementById(id).value='');
       document.getElementById('new-color').value='#BAD5EB';document.getElementById('new-color-preview').style.background='#BAD5EB';
@@ -1853,7 +1864,7 @@ const UNI=(function(){
       const el=document.getElementById('u-sch-cards');if(!el)return;
       const SCH_PILL={prep:'pill-prep',applied:'pill-applied',waiting:'pill-waiting',pass:'pill-pass',fail:'pill-fail',below:'pill-fail',enrolled:'pill-fail'};
       const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ',below:'คะแนนไม่ถึงเกณฑ์',enrolled:'เฉพาะนักศึกษาที่เรียนอยู่'};
-      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',deposit:'ค่าประกันหอพัก',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',deposit:'ค่าประกันหอพัก',thaiPrep:'ค่าเอกสาร',other:'อื่นๆ'};
       const CAT_ICON={tuition:'🎓',dorm:'🏠',living:'🛒',apply:'📝',entrance:'🚪',deposit:'🔑',thaiPrep:'✈️',other:'📌'};
       if(!u.scholarships.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0 12px">ยังไม่มีทุน — กด "+ เพิ่มทุน" เพื่อเริ่ม</div>';return;}
       el.innerHTML=u.scholarships.map((s,i)=>{
@@ -1911,7 +1922,7 @@ const UNI=(function(){
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">หมวด</label><select id="sdi-cat-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
                 <option value="tuition">ค่าเทอม</option><option value="dorm">ค่าหอ</option>
                 <option value="living">ค่าครองชีพ</option><option value="apply">ค่าสมัคร</option>
-                <option value="entrance">ค่าแรกเข้า</option><option value="deposit">ค่าประกันหอพัก</option><option value="thaiPrep">ค่าเตรียมตัว</option>
+                <option value="entrance">ค่าแรกเข้า</option><option value="deposit">ค่าประกันหอพัก</option><option value="thaiPrep">ค่าเอกสาร</option>
                 <option value="other">อื่นๆ</option>
               </select></div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ประเภท</label><select id="sdi-type-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
@@ -1957,16 +1968,16 @@ const UNI=(function(){
       window._pendingDiscounts.push({cat,type,val,dur,durUnit});
       document.getElementById('sdi-val').value='';
       document.getElementById('sdi-dur').value='';
-      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเอกสาร',other:'อื่นๆ'};
       document.getElementById('s-discount-preview').innerHTML=window._pendingDiscounts.map((d,i)=>{
-        const CAT_LABEL2={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+        const CAT_LABEL2={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเอกสาร',other:'อื่นๆ'};
         const dLabel=d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString();
         return`<span class="s-discount-tag">${CAT_LABEL2[d.cat]||d.cat} ${dLabel}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
           <button onclick="window._pendingDiscounts.splice(${i},1);document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
         </span>`;}).join('');
     },
     _renderPendingTags(){
-      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเอกสาร',other:'อื่นๆ'};
       return (window._pendingDiscounts||[]).map((d,i)=>`
         <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
           <button onclick="window._pendingDiscounts.splice(${i},1);document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
@@ -1997,7 +2008,7 @@ const UNI=(function(){
       const u=getU();if(!u)return;
       const s=u.scholarships[i];if(!s)return;
       if(!s.discounts||!s.discounts.length){alert('กรุณาเพิ่มส่วนลดในทุนนี้ก่อน');return;}
-      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',deposit:'ค่าประกันหอพัก',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',deposit:'ค่าประกันหอพัก',thaiPrep:'ค่าเอกสาร',other:'อื่นๆ'};
       const COST_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',deposit:'deposit',thaiPrep:'thaiPrep',other:null};
       // อัตราแลกเปลี่ยนจาก CMP module (ผู้ใช้ตั้งได้ที่หน้า Compare)
       const KRW_RATE=(typeof CMP!=='undefined'&&CMP._rate)?CMP._rate():36;
@@ -2048,7 +2059,7 @@ const UNI=(function(){
       const u=getU();if(!u)return null;
       const KRW=(typeof CMP!=='undefined'&&CMP._rate)?CMP._rate():36;
       const cu=u.currencies||{};
-      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
+      const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเอกสาร',other:'อื่นๆ'};
       const COST_KEY={tuition:'tuition',dorm:'dorm',living:'living',apply:'apply',entrance:'entrance',thaiPrep:'thaiPrep',other:null};
       function toTHB(raw,key){return (cu[key]||'THB')==='KRW'?raw/KRW:raw;}
       function fmtAmt(raw,key){const s=(cu[key]||'THB')==='KRW'?'₩':'฿';return s+Math.round(raw).toLocaleString();}
@@ -2439,9 +2450,12 @@ const CMP=(function(){
     {key:'dorm',label:'ค่าหอพัก',sub:'ต่อเดือน',visible:true},
     {key:'apply',label:'ค่าสมัคร',sub:'ครั้งเดียว',visible:true},
     {key:'entrance',label:'ค่าแรกเข้า',sub:'ครั้งเดียว',visible:true},
-    {key:'thaiPrep',label:'ค่าเตรียมตัว',sub:'ก่อนเดินทาง',visible:true},
+    {key:'thaiPrep',label:'ค่าเอกสาร',sub:'ก่อนเดินทาง',visible:true},
   ];
   let extraUnis=[];let currency='THB';let KRW_RATE=36;
+  // ค่าครองชีพ & preTravelCost ที่กรอกใน Compare — เก็บ per uni id (string key)
+  let cmpLiving={};    // uniId => { monthly: number, months: number }
+  let cmpPreTravel={}; // uniId => number
   // คืนรายการหอทั้งหมดของมหาวิทยาลัยหนึ่ง ในรูปแบบเดียวกับหน้า Universities > สรุป
   function getDormOptions(u){
     const cu=u.currencies||{};
@@ -2466,10 +2480,16 @@ const CMP=(function(){
   }
   function toTHB(raw,curr){return curr==='KRW'?Math.round(raw/KRW_RATE):raw;}
   function convDisplay(rawTHB){return currency==='THB'?'฿'+rawTHB.toLocaleString():'₩'+Math.round(rawTHB*KRW_RATE).toLocaleString();}
-  function calcTotal(costs,currencies){
-    // Est. Cost per Semester: tuition×1 + dorm×1 + one-time fees×1 (living excluded — shown separately as ref)
+  function calcTotal(costs,currencies,uniId){
+    // Est. Cost per Semester: tuition×1 + dorm×1 + one-time fees×1 + living (จาก Compare input) + preTravelCost (จาก Compare input)
     const cu=currencies||{};const f=k=>toTHB(costs[k]||0,cu[k]||'THB');
-    return f('tuition')+f('dorm')+f('apply')+f('entrance')+f('thaiPrep');
+    const baseCost=f('tuition')+f('dorm')+f('apply')+f('entrance')+f('thaiPrep');
+    // living จาก Compare block
+    const liv=cmpLiving[String(uniId)]||{monthly:0,months:0};
+    const livTHB=(liv.monthly||0)*(liv.months||0);
+    // preTravelCost จาก Compare block หรือจาก costs ของมหาลัย
+    const preTravel=cmpPreTravel[String(uniId)]!=null?cmpPreTravel[String(uniId)]:(costs.preTravelCost||0);
+    return baseCost+livTHB+preTravel;
   }
   function rawTotalsByCurrency(costs,currencies){
     const cu=currencies||{};const mult={tuition:1,dorm:1,apply:1,entrance:1,thaiPrep:1};
@@ -2494,7 +2514,7 @@ const CMP=(function(){
     const unis=getUnis();const vis=COST_COLS.filter(c=>c.visible);const table=document.getElementById('compare-table');if(!table)return;
     const colStats={};
     vis.forEach(c=>{const vals=unis.map(u=>toTHB(u.costs[c.key]||0,(u.currencies||{})[c.key]||'THB'));colStats[c.key]={min:Math.min(...vals),max:Math.max(...vals)};});
-    const totals=unis.map(u=>calcTotal(u.costs,u.currencies));const minT=Math.min(...totals);const maxT=Math.max(...totals);
+    const totals=unis.map(u=>calcTotal(u.costs,u.currencies,u.id));const minT=Math.min(...totals);const maxT=Math.max(...totals);
     let html='<thead><tr class="uni-row"><th>รายการ</th>';
     unis.forEach(u=>{html+=`<th><span class="uni-th-dot" style="background:${u.color}"></span><span class="uni-th-name">${u.name}</span></th>`;});
     html+='</tr><tr><th></th>';
@@ -2533,7 +2553,7 @@ const CMP=(function(){
   function renderBars(){
     const unis=getUnis();
     const el=document.getElementById('cmp-chart-lbl');if(el)el.textContent='Est. Cost per Semester';
-    const totals=unis.map(u=>calcTotal(u.costs,u.currencies));const maxT=Math.max(...totals)||1;
+    const totals=unis.map(u=>calcTotal(u.costs,u.currencies,u.id));const maxT=Math.max(...totals)||1;
     const bg=document.getElementById('bar-group');if(!bg)return;
     bg.innerHTML=unis.map((u,i)=>{
       const t=totals[i];const pct=Math.round(t/maxT*100);
@@ -2541,7 +2561,62 @@ const CMP=(function(){
       return `<div class="bar-row"><span class="bar-uni-name" title="${u.name}">${u.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${u.color}"><span class="bar-fill-label">${pct}%</span></div></div><span class="bar-amount"><span class="amount-approx">≈ ${convDisplay(t)}</span><span class="amount-raw">${raw} จริง</span></span></div>`;
     }).join('');
   }
+  function renderExtraInputs(){
+    const unis=getUnis();
+    const el=document.getElementById('cmp-extra-table');if(!el)return;
+    if(!unis.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted)">ยังไม่มีมหาวิทยาลัย</div>';return;}
+    let html=`<table style="border-collapse:collapse;font-size:13px;min-width:600px;width:100%">
+      <thead><tr style="border-bottom:0.5px solid var(--border)">
+        <th style="text-align:left;padding:8px 12px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);font-weight:500;min-width:180px">รายการ</th>`;
+    unis.forEach(u=>{html+=`<th style="padding:8px 12px;font-size:13px;text-align:center;font-weight:400;color:var(--text-primary)"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${u.color};margin-right:5px;vertical-align:middle"></span>${u.name}</th>`;});
+    html+=`</tr></thead><tbody>`;
+    // ค่าครองชีพ / เดือน
+    html+=`<tr style="border-bottom:0.5px solid var(--border);background:var(--cream)">
+      <td style="padding:10px 12px"><div style="font-size:11px;font-weight:500;color:var(--text-secondary)">ค่าครองชีพ / เดือน (฿)</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">อาหาร ค่าเดินทาง ฯลฯ</div></td>`;
+    unis.forEach(u=>{
+      const key=String(u.id);const liv=cmpLiving[key]||{monthly:0,months:0};
+      html+=`<td style="padding:8px 12px;text-align:center"><input type="number" min="0" placeholder="0" value="${liv.monthly||''}" style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:90%;text-align:right;max-width:120px" oninput="CMP.setLiving('${key}','monthly',this.value)"></td>`;
+    });
+    html+=`</tr>`;
+    // จำนวนเดือน
+    html+=`<tr style="border-bottom:0.5px solid var(--border)">
+      <td style="padding:10px 12px"><div style="font-size:11px;font-weight:500;color:var(--text-secondary)">× จำนวนเดือน</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">ตลอดหลักสูตร</div></td>`;
+    unis.forEach(u=>{
+      const key=String(u.id);const liv=cmpLiving[key]||{monthly:0,months:0};
+      html+=`<td style="padding:8px 12px;text-align:center"><input type="number" min="0" placeholder="0" value="${liv.months||''}" style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:90%;text-align:right;max-width:120px" oninput="CMP.setLiving('${key}','months',this.value)"></td>`;
+    });
+    html+=`</tr>`;
+    // รวมค่าครองชีพ
+    html+=`<tr style="border-bottom:1.5px solid var(--border);background:var(--cream-dark)">
+      <td style="padding:8px 12px"><div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted)">= รวมค่าครองชีพ</div></td>`;
+    unis.forEach(u=>{
+      const key=String(u.id);const liv=cmpLiving[key]||{monthly:0,months:0};
+      const tot=(liv.monthly||0)*(liv.months||0);
+      html+=`<td style="padding:8px 12px;text-align:center;font-size:14px;font-weight:500;color:var(--blue-dark)">฿${Math.round(tot).toLocaleString()}</td>`;
+    });
+    html+=`</tr>`;
+    // ค่าเตรียมตัวก่อนไป
+    html+=`<tr style="border-bottom:0.5px solid var(--border);background:var(--cream)">
+      <td style="padding:10px 12px"><div style="font-size:11px;font-weight:500;color:var(--text-secondary)">ค่าเตรียมตัวก่อนไป (฿)</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">วีซ่า ตั๋ว ค่าแปลเอกสาร ฯลฯ</div></td>`;
+    unis.forEach(u=>{
+      const key=String(u.id);
+      const val=cmpPreTravel[key]!=null?cmpPreTravel[key]:((u.costs&&u.costs.preTravelCost)||0);
+      html+=`<td style="padding:8px 12px;text-align:center"><input type="number" min="0" placeholder="0" value="${val||''}" style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:90%;text-align:right;max-width:120px" oninput="CMP.setPreTravel('${key}',this.value)"></td>`;
+    });
+    html+=`</tr>`;
+    html+=`</tbody></table>`;
+    el.innerHTML=html;
+  }
   return {
+    setLiving(key,field,val){
+      if(!cmpLiving[key])cmpLiving[key]={monthly:0,months:0};
+      cmpLiving[key][field]=parseFloat(val)||0;
+      renderExtraInputs();renderBars();renderTable();
+    },
+    setPreTravel(key,val){
+      cmpPreTravel[key]=parseFloat(val)||0;
+      renderBars();renderTable();
+    },
     toggleCol(i){COST_COLS[i].visible=!COST_COLS[i].visible;renderColToggles();renderTable();},
     setCurrency(c){
       currency='THB';renderTable();renderBars();
@@ -2564,7 +2639,7 @@ const CMP=(function(){
       STORAGE.save();
     },
     render(){
-      renderColToggles();renderTable();renderBars();
+      renderColToggles();renderTable();renderBars();renderExtraInputs();
       const inp=document.getElementById('cmp-rate-input');if(inp)inp.value=KRW_RATE;
       const note=document.getElementById('cmp-rate-note');if(note)note.textContent=KRW_RATE;
     },
@@ -2752,7 +2827,7 @@ const STORAGE=(function(){
           docs: [],
           dates: [],
           scholarships: [],
-          costs: {apply:0,tuition:0,dorm:0,entrance:0,deposit:0,thaiPrep:0,living:0},
+          costs: {apply:0,tuition:0,dorm:0,entrance:0,deposit:0,thaiPrep:0,living:0,preTravelCost:0},
           currencies: {tuition:'THB',dorm:'THB',living:'THB',apply:'THB',entrance:'THB',deposit:'THB',thaiPrep:'THB'},
           thaiPrepNote: '',
           notes: '',
