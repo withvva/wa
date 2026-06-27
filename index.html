@@ -36,9 +36,10 @@ body.locked select:not([disabled]),
 body.locked textarea:not([readonly]){pointer-events:none;background:transparent!important;border-color:transparent!important;-webkit-appearance:none;appearance:none}
 body.locked .export-strip{display:none!important}
 body.locked .lock-banner{display:flex}
-.lock-banner{display:none;align-items:center;gap:8px;justify-content:center;background:#FDE8D0;color:#7D3A0A;font-size:12px;padding:7px 14px;letter-spacing:0.02em;cursor:pointer;transition:background .15s}
-.lock-banner:hover{background:#FBDCAE}
-.lock-banner button{background:none;border:none;color:#7D3A0A;text-decoration:underline;cursor:pointer;font-family:inherit;font-size:12px;padding:0}
+.lock-banner{display:none;align-items:center;gap:7px;justify-content:center;background:var(--cream-dark);color:var(--text-secondary);font-size:11.5px;letter-spacing:0.03em;padding:6px 14px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .15s}
+.lock-banner:hover{background:var(--blue-light)}
+.lock-banner button{background:none;border:none;color:var(--blue-dark);cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:600;padding:0}
+.lock-banner svg{opacity:0.55;flex-shrink:0}
 .lockmode-shake{animation:lockmodeShake .3s}
 @keyframes lockmodeShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 #sync-status{font-size:10px;letter-spacing:0.07em;padding:2px 9px;border-radius:10px;transition:all .3s;white-space:nowrap}
@@ -606,8 +607,8 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
 </header>
 
 <div class="lock-banner" id="lock-banner" onclick="LOCKMODE.requestUnlock()">
-  <svg id="lock-banner-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-  <span id="lock-banner-text">หน้านี้อยู่ในโหมดดูอย่างเดียว</span> — <button onclick="event.stopPropagation();LOCKMODE.requestUnlock()">ปลดล็อกเพื่อแก้ไข</button>
+  <svg id="lock-banner-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <span id="lock-banner-text">โหมดดูอย่างเดียว</span><span style="opacity:0.4">·</span><button onclick="event.stopPropagation();LOCKMODE.requestUnlock()">ปลดล็อกเพื่อแก้ไข</button>
 </div>
 
 <!-- HOME PAGE -->
@@ -911,7 +912,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
               </div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">ประเภท</label>
                 <select id="sdi-type" style="font-family:inherit;font-size:12px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%">
-                  <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="fixed_krw">จำนวน ₩ (ลด KRW)</option><option value="free">ฟรีทั้งหมด</option><option value="stipend">เงินให้ (stipend)</option>
+                  <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="fixed_krw">จำนวน ₩ (ลด KRW)</option><option value="free">ฟรีทั้งหมด</option><option value="stipend">เงินให้ (stipend) — ฿</option><option value="stipend_krw">เงินให้ (stipend) — ₩</option>
                 </select>
               </div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:3px">ค่า (%, ฿ หรือ ₩)</label>
@@ -1872,7 +1873,7 @@ const UNI=(function(){
         if(!s.discounts)s.discounts=[];
         const tags=s.discounts.map(d=>{
           const cls=d.type==='free'?'free':d.type==='pct'?'pct':'';
-          const val=d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'💰+'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString();
+          const val=d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'+฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'+₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString();
           const dur=d.dur&&d.dur>0?` ${d.dur}${d.durUnit||'เทอม'}`:'';
           return `<span class="sch-card-tag ${cls}">${CAT_LABEL[d.cat]||d.cat} ${val}${dur}</span>`;
         }).join('');
@@ -1882,7 +1883,7 @@ const UNI=(function(){
               return `<div class="sch-card-discount-row">
                 <span class="sch-card-discount-label">${CAT_LABEL[d.cat]||d.cat}</span>
                 <span class="sch-card-discount-sub">${durTxt}</span>
-                <span class="sch-card-discount-val">${d.type==='free'?'ฟรี':d.type==='pct'?'ลด '+d.val+'%':d.type==='stipend'?'💰 ได้รับ ฿'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'ลด ₩'+Number(d.val).toLocaleString():'ลด ฿'+Number(d.val).toLocaleString()}</span>
+                <span class="sch-card-discount-val">${d.type==='free'?'ฟรี':d.type==='pct'?'ลด '+d.val+'%':d.type==='stipend'?'ได้รับ ฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'ได้รับ ₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'ลด ₩'+Number(d.val).toLocaleString():'ลด ฿'+Number(d.val).toLocaleString()}</span>
                 <button style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-muted)" onclick="event.stopPropagation();UNI.delDiscount(${i},${di})">✕</button>
               </div>`;
             }).join('')
@@ -1927,7 +1928,7 @@ const UNI=(function(){
                 <option value="other">อื่นๆ</option>
               </select></div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ประเภท</label><select id="sdi-type-${i}" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)">
-                <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="fixed_krw">จำนวน ₩ (ลด KRW)</option><option value="free">ฟรีทั้งหมด</option><option value="stipend">เงินให้ (stipend)</option>
+                <option value="pct">% ส่วนลด</option><option value="fixed">จำนวน ฿</option><option value="fixed_krw">จำนวน ₩ (ลด KRW)</option><option value="free">ฟรีทั้งหมด</option><option value="stipend">เงินให้ (stipend) — ฿</option><option value="stipend_krw">เงินให้ (stipend) — ₩</option>
               </select></div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">ค่า (%, ฿ หรือ ₩)</label><input type="number" id="sdi-val-${i}" placeholder="เช่น 30" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
               <div><label style="font-size:10px;color:var(--text-muted);display:block;margin-bottom:2px">จำนวน</label><input type="number" id="sdi-dur-${i}" placeholder="เช่น 1" min="0" style="font-family:inherit;font-size:12px;padding:5px 7px;border:0.5px solid var(--border);border-radius:3px;width:100%;background:var(--white)"></div>
@@ -1972,7 +1973,7 @@ const UNI=(function(){
       const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
       document.getElementById('s-discount-preview').innerHTML=window._pendingDiscounts.map((d,i)=>{
         const CAT_LABEL2={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
-        const dLabel=d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'💰 ฿'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString();
+        const dLabel=d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString();
         return`<span class="s-discount-tag">${CAT_LABEL2[d.cat]||d.cat} ${dLabel}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
           <button onclick="window._pendingDiscounts.splice(${i},1);document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
         </span>`;}).join('');
@@ -1980,7 +1981,7 @@ const UNI=(function(){
     _renderPendingTags(){
       const CAT_LABEL={tuition:'ค่าเทอม',dorm:'ค่าหอ',living:'ค่าครองชีพ',apply:'ค่าสมัคร',entrance:'ค่าแรกเข้า',thaiPrep:'ค่าเตรียมตัว',other:'อื่นๆ'};
       return (window._pendingDiscounts||[]).map((d,i)=>`
-        <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'💰 ฿'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
+        <span class="s-discount-tag">${CAT_LABEL[d.cat]} ${d.type==='free'?'ฟรี':d.type==='pct'?d.val+'%':d.type==='stipend'?'฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'₩'+Number(d.val).toLocaleString():'฿'+Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' '+d.dur+d.durUnit:''}
           <button onclick="window._pendingDiscounts.splice(${i},1);document.getElementById('s-discount-preview').innerHTML=UNI._renderPendingTags()">✕</button>
         </span>`).join('');
     },
@@ -2031,15 +2032,16 @@ const UNI=(function(){
         // before = ค่าในสกุลเดิม (ยังไม่แปลง) คูณ duration
         const before=d.dur&&d.dur>0&&d.durUnit!=='ตลอดหลักสูตร'?rawUnit*d.dur:rawUnit;
         // discount amount (ในสกุลเดิม)
-        const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):d.type==='stipend'?(curr==='KRW'?d.val:d.val):d.type==='fixed_krw'?(curr==='KRW'?d.val:(d.val/KRW_RATE)):(curr==='KRW'?d.val*KRW_RATE:d.val);
+        const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(d.type==='stipend'||d.type==='stipend_krw')?0:d.type==='fixed_krw'?(curr==='KRW'?d.val:(d.val/KRW_RATE)):(curr==='KRW'?d.val*KRW_RATE:d.val);
         const after=Math.max(0,before-disc);
         // stipend ไม่หักจาก before (ไม่ใช่ส่วนลด) แต่นับเป็น "ได้รับ" แยกต่างหาก
-        const stipendAmt=d.type==='stipend'?(curr==='KRW'?d.val/KRW_RATE:d.val):0;
+        // หน่วยเงินของ stipend มาจากชนิดที่เลือกตรงๆ (stipend=฿, stipend_krw=₩) ไม่เดาจากค่าใช้จ่ายอื่น
+        const stipendAmt=d.type==='stipend'?d.val:d.type==='stipend_krw'?d.val/KRW_RATE:0;
         // สะสม total เป็น THB
         totalTHBBefore+=toTHB(before,key);
         totalTHBAfter+=toTHB(after,key)-stipendAmt;
         const sym=curr==='KRW'?'₩':'฿';
-        const discTxt=d.type==='free'?'ฟรีทั้งหมด':d.type==='pct'?'ลด '+d.val+'%':d.type==='stipend'?'💰 ได้รับ '+sym+Number(d.val).toLocaleString()+'/เทอม':d.type==='fixed_krw'?'ลด ₩'+Number(d.val).toLocaleString():'ลด '+sym+Number(d.val).toLocaleString();
+        const discTxt=d.type==='free'?'ฟรีทั้งหมด':d.type==='pct'?'ลด '+d.val+'%':d.type==='stipend'?'ได้รับ ฿'+Number(d.val).toLocaleString()+'/เทอม':d.type==='stipend_krw'?'ได้รับ ₩'+Number(d.val).toLocaleString()+'/เทอม':d.type==='fixed_krw'?'ลด ₩'+Number(d.val).toLocaleString():'ลด '+sym+Number(d.val).toLocaleString();
         const durTxt=d.dur&&d.dur>0?` (${d.dur} ${d.durUnit||'เทอม'})`:d.durUnit==='ตลอดหลักสูตร'?' (ตลอดหลักสูตร)':'';
         const hint=!rawUnit?'<span style="font-size:10px;color:#C08040"> — ต้องใส่ตัวเลขในแท็บ "ค่าใช้จ่าย" ก่อน</span>':'';
         const amtDisplay=rawUnit?`${fmtAmt(before,key)} → <b>${fmtAmt(after,key)}</b>`:'—';
@@ -2050,8 +2052,8 @@ const UNI=(function(){
       }).join('');
       const savedTHB=totalTHBBefore-totalTHBAfter;
       const el=document.getElementById('sch-result-'+i);if(!el)return;
-      const stipendSum=s.discounts.filter(d=>d.type==='stipend').reduce((acc,d)=>acc+Number(d.val||0),0);
-      const stipendNote=stipendSum>0?`<div class="sch-card-result-row" style="background:#EBF7EE;border-top:0.5px dashed #A5D6B5"><span style="color:#1A6B3A">💰 เงินสนับสนุน (stipend) — แสดงข้อมูลเท่านั้น ไม่คิดในยอดรวม</span><span style="color:#1A6B3A">฿${Math.round(stipendSum).toLocaleString()}/เทอม</span></div>`:'';
+      const stipendSum=s.discounts.filter(d=>d.type==='stipend'||d.type==='stipend_krw').reduce((acc,d)=>acc+(d.type==='stipend_krw'?Number(d.val||0)/KRW_RATE:Number(d.val||0)),0);
+      const stipendNote=stipendSum>0?`<div class="sch-card-result-row" style="background:#EBF7EE;border-top:0.5px dashed #A5D6B5"><span style="color:#1A6B3A">เงินสนับสนุน (stipend) — แสดงข้อมูลเท่านั้น ไม่คิดในยอดรวม</span><span style="color:#1A6B3A">฿${Math.round(stipendSum).toLocaleString()}/เทอม</span></div>`:'';
       el.innerHTML=rows+`<div class="sch-card-result-row total"><span>รวมหลังได้ทุนนี้ (≈ THB)</span><span>฿${Math.round(totalTHBAfter).toLocaleString()}</span></div>
         <div class="sch-card-result-saved">ประหยัดไป ≈ ฿${Math.round(savedTHB).toLocaleString()}</div>`+stipendNote;
       el.classList.add('show');
@@ -2080,12 +2082,12 @@ const UNI=(function(){
           const rawUnit=(key&&u.costs[key])?Number(u.costs[key]):0;
           // คิดแค่ 1 เทอม เสมอ — dur เป็นแค่ข้อมูล reference ไม่นำมาคูณ
           const before=rawUnit;
-          const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):d.type==='stipend'?0:d.type==='fixed_krw'?(((cu[key]||'THB')==='KRW'?d.val:d.val/KRW)):(((cu[key]||'THB')==='KRW'?d.val*KRW:d.val));
-          const stipendAmt=d.type==='stipend'?((cu[key]||'THB')==='KRW'?d.val/KRW:d.val):0;
+          const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(d.type==='stipend'||d.type==='stipend_krw')?0:d.type==='fixed_krw'?(((cu[key]||'THB')==='KRW'?d.val:d.val/KRW)):(((cu[key]||'THB')==='KRW'?d.val*KRW:d.val));
+          const stipendAmt=d.type==='stipend'?d.val:d.type==='stipend_krw'?d.val/KRW:0;
           const after=Math.max(0,before-disc);
           tBefore+=toTHB(before,key);tAfter+=toTHB(after,key)-stipendAmt;
           const sym=(cu[key]||'THB')==='KRW'?'₩':'฿';
-          const discTxt=d.type==='free'?'ฟรี':d.type==='pct'?'-'+d.val+'%':d.type==='stipend'?'💰 ได้ '+sym+Number(d.val).toLocaleString():d.type==='fixed_krw'?'-₩'+Number(d.val).toLocaleString():'-'+sym+Number(d.val).toLocaleString();
+          const discTxt=d.type==='free'?'ฟรี':d.type==='pct'?'-'+d.val+'%':d.type==='stipend'?'ได้ ฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'ได้ ₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'-₩'+Number(d.val).toLocaleString():'-'+sym+Number(d.val).toLocaleString();
           const durTxt=d.dur&&d.dur>0?` ${d.dur}${d.durUnit||'เทอม'}`:d.durUnit==='ตลอดหลักสูตร'?' ตลอดหลักสูตร':'';
           return{label:CAT_LABEL[d.cat]||d.cat,discTxt,durTxt,before:fmtAmt(before,key),after:fmtAmt(after,key),noData:!rawUnit};
         });
@@ -2128,8 +2130,8 @@ const UNI=(function(){
       const schRows=schResults.length?schResults.map(s=>{
         const isBest=best&&s.name===best.name&&s.netTHB===best.netTHB;
         const discTags=s.rows.map(r=>`<span class="sch-card-tag${r.noData?' ':' pct'}" style="font-size:10px">${r.label} ${r.discTxt}${r.durTxt}</span>`).join('');
-        const stipendRows=s.discounts.filter(d=>d.type==='stipend');
-        const stipendInfo=stipendRows.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">${stipendRows.map(d=>{const sym=(d.cat&&(getU()||{}).currencies&&((getU()||{}).currencies[d.cat]||'THB')==='KRW')?'₩':'฿';return`<span style="font-size:10px;background:#D5F0E0;color:#1A6B3A;padding:2px 7px;border-radius:10px;display:inline-flex;align-items:center;gap:3px">💰 stipend ${sym}${Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' × '+d.dur+(d.durUnit||'เทอม'):''}  <span style="color:#5A9A6A;font-size:9px">(แสดงข้อมูลเท่านั้น — ไม่หักยอดรวม)</span></span>`}).join('')}</div>`:'';
+        const stipendRows=s.discounts.filter(d=>d.type==='stipend'||d.type==='stipend_krw');
+        const stipendInfo=stipendRows.length?`<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">${stipendRows.map(d=>{const sym=d.type==='stipend_krw'?'₩':'฿';return`<span style="font-size:10px;background:#D5F0E0;color:#1A6B3A;padding:2px 7px;border-radius:10px;display:inline-flex;align-items:center;gap:3px">stipend ${sym}${Number(d.val).toLocaleString()}${d.dur&&d.dur>0?' × '+d.dur+(d.durUnit||'เทอม'):''}  <span style="color:#5A9A6A;font-size:9px">(แสดงข้อมูลเท่านั้น — ไม่หักยอดรวม)</span></span>`}).join('')}</div>`:'';
         const hasDisc=s.rows.length>0;
         return `<div class="sum-sch-row"${isBest?' style="border-left:2px solid #7B57CE;background:var(--blue-light)"':''}>
           <div>
