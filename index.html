@@ -739,8 +739,9 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
   <div class="add-section">
     <div class="add-form">
       <div class="add-title">+ เพิ่มกิจกรรม</div>
-      <div class="tl-form-row">
-        <div class="form-group" style="margin:0"><label>วันที่</label><input type="date" id="ev-date"></div>
+      <div class="tl-form-row" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <div class="form-group" style="margin:0"><label>วันที่เริ่ม</label><input type="date" id="ev-date"></div>
+        <div class="form-group" style="margin:0"><label>วันสิ้นสุด (optional)</label><input type="date" id="ev-end-date"></div>
         <div class="form-group" style="margin:0"><label>มหาลัย / รอบ</label><select id="ev-uni"></select></div>
         <div class="form-group" style="margin:0"><label>ประเภท</label><select id="ev-type"><option value="apply">สมัคร / Deadline</option><option value="doc">เอกสาร</option><option value="inter">สัมภาษณ์</option><option value="result">ประกาศผล</option><option value="other">อื่นๆ</option></select></div>
       </div>
@@ -769,6 +770,10 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
       <div class="cal-modal-form-row">
         <input type="text" id="m-title" placeholder="ชื่อกิจกรรม" style="flex:2">
         <input type="text" id="m-step" placeholder="หมายเหตุ" style="flex:1">
+      </div>
+      <div class="cal-modal-form-row" style="align-items:center;gap:6px">
+        <label style="font-size:10px;color:var(--text-muted);white-space:nowrap;letter-spacing:0.08em;text-transform:uppercase">วันสิ้นสุด (optional)</label>
+        <input type="date" id="m-end-date" style="flex:1">
       </div>
       <button class="btn btn-primary btn-sm" onclick="TL.addFromModal()">เพิ่ม</button>
     </div>
@@ -889,7 +894,8 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
         <div class="sec-label">วันสำคัญ</div>
         <div class="dates-list" id="u-dates-list"></div>
         <div class="date-add-row">
-          <div class="form-group" style="margin:0"><label>วันที่</label><input type="date" id="add-date-val"></div>
+          <div class="form-group" style="margin:0"><label>วันที่เริ่ม</label><input type="date" id="add-date-val"></div>
+          <div class="form-group" style="margin:0"><label>วันสิ้นสุด (optional)</label><input type="date" id="add-date-end"></div>
           <div class="form-group" style="margin:0"><label>ชื่อกิจกรรม</label><input type="text" id="add-date-name" placeholder="เช่น ปิดรับสมัคร"></div>
           <div class="form-group" style="margin:0"><label>ประเภท</label><select id="add-date-type"><option value="apply">สมัคร</option><option value="doc">เอกสาร</option><option value="inter">สัมภาษณ์</option><option value="result">ประกาศผล</option><option value="other">อื่นๆ</option></select></div>
           <button class="btn btn-primary btn-sm" style="align-self:end;height:36px" onclick="UNI.addDate()">+ เพิ่ม</button>
@@ -1596,13 +1602,13 @@ const TL=(function(){
   const now=new Date();
   let year=now.getFullYear(),month=now.getMonth(),curModalDate='';
   function uniLabel(uniId){if(uniId==='gks')return 'GKS';if(uniId==='personal')return 'Personal';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.name:'Unknown';}
-  function uniColor(uniId){if(uniId==='gks')return '#3A6FA0';if(uniId==='personal')return '#A0522D';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.color:'#A0522D';}
+  function uniColor(uniId){if(uniId==='gks')return '#3A6FA0';if(uniId==='personal')return '#7B8FA8';const u=UNI.getUnis().find(x=>x.id===parseInt(uniId));return u?u.color:'#7B8FA8';}
   // วันสำคัญที่กรอกไว้ในหน้า University (u.dates) — แปลงให้อยู่ในรูปแบบเดียวกับ event ของปฏิทิน
   // ไม่ได้ copy ข้อมูลมาเก็บซ้ำ แค่ "มอง" ข้อมูลเดิมในรูปแบบใหม่ตอน render ทุกครั้ง
   // จึงไม่มีปัญหาข้อมูลไม่ตรงกัน (out of sync) ระหว่าง 2 หน้า
   function uniDateEvents(){
     return UNI.getUnis().flatMap(u=>(u.dates||[]).map((d,idx)=>(
-      {date:d.val,uniId:u.id,type:d.type,title:d.name,step:'',_src:'uni',_idx:idx}
+      {date:d.val,endDate:d.endDate||'',uniId:u.id,type:d.type,title:d.name,step:'',_src:'uni',_idx:idx}
     )));
   }
   function allEvents(){return [...events,...uniDateEvents()];}
@@ -1617,7 +1623,7 @@ const TL=(function(){
     const unis=UNI.getUnis();
     el.innerHTML='<span class="legend-item"><span class="legend-dot" style="background:#7B57CE"></span>GKS</span>'
       +unis.map(u=>`<span class="legend-item"><span class="legend-dot" style="background:${u.color}"></span><span class="legend-uni-link" onclick="TL.goToUni(${u.id})">${u.name}</span></span>`).join('')
-      +'<span class="legend-item"><span class="legend-dot" style="background:#A0522D"></span>Personal</span>';
+      +'<span class="legend-item"><span class="legend-dot" style="background:#7B8FA8"></span>Personal</span>';
   }
   function render(){
     const label=document.getElementById('tl-month-label');const grid=document.getElementById('tl-cal-grid');if(!label||!grid)return;
@@ -1625,13 +1631,31 @@ const TL=(function(){
     const merged=allEvents();
     const first=new Date(year,month,1).getDay();const dim=new Date(year,month+1,0).getDate();
     const today=new Date();
+    // helper: check if date string ds falls within event range
+    function inRange(e,ds){
+      if(e.endDate&&e.endDate>=e.date)return ds>=e.date&&ds<=e.endDate;
+      return e.date===ds;
+    }
     for(let i=0;i<first;i++){const p=new Date(year,month,0-(first-i-1));grid.innerHTML+=`<div class="cal-day other-month"><div class="day-num">${p.getDate()}</div></div>`;}
     for(let d=1;d<=dim;d++){
       const isToday=today.getFullYear()===year&&today.getMonth()===month&&today.getDate()===d;
       const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const evs=merged.filter(e=>e.date===ds);
+      const evs=merged.filter(e=>inRange(e,ds));
       let html=`<div class="cal-day${isToday?' today':''}" onclick="TL.openModal('${ds}',${d})"><div class="day-num">${d}</div>`;
-      evs.slice(0,3).forEach(e=>{const bg=uniColor(e.uniId);html+=`<span class="event-pill" style="background:${bg}">${uniLabel(e.uniId)}·${e.title}</span>`;});
+      evs.slice(0,3).forEach(e=>{
+        const bg=uniColor(e.uniId);
+        const isStart=e.date===ds;
+        const isEnd=!e.endDate||e.endDate===ds||e.endDate<e.date;
+        const isMulti=e.endDate&&e.endDate>e.date;
+        let pillStyle=`background:${bg}`;
+        if(isMulti){
+          if(isStart) pillStyle+=';border-radius:2px 0 0 2px;margin-right:-1px';
+          else if(isEnd) pillStyle+=';border-radius:0 2px 2px 0;margin-left:-1px;opacity:0.85';
+          else pillStyle+=';border-radius:0;margin:0 -1px;opacity:0.75';
+        }
+        const label_txt=isStart?(uniLabel(e.uniId)+'·'+e.title):'';
+        html+=`<span class="event-pill" style="${pillStyle}" title="${e.title}">${label_txt}</span>`;
+      });
       if(evs.length>3)html+=`<span style="font-size:9px;color:var(--text-muted)">+${evs.length-3}</span>`;
       grid.innerHTML+=html+'</div>';
     }
@@ -1639,7 +1663,8 @@ const TL=(function(){
     for(let i=1;i<=trail;i++)grid.innerHTML+=`<div class="cal-day other-month"><div class="day-num">${i}</div></div>`;
   }
   function renderModalEvents(ds){
-    const evs=allEvents().filter(e=>e.date===ds);const el=document.getElementById('cal-modal-events');
+    function inRange(e,ds){if(e.endDate&&e.endDate>=e.date)return ds>=e.date&&ds<=e.endDate;return e.date===ds;}
+    const evs=allEvents().filter(e=>inRange(e,ds));const el=document.getElementById('cal-modal-events');
     if(!evs.length){el.innerHTML='<div class="cal-modal-empty">ไม่มีกิจกรรมในวันนี้</div>';return;}
     el.innerHTML=evs.map(e=>{
       const isUni=e.uniId!=='gks'&&e.uniId!=='personal';
@@ -1649,9 +1674,14 @@ const TL=(function(){
       const actionBtn=fromUni
         ? `<button class="del-ev" title="แก้ไขที่หน้ามหาวิทยาลัย" onclick="TL.goToUni(${e.uniId})">✎</button>`
         : `<button class="del-ev" onclick="TL.del(${idx})">✕</button>`;
+      // date range display
+      const MN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+      function fmtD(s){const p=s.split('-');return parseInt(p[2])+' '+MN[parseInt(p[1])-1];}
+      const dateRange=e.endDate&&e.endDate>e.date
+        ?`<span style="font-size:11px;color:var(--blue-dark);background:var(--blue-light);padding:1px 7px;border-radius:10px;margin-left:6px">${fmtD(e.date)} – ${fmtD(e.endDate)}</span>`:'';
       return `<div class="cal-modal-event" style="border-left-color:${TYPE_COLOR[e.type]||'#6B6B6B'}">
         ${actionBtn}
-        <div class="cal-modal-event-title">${e.title}</div>
+        <div class="cal-modal-event-title">${e.title}${dateRange}</div>
         <div class="cal-modal-event-meta" ${metaClick}>${uniLabel(e.uniId)}${fromUni?' · วันสำคัญจากหน้ามหาวิทยาลัย':''}</div>
         ${e.step?`<span class="cal-modal-event-step" style="background:${TYPE_BG[e.type]};color:${TYPE_COLOR[e.type]}">${TYPE_LABEL[e.type]}${e.step?' · '+e.step:''}</span>`:''}
       </div>`;
@@ -1673,18 +1703,24 @@ const TL=(function(){
     addFromModal(){
       const title=document.getElementById('m-title').value.trim();if(!title){alert('กรุณาใส่ชื่อกิจกรรม');return;}
       const rawUni=document.getElementById('m-uni').value;const uniId=(rawUni==='gks'||rawUni==='personal')?rawUni:parseInt(rawUni);
-      events.push({date:curModalDate,uniId,type:document.getElementById('m-type').value,title,step:document.getElementById('m-step').value.trim()});
+      const endDate=document.getElementById('m-end-date').value||'';
+      const entry={date:curModalDate,uniId,type:document.getElementById('m-type').value,title,step:document.getElementById('m-step').value.trim()};
+      if(endDate&&endDate>curModalDate)entry.endDate=endDate;
+      events.push(entry);
       render();renderModalEvents(curModalDate);
-      document.getElementById('m-title').value='';document.getElementById('m-step').value='';
+      document.getElementById('m-title').value='';document.getElementById('m-step').value='';document.getElementById('m-end-date').value='';
       STORAGE.save();
     },
     addFromForm(){
       const date=document.getElementById('ev-date').value;const title=document.getElementById('ev-title').value.trim();
       if(!date||!title){alert('กรุณาใส่วันที่และชื่อกิจกรรม');return;}
       const rawUni=document.getElementById('ev-uni').value;const uniId=(rawUni==='gks'||rawUni==='personal')?rawUni:parseInt(rawUni);
-      events.push({date,uniId,type:document.getElementById('ev-type').value,title,step:document.getElementById('ev-step').value.trim()});
+      const endDate=document.getElementById('ev-end-date').value||'';
+      const entry={date,uniId,type:document.getElementById('ev-type').value,title,step:document.getElementById('ev-step').value.trim()};
+      if(endDate&&endDate>date)entry.endDate=endDate;
+      events.push(entry);
       const d=new Date(date);if(d.getFullYear()===year&&d.getMonth()===month)render();
-      document.getElementById('ev-date').value='';document.getElementById('ev-title').value='';document.getElementById('ev-step').value='';
+      document.getElementById('ev-date').value='';document.getElementById('ev-end-date').value='';document.getElementById('ev-title').value='';document.getElementById('ev-step').value='';
       STORAGE.save();
     },
     goToUni,refreshUniSelects,render,
@@ -1936,10 +1972,21 @@ const UNI=(function(){
       const u=getU();if(!u)return;const el=document.getElementById('u-dates-list');if(!el)return;
       if(!u.dates)u.dates=[];
       if(!u.dates.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:8px 0">ยังไม่มีวันสำคัญ</div>';return;}
+      const MN=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
       el.innerHTML=u.dates.map((d,i)=>{
         const dt=new Date(d.val+'T00:00:00');
+        let dateDisplay;
+        if(d.endDate&&d.endDate>d.val){
+          const de=new Date(d.endDate+'T00:00:00');
+          const sameMonth=dt.getMonth()===de.getMonth()&&dt.getFullYear()===de.getFullYear();
+          dateDisplay=sameMonth
+            ?`<span class="dr-day">${dt.getDate()}–${de.getDate()}</span><span class="dr-month">${MN[dt.getMonth()]}</span>`
+            :`<span class="dr-day" style="font-size:14px">${dt.getDate()} ${MN[dt.getMonth()]}</span><span class="dr-month">– ${de.getDate()} ${MN[de.getMonth()]}</span>`;
+        } else {
+          dateDisplay=`<span class="dr-day">${dt.getDate()}</span><span class="dr-month">${MN[dt.getMonth()]}</span>`;
+        }
         return `<div class="date-row">
-          <div class="dr-date"><span class="dr-day">${dt.getDate()}</span><span class="dr-month">${dt.toLocaleString('en',{month:'short'}).toUpperCase()}</span></div>
+          <div class="dr-date">${dateDisplay}</div>
           <div><div class="dr-name">${d.name}</div></div>
           <span class="tag ${TAG_MAP[d.type]||'tag-apply'}">${TAG_LABEL[d.type]||d.type}</span>
           <button class="dr-del" onclick="UNI.delDate(${i})">✕</button>
@@ -1950,9 +1997,12 @@ const UNI=(function(){
       const val=document.getElementById('add-date-val').value;const name=document.getElementById('add-date-name').value.trim();
       if(!val||!name){alert('กรุณาใส่วันที่และชื่อ');return;}
       const u=getU();if(!u){alert('ไม่พบข้อมูลมหาวิทยาลัย กรุณาเปิดหน้ารายละเอียดก่อน');return;}
-      u.dates.push({val,name,type:document.getElementById('add-date-type').value});
+      const endVal=document.getElementById('add-date-end').value||'';
+      const entry={val,name,type:document.getElementById('add-date-type').value};
+      if(endVal&&endVal>val)entry.endDate=endVal;
+      u.dates.push(entry);
       u.dates.sort((a,b)=>a.val.localeCompare(b.val));
-      document.getElementById('add-date-val').value='';document.getElementById('add-date-name').value='';
+      document.getElementById('add-date-val').value='';document.getElementById('add-date-end').value='';document.getElementById('add-date-name').value='';
       this.renderDates();HOME.refresh();STORAGE.save();
     },
     delDate(i){getU().dates.splice(i,1);this.renderDates();HOME.refresh();STORAGE.save();},
