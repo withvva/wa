@@ -2452,8 +2452,8 @@ const CMP=(function(){
   ];
   let extraUnis=[];let currency='THB';let KRW_RATE=36;
   // ค่าครองชีพ & preTravelCost ที่กรอกใน Compare — เก็บ per uni id (string key)
-  let cmpLiving={};    // uniId => { monthly: number, months: number }
-  let cmpPreTravel={}; // uniId => number
+  let cmpLiving={monthly:0,months:0}; // shared across all unis
+  let cmpPreTravel=0;                  // shared across all unis (฿)
   let cmpSchIdx={};    // uniId => scholarship index (-1 = none)
   // คืนรายการหอทั้งหมดของมหาวิทยาลัยหนึ่ง ในรูปแบบเดียวกับหน้า Universities > สรุป
   function getDormOptions(u){
@@ -2482,11 +2482,10 @@ const CMP=(function(){
   function calcTotal(costs,currencies,uniId){
     const cu=currencies||{};const f=k=>toTHB(costs[k]||0,cu[k]||'THB');
     const baseCost=f('tuition')+f('dorm')+f('apply')+f('entrance')+f('thaiPrep');
-    // living จาก Compare block (₩ → THB)
-    const liv=cmpLiving[String(uniId)]||{monthly:0,months:0};
-    const livTHB=(liv.monthly||0)*(liv.months||0)/KRW_RATE;
-    // preTravelCost
-    const preTravel=cmpPreTravel[String(uniId)]!=null?cmpPreTravel[String(uniId)]:(costs.preTravelCost||0);
+    // living จาก Compare block (₩ → THB) — shared ทุกมหาลัย
+    const livTHB=(cmpLiving.monthly||0)*(cmpLiving.months||0)/KRW_RATE;
+    // preTravelCost — shared ทุกมหาลัย
+    const preTravel=cmpPreTravel||0;
     // ทุนที่เลือก
     const schSaving=calcScholarshipSaving({id:uniId,_isReal:true},cmpSchIdx[String(uniId)]);
     return Math.max(0,baseCost+livTHB+preTravel-schSaving);
@@ -2564,7 +2563,7 @@ const CMP=(function(){
   // helpers สำหรับ scholarship ใน compare
   function getUniScholarships(u){
     if(!u._isReal)return[];
-    const realU=UNI.getUnis().find(x=>x.id===u.id);
+    const realU=UNI.getUnis().find(x=>String(x.id)===String(u.id));
     return realU?(realU.scholarships||[]):[];
   }
   function calcScholarshipSaving(u,schIdx){
@@ -2597,14 +2596,50 @@ const CMP=(function(){
     const el=document.getElementById('cmp-extra-table');if(!el)return;
     if(!unis.length){el.innerHTML='<div style="font-size:13px;color:var(--text-muted)">ยังไม่มีมหาวิทยาลัย</div>';return;}
 
-    // card grid — 1 card per uni
+    // ── Shared block: ค่าครองชีพ + ค่าเตรียมตัว (กรอกครั้งเดียว ใช้กับทุกมหาลัย) ──
+    const livTotalTHB=Math.round((cmpLiving.monthly||0)*(cmpLiving.months||0)/KRW_RATE);
+    const sharedBlock=`<div style="background:var(--white);border:0.5px solid var(--border);border-radius:6px;padding:16px 18px;margin-bottom:14px">
+      <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px;font-weight:500">รายจ่ายที่ใช้ร่วมกันทุกมหาลัย</div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+        <!-- ค่าครองชีพ -->
+        <div style="flex:2;min-width:220px">
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ค่าครองชีพ</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">₩ / เดือน</div>
+              <input type="number" min="0" placeholder="0" value="${cmpLiving.monthly||''}"
+                class="cmp-live-input"
+                style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%"
+                oninput="CMP.setLiving('monthly',this.value)">
+            </div>
+            <div style="font-size:16px;color:var(--text-muted);padding-top:14px">×</div>
+            <div style="flex:1">
+              <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">จำนวนเดือน</div>
+              <input type="number" min="0" placeholder="0" value="${cmpLiving.months||''}"
+                class="cmp-live-input"
+                style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%"
+                oninput="CMP.setLiving('months',this.value)">
+            </div>
+          </div>
+          <div style="background:var(--cream);border-radius:3px;padding:5px 10px;font-size:12px;display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <span style="color:var(--text-muted)">รวม ≈</span>
+            <span style="font-weight:500;color:var(--blue-dark)">฿${livTotalTHB.toLocaleString()}</span>
+          </div>
+        </div>
+        <!-- ค่าเตรียมตัวก่อนไป -->
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ค่าเตรียมตัวก่อนไป (฿)</div>
+          <input type="number" min="0" placeholder="วีซ่า ตั๋ว เอกสาร ฯลฯ" value="${cmpPreTravel||''}"
+            class="cmp-live-input"
+            style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%"
+            oninput="CMP.setPreTravel(this.value)">
+        </div>
+      </div>
+    </div>`;
+
+    // card grid — 1 card per uni (scholarship only)
     const cards=unis.map(u=>{
       const key=String(u.id);
-      const liv=cmpLiving[key]||{monthly:0,months:0};
-      const livKRW=liv.monthly||0; // หน่วย ₩
-      const months=liv.months||0;
-      const livTotalTHB=Math.round(livKRW*months/KRW_RATE);
-      const preTravel=cmpPreTravel[key]!=null?cmpPreTravel[key]:((u.costs&&u.costs.preTravelCost)||0);
 
       // scholarship section (only real unis)
       const schs=getUniScholarships(u);
@@ -2612,65 +2647,34 @@ const CMP=(function(){
       const savedTHB=calcScholarshipSaving(u,selSchIdx);
 
       const schSection=u._isReal?(schs.length?`
-        <div style="margin-top:12px;padding-top:12px;border-top:0.5px dashed var(--border)">
-          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ทุนที่ใช้คำนวณ</div>
-          <select style="font-family:inherit;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%" onchange="CMP.setSchIdx('${key}',parseInt(this.value))">
-            <option value="-1"${selSchIdx===-1?' selected':''}>— ไม่ใช้ทุน</option>
-            ${schs.map((s,i)=>`<option value="${i}"${selSchIdx===i?' selected':''}>${s.name}</option>`).join('')}
-          </select>
-          ${selSchIdx>=0&&savedTHB>0?`<div style="margin-top:6px;font-size:12px;color:#1A6B3A;font-weight:500">ประหยัด ≈ ฿${Math.round(savedTHB).toLocaleString()}</div>`
-          :selSchIdx>=0?`<div style="margin-top:6px;font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลดที่คำนวณได้</div>`:''}
-        </div>`
-      :`<div style="margin-top:12px;padding-top:12px;border-top:0.5px dashed var(--border);font-size:11px;color:var(--text-muted)">— ยังไม่มีทุน</div>`)
-      :`<div style="margin-top:12px;padding-top:12px;border-top:0.5px dashed var(--border);font-size:11px;color:var(--text-muted)">— มหาลัย custom ไม่มีข้อมูลทุน</div>`;
+        <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ทุนที่ใช้คำนวณ</div>
+        <select style="font-family:inherit;font-size:12px;padding:5px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%" onchange="CMP.setSchIdx('${key}',parseInt(this.value))">
+          <option value="-1"${selSchIdx===-1?' selected':''}>— ไม่ใช้ทุน</option>
+          ${schs.map((s,i)=>`<option value="${i}"${selSchIdx===i?' selected':''}>${s.name}</option>`).join('')}
+        </select>
+        ${selSchIdx>=0&&savedTHB>0?`<div style="margin-top:6px;font-size:12px;color:#1A6B3A;font-weight:500">ประหยัด ≈ ฿${Math.round(savedTHB).toLocaleString()}</div>`
+        :selSchIdx>=0?`<div style="margin-top:6px;font-size:11px;color:var(--text-muted)">ยังไม่มีส่วนลดที่คำนวณได้</div>`:''}
+      `:`<div style="font-size:11px;color:var(--text-muted)">— ยังไม่มีทุน</div>`)
+      :`<div style="font-size:11px;color:var(--text-muted)">— มหาลัย custom ไม่มีข้อมูลทุน</div>`;
 
-      return `<div style="background:var(--white);border:0.5px solid var(--border);border-radius:6px;padding:16px 18px;min-width:200px;flex:1">
-        <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px">
+      return `<div style="background:var(--white);border:0.5px solid var(--border);border-radius:6px;padding:16px 18px;min-width:180px;flex:1">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:12px">
           <span style="width:10px;height:10px;border-radius:50%;background:${u.color};flex-shrink:0;display:inline-block"></span>
           <span style="font-size:14px;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name}</span>
-        </div>
-        <!-- ค่าครองชีพ -->
-        <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ค่าครองชีพ</div>
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">₩ / เดือน</div>
-            <input type="number" min="0" placeholder="0" value="${livKRW||''}"
-              style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%"
-              oninput="CMP.setLiving('${key}','monthly',this.value)">
-          </div>
-          <div style="font-size:16px;color:var(--text-muted);padding-top:18px">×</div>
-          <div style="flex:1">
-            <div style="font-size:10px;color:var(--text-muted);margin-bottom:3px">จำนวนเดือน</div>
-            <input type="number" min="0" placeholder="0" value="${months||''}"
-              style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%"
-              oninput="CMP.setLiving('${key}','months',this.value)">
-          </div>
-        </div>
-        <div style="background:var(--cream);border-radius:3px;padding:6px 10px;font-size:12px;display:flex;justify-content:space-between;align-items:center">
-          <span style="color:var(--text-muted)">รวม ≈</span>
-          <span style="font-weight:500;color:var(--blue-dark)">฿${livTotalTHB.toLocaleString()}</span>
-        </div>
-        <!-- ค่าเตรียมตัวก่อนไป -->
-        <div style="margin-top:12px">
-          <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">ค่าเตรียมตัวก่อนไป (฿)</div>
-          <input type="number" min="0" placeholder="วีซ่า ตั๋ว เอกสาร ฯลฯ" value="${preTravel||''}"
-            style="font-family:inherit;font-size:13px;padding:6px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);color:var(--text-primary);width:100%"
-            oninput="CMP.setPreTravel('${key}',this.value)">
         </div>
         ${schSection}
       </div>`;
     }).join('');
 
-    el.innerHTML=`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">${cards}</div>`;
+    el.innerHTML=sharedBlock+`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">${cards}</div>`;
   }
   return {
-    setLiving(key,field,val){
-      if(!cmpLiving[key])cmpLiving[key]={monthly:0,months:0};
-      cmpLiving[key][field]=parseFloat(val)||0;
+    setLiving(field,val){
+      cmpLiving[field]=parseFloat(val)||0;
       renderExtraInputs();renderBars();renderTable();
     },
-    setPreTravel(key,val){
-      cmpPreTravel[key]=parseFloat(val)||0;
+    setPreTravel(val){
+      cmpPreTravel=parseFloat(val)||0;
       renderBars();renderTable();
     },
     setSchIdx(key,idx){
