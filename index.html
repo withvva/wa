@@ -172,14 +172,15 @@ footer p{font-size:11px;color:var(--text-muted);letter-spacing:.06em}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:0.5px solid var(--border)}
 .cal-wd{padding:10px 0;text-align:center;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
-.cal-day{min-height:84px;padding:8px 6px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .15s;position:relative}
+.cal-day{min-height:100px;padding:6px 5px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);cursor:pointer;transition:background .15s;position:relative;overflow:hidden}
 .cal-day:nth-child(7n){border-right:none}
 .cal-day:hover{background:var(--cream)}
 .cal-day.other-month .day-num{color:var(--text-muted);opacity:.3}
 .cal-day.today{background:#EFF5FB}
-.day-num{font-size:12px;color:var(--text-secondary);margin-bottom:4px}
+.day-num{font-size:11px;color:var(--text-secondary);margin-bottom:3px}
 .cal-day.today .day-num{font-weight:500;color:var(--blue-dark)}
-.event-pill{font-size:9px;padding:2px 5px;border-radius:2px;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block;line-height:1.4}
+.event-pill{font-size:9px;padding:1px 4px;border-radius:2px;color:#fff;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block;line-height:1.5}
+.cal-more{font-size:9px;color:var(--text-muted);padding:1px 4px;display:block;line-height:1.4}
 .cal-modal-overlay{position:fixed;inset:0;background:rgba(26,26,24,.4);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
 .cal-modal-overlay.open{display:flex}
 .cal-modal{background:var(--white);border-radius:6px;padding:28px 32px;max-width:460px;width:100%;max-height:80vh;overflow-y:auto;border:0.5px solid var(--border)}
@@ -287,7 +288,7 @@ footer p{font-size:11px;color:var(--text-muted);letter-spacing:.06em}
 .dr-name{font-size:13px;font-weight:500}
 .dr-del{background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-muted);padding:2px 4px}
 .dr-del:hover{color:#7A1A1A}
-.date-add-row{display:grid;grid-template-columns:148px 148px 1fr 130px auto;gap:10px;align-items:end;margin-top:14px}
+.date-add-row{display:grid;grid-template-columns:148px 148px 1fr 160px 130px auto;gap:10px;align-items:end;margin-top:14px}
 .cost-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;margin-bottom:20px}
 .cost-card{background:var(--white);border:0.5px solid var(--border);border-radius:4px;padding:16px 18px}
 .cost-card-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
@@ -897,6 +898,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
           <div class="form-group" style="margin:0"><label>วันที่เริ่ม</label><input type="date" id="add-date-val"></div>
           <div class="form-group" style="margin:0"><label>วันสิ้นสุด (optional)</label><input type="date" id="add-date-end"></div>
           <div class="form-group" style="margin:0"><label>ชื่อกิจกรรม</label><input type="text" id="add-date-name" placeholder="เช่น ปิดรับสมัคร"></div>
+          <div class="form-group" style="margin:0"><label>หมายเหตุ (optional)</label><input type="text" id="add-date-note" placeholder="เช่น Online Application"></div>
           <div class="form-group" style="margin:0"><label>ประเภท</label><select id="add-date-type"><option value="apply">สมัคร</option><option value="doc">เอกสาร</option><option value="inter">สัมภาษณ์</option><option value="result">ประกาศผล</option><option value="other">อื่นๆ</option></select></div>
           <button class="btn btn-primary btn-sm" style="align-self:end;height:36px" onclick="UNI.addDate()">+ เพิ่ม</button>
         </div>
@@ -1608,7 +1610,7 @@ const TL=(function(){
   // จึงไม่มีปัญหาข้อมูลไม่ตรงกัน (out of sync) ระหว่าง 2 หน้า
   function uniDateEvents(){
     return UNI.getUnis().flatMap(u=>(u.dates||[]).map((d,idx)=>(
-      {date:d.val,endDate:d.endDate||'',uniId:u.id,type:d.type,title:d.name,step:'',_src:'uni',_idx:idx}
+      {date:d.val,endDate:d.endDate||'',uniId:u.id,type:d.type,title:d.name,step:'',note:d.note||'',_src:'uni',_idx:idx}
     )));
   }
   function allEvents(){return [...events,...uniDateEvents()];}
@@ -1642,7 +1644,7 @@ const TL=(function(){
       const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const evs=merged.filter(e=>inRange(e,ds));
       let html=`<div class="cal-day${isToday?' today':''}" onclick="TL.openModal('${ds}',${d})"><div class="day-num">${d}</div>`;
-      evs.slice(0,3).forEach(e=>{
+      evs.slice(0,4).forEach(e=>{
         const bg=uniColor(e.uniId);
         const isStart=e.date===ds;
         const isEnd=!e.endDate||e.endDate===ds||e.endDate<e.date;
@@ -1653,10 +1655,10 @@ const TL=(function(){
           else if(isEnd) pillStyle+=';border-radius:0 2px 2px 0;margin-left:-1px;opacity:0.85';
           else pillStyle+=';border-radius:0;margin:0 -1px;opacity:0.75';
         }
-        const label_txt=isStart?(uniLabel(e.uniId)+'·'+e.title):'';
-        html+=`<span class="event-pill" style="${pillStyle}" title="${e.title}">${label_txt}</span>`;
+        const label_txt=isStart?e.title:'';
+        html+=`<span class="event-pill" style="${pillStyle}" title="${uniLabel(e.uniId)}: ${e.title}">${label_txt}</span>`;
       });
-      if(evs.length>3)html+=`<span style="font-size:9px;color:var(--text-muted)">+${evs.length-3}</span>`;
+      if(evs.length>4)html+=`<span class="cal-more">+${evs.length-4} อื่นๆ</span>`;
       grid.innerHTML+=html+'</div>';
     }
     const trail=(7-((first+dim)%7))%7;
@@ -1683,6 +1685,7 @@ const TL=(function(){
         ${actionBtn}
         <div class="cal-modal-event-title">${e.title}${dateRange}</div>
         <div class="cal-modal-event-meta" ${metaClick}>${uniLabel(e.uniId)}${fromUni?' · วันสำคัญจากหน้ามหาวิทยาลัย':''}</div>
+        ${e.note?`<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${e.note}</div>`:''}
         ${e.step?`<span class="cal-modal-event-step" style="background:${TYPE_BG[e.type]};color:${TYPE_COLOR[e.type]}">${TYPE_LABEL[e.type]}${e.step?' · '+e.step:''}</span>`:''}
       </div>`;
     }).join('');
@@ -1987,7 +1990,7 @@ const UNI=(function(){
         }
         return `<div class="date-row">
           <div class="dr-date">${dateDisplay}</div>
-          <div><div class="dr-name">${d.name}</div></div>
+          <div><div class="dr-name">${d.name}</div>${d.note?`<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${d.note}</div>`:''}</div>
           <span class="tag ${TAG_MAP[d.type]||'tag-apply'}">${TAG_LABEL[d.type]||d.type}</span>
           <button class="dr-del" onclick="UNI.delDate(${i})">✕</button>
         </div>`;
@@ -1998,11 +2001,13 @@ const UNI=(function(){
       if(!val||!name){alert('กรุณาใส่วันที่และชื่อ');return;}
       const u=getU();if(!u){alert('ไม่พบข้อมูลมหาวิทยาลัย กรุณาเปิดหน้ารายละเอียดก่อน');return;}
       const endVal=document.getElementById('add-date-end').value||'';
+      const noteVal=document.getElementById('add-date-note').value.trim();
       const entry={val,name,type:document.getElementById('add-date-type').value};
       if(endVal&&endVal>val)entry.endDate=endVal;
+      if(noteVal)entry.note=noteVal;
       u.dates.push(entry);
       u.dates.sort((a,b)=>a.val.localeCompare(b.val));
-      document.getElementById('add-date-val').value='';document.getElementById('add-date-end').value='';document.getElementById('add-date-name').value='';
+      document.getElementById('add-date-val').value='';document.getElementById('add-date-end').value='';document.getElementById('add-date-name').value='';document.getElementById('add-date-note').value='';
       this.renderDates();HOME.refresh();STORAGE.save();
     },
     delDate(i){getU().dates.splice(i,1);this.renderDates();HOME.refresh();STORAGE.save();},
