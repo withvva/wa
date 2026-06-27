@@ -32,7 +32,7 @@ nav button:hover,nav button.active,nav button.nav-active{color:var(--text-primar
 /* ── Elements hidden in lock mode ── */
 body.locked .edit-only{display:none!important}
 body.locked input:not([readonly]):not([disabled]),
-body.locked select:not([disabled]),
+body.locked select:not([disabled]):not(.view-safe-select),
 body.locked textarea:not([readonly]){pointer-events:none;background:transparent!important;border-color:transparent!important;-webkit-appearance:none;appearance:none}
 body.locked .export-strip{display:none!important}
 body.locked .lock-banner{display:flex}
@@ -2021,12 +2021,10 @@ const UNI=(function(){
         // discount amount (ในสกุลเดิม)
         const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(d.type==='stipend'||d.type==='stipend_krw')?0:d.type==='fixed_krw'?(curr==='KRW'?d.val:(d.val/KRW_RATE)):(curr==='KRW'?d.val*KRW_RATE:d.val);
         const after=Math.max(0,before-disc);
-        // stipend ไม่หักจาก before (ไม่ใช่ส่วนลด) แต่นับเป็น "ได้รับ" แยกต่างหาก
-        // หน่วยเงินของ stipend มาจากชนิดที่เลือกตรงๆ (stipend=฿, stipend_krw=₩) ไม่เดาจากค่าใช้จ่ายอื่น
-        const stipendAmt=d.type==='stipend'?d.val:d.type==='stipend_krw'?d.val/KRW_RATE:0;
+        // stipend ไม่หักจาก before (ไม่ใช่ส่วนลด) และไม่นำไปหักยอดรวมเลย แสดงแยกเป็นข้อมูลอย่างเดียว
         // สะสม total เป็น THB
         totalTHBBefore+=toTHB(before,key);
-        totalTHBAfter+=toTHB(after,key)-stipendAmt;
+        totalTHBAfter+=toTHB(after,key);
         const sym=curr==='KRW'?'₩':'฿';
         const discTxt=d.type==='free'?'ฟรีทั้งหมด':d.type==='pct'?'ลด '+d.val+'%':d.type==='stipend'?'ได้รับ ฿'+Number(d.val).toLocaleString()+'/เทอม':d.type==='stipend_krw'?'ได้รับ ₩'+Number(d.val).toLocaleString()+'/เทอม':d.type==='fixed_krw'?'ลด ₩'+Number(d.val).toLocaleString():'ลด '+sym+Number(d.val).toLocaleString();
         const durTxt=d.dur&&d.dur>0?` (${d.dur} ${d.durUnit||'เทอม'})`:d.durUnit==='ตลอดหลักสูตร'?' (ตลอดหลักสูตร)':'';
@@ -2070,9 +2068,8 @@ const UNI=(function(){
           // คิดแค่ 1 เทอม เสมอ — dur เป็นแค่ข้อมูล reference ไม่นำมาคูณ
           const before=rawUnit;
           const disc=d.type==='free'?before:d.type==='pct'?before*(d.val/100):(d.type==='stipend'||d.type==='stipend_krw')?0:d.type==='fixed_krw'?(((cu[key]||'THB')==='KRW'?d.val:d.val/KRW)):(((cu[key]||'THB')==='KRW'?d.val*KRW:d.val));
-          const stipendAmt=d.type==='stipend'?d.val:d.type==='stipend_krw'?d.val/KRW:0;
           const after=Math.max(0,before-disc);
-          tBefore+=toTHB(before,key);tAfter+=toTHB(after,key)-stipendAmt;
+          tBefore+=toTHB(before,key);tAfter+=toTHB(after,key);
           const sym=(cu[key]||'THB')==='KRW'?'₩':'฿';
           const discTxt=d.type==='free'?'ฟรี':d.type==='pct'?'-'+d.val+'%':d.type==='stipend'?'ได้ ฿'+Number(d.val).toLocaleString():d.type==='stipend_krw'?'ได้ ₩'+Number(d.val).toLocaleString():d.type==='fixed_krw'?'-₩'+Number(d.val).toLocaleString():'-'+sym+Number(d.val).toLocaleString();
           const durTxt=d.dur&&d.dur>0?` ${d.dur}${d.durUnit||'เทอม'}`:d.durUnit==='ตลอดหลักสูตร'?' ตลอดหลักสูตร':'';
@@ -2094,7 +2091,7 @@ const UNI=(function(){
       const selIdx=u.selectedDormIdx!=null?u.selectedDormIdx:-1;
       const dormOptions=[{label:u.dormName||'หอ 1 (หลัก)',amount:u.costs['dorm']||0,currency:cu['dorm']||'THB',unit:u.dormUnit||'เดือน'},...(u.dormOptions||[]).map((d,i)=>({label:d.name||'หอ '+(i+2),amount:d.amount||0,currency:d.currency||'THB',unit:d.unit||'เดือน'}))];
       const dormSelOpts=dormOptions.map((d,i)=>`<option value="${i-1}"${selIdx===(i-1)?' selected':''}>${d.label}</option>`).join('');
-      const dormSelectorHTML=dormOptions.length>1?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--cream);border:0.5px solid var(--border);border-radius:4px"><span style="font-size:11px;color:var(--text-muted);white-space:nowrap">หอที่ใช้คำนวณ:</span><select style="font-family:inherit;font-size:12px;padding:4px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);flex:1" onchange="UNI.setSelectedDorm(parseInt(this.value))">${dormSelOpts}</select></div>`:'';
+      const dormSelectorHTML=dormOptions.length>1?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 12px;background:var(--cream);border:0.5px solid var(--border);border-radius:4px"><span style="font-size:11px;color:var(--text-muted);white-space:nowrap">หอที่ใช้คำนวณ:</span><select class="view-safe-select" style="font-family:inherit;font-size:12px;padding:4px 8px;border:0.5px solid var(--border);border-radius:3px;background:var(--white);flex:1" onchange="UNI.setSelectedDorm(parseInt(this.value))">${dormSelOpts}</select></div>`:'';
       const selDorm=dormOptions[selIdx+1]||dormOptions[0];
       const dormSym=selDorm.currency==='KRW'?'₩':'฿';
       const dormCell=`<div class="sum-base-cell" style="border-left:2px solid var(--blue-mid)">
@@ -2199,7 +2196,7 @@ const UNI=(function(){
       STORAGE.save();
     },
     _autoSaveSchField(i,field,value){const u=getU();if(!u||!u.scholarships[i])return;u.scholarships[i][field]=value;const badge=document.querySelector(`#sch-card-${i} .sch-badge`);if(badge&&field==='status'){const schStatusLabel={prep:'กำลังเตรียม',applied:'สมัครแล้ว',waiting:'รอผล',pass:'ได้รับทุน ✓',fail:'ไม่ได้รับ'};badge.textContent=schStatusLabel[value]||value;}STORAGE.save();},
-    setSelectedDorm(idx){const u=getU();if(!u)return;u.selectedDormIdx=idx;STORAGE.save();this.renderSummary();},
+    setSelectedDorm(idx){const u=getU();if(!u)return;u.selectedDormIdx=idx;if(!document.body.classList.contains('locked'))STORAGE.save();this.renderSummary();},
     delScholarship(i){if(!confirm('ลบทุนนี้?'))return;getU().scholarships.splice(i,1);this.renderScholarships();STORAGE.save();},
     addScholarship(){
       const name=document.getElementById('s-name').value.trim();if(!name){alert('กรุณาใส่ชื่อทุน');return;}
