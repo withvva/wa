@@ -1373,9 +1373,9 @@ function startListening() {
 }
 
 // ── ต้อง sign in (แบบ anonymous) ให้เสร็จก่อน ถึงจะอ่าน/เขียน database ได้ ──
-setSyncing();
 signInAnonymously(auth)
   .then(() => {
+    setSynced();
     startListening();
   })
   .catch((err) => {
