@@ -1305,6 +1305,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCxk3-JjJKBzyFWsIdHt3U9wQMDCZPvVz8",
@@ -1317,8 +1318,9 @@ const firebaseConfig = {
   measurementId: "G-B78XFMWLSF"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getDatabase(app);
+const auth = getAuth(app);
 const DB_PATH = "springround/data";
 
 const syncEl = document.getElementById('sync-status');
@@ -1345,28 +1347,43 @@ window.FIREBASE_CLEAR = function() {
     .catch(err => { console.error('Firebase clear error', err); setOffline(); });
 };
 
-onValue(ref(db, DB_PATH), (snapshot) => {
-  const saved = snapshot.val();
-  isRemoteUpdate = true;
-  try {
-    if (saved) {
-      if (!window._appReady) {
-        window._savedData = saved;
-        window._bootApp && window._bootApp(saved);
+function startListening() {
+  onValue(ref(db, DB_PATH), (snapshot) => {
+    const saved = snapshot.val();
+    isRemoteUpdate = true;
+    try {
+      if (saved) {
+        if (!window._appReady) {
+          window._savedData = saved;
+          window._bootApp && window._bootApp(saved);
+        } else {
+          window._applyRemoteData && window._applyRemoteData(saved);
+        }
       } else {
-        window._applyRemoteData && window._applyRemoteData(saved);
+        window._bootApp && window._bootApp(null);
       }
-    } else {
-      window._bootApp && window._bootApp(null);
+    } finally {
+      isRemoteUpdate = false;
     }
-  } finally {
-    isRemoteUpdate = false;
-  }
-}, (error) => {
-  console.error('Firebase listen error', error);
-  setOffline();
-  window._bootApp && window._bootApp(null);
-});
+  }, (error) => {
+    console.error('Firebase listen error', error);
+    setOffline();
+    window._bootApp && window._bootApp(null);
+  });
+}
+
+// ── ต้อง sign in (แบบ anonymous) ให้เสร็จก่อน ถึงจะอ่าน/เขียน database ได้ ──
+setSyncing();
+signInAnonymously(auth)
+  .then(() => {
+    startListening();
+  })
+  .catch((err) => {
+    console.error('Anonymous sign-in failed', err);
+    setOffline();
+    // ยังคง boot แอปด้วยข้อมูล default ไว้ก่อน จะได้ไม่ค้างที่หน้า loading
+    window._bootApp && window._bootApp(null);
+  });
 
 window._isRemoteUpdate = () => isRemoteUpdate;
 // Auto slideshow photos
