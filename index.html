@@ -631,6 +631,20 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
   <div class="lo-sub">กำลังโหลดข้อมูล…</div>
 </div>
 
+<!-- Login Overlay -->
+<div id="login-overlay" style="position:fixed;inset:0;background:var(--cream);z-index:10000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+  <div style="font-family:'Libre Baskerville',serif;font-size:26px">Spring Round</div>
+  <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">เข้าสู่ระบบเพื่อใช้งาน</div>
+  <form id="login-form" style="display:flex;flex-direction:column;gap:10px;width:260px">
+    <input type="email" id="login-email" placeholder="อีเมล" required autocomplete="username"
+      style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:9px 12px;border:0.5px solid var(--border);border-radius:4px;background:var(--white)">
+    <input type="password" id="login-password" placeholder="รหัสผ่าน" required autocomplete="current-password"
+      style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:9px 12px;border:0.5px solid var(--border);border-radius:4px;background:var(--white)">
+    <button type="submit" style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:13px;padding:10px;border-radius:4px;border:none;background:var(--blue-dark);color:white;cursor:pointer">เข้าสู่ระบบ</button>
+    <div id="login-error" style="color:#7A1A1A;font-size:12px;text-align:center;display:none">อีเมลหรือรหัสผ่านไม่ถูกต้อง</div>
+  </form>
+</div>
+
 <header>
   <button class="logo" onclick="goPage('home')">Spring Round</button>
   <nav>
@@ -1305,7 +1319,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCxk3-JjJKBzyFWsIdHt3U9wQMDCZPvVz8",
@@ -1372,18 +1386,59 @@ function startListening() {
   });
 }
 
-// ── ต้อง sign in (แบบ anonymous) ให้เสร็จก่อน ถึงจะอ่าน/เขียน database ได้ ──
-signInAnonymously(auth)
+// ── ต้อง sign in ด้วยอีเมล/รหัสผ่านให้เสร็จก่อน ถึงจะอ่าน/เขียน database ได้ ──
+const loginOverlay   = document.getElementById('login-overlay');
+const loadingOverlay = document.getElementById('loading-overlay');
+const loginForm      = document.getElementById('login-form');
+const loginError     = document.getElementById('login-error');
+const loginBtn       = loginForm.querySelector('button[type="submit"]');
+
+setPersistence(auth, browserLocalPersistence)
   .then(() => {
-    setSynced();
-    startListening();
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginOverlay.style.display = 'none';
+        setSynced();
+        startListening();
+      } else {
+        loadingOverlay.style.display = 'none';
+        loginOverlay.style.display = 'flex';
+      }
+    });
   })
   .catch((err) => {
-    console.error('Anonymous sign-in failed', err);
-    setOffline();
-    // ยังคง boot แอปด้วยข้อมูล default ไว้ก่อน จะได้ไม่ค้างที่หน้า loading
-    window._bootApp && window._bootApp(null);
+    console.error('setPersistence failed', err);
+    // fallback: ยังคงลอง auth state ปกติแม้ persistence ตั้งไม่สำเร็จ
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginOverlay.style.display = 'none';
+        setSynced();
+        startListening();
+      } else {
+        loadingOverlay.style.display = 'none';
+        loginOverlay.style.display = 'flex';
+      }
+    });
   });
+
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  loginError.style.display = 'none';
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'กำลังเข้าสู่ระบบ...';
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .catch((err) => {
+      console.error('Login failed', err);
+      loginError.style.display = 'block';
+    })
+    .finally(() => {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'เข้าสู่ระบบ';
+    });
+});
 
 window._isRemoteUpdate = () => isRemoteUpdate;
 // Auto slideshow photos
