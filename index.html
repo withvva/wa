@@ -1319,7 +1319,7 @@ nav button.nav-active{color:var(--blue-dark);font-weight:500}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCxk3-JjJKBzyFWsIdHt3U9wQMDCZPvVz8",
@@ -1393,32 +1393,32 @@ const loginForm      = document.getElementById('login-form');
 const loginError     = document.getElementById('login-error');
 const loginBtn       = loginForm.querySelector('button[type="submit"]');
 
+// จัดการ session ที่ auth state เปลี่ยน — เตะ anonymous user เก่าที่ค้างอยู่ในเบราว์เซอร์ออกอัตโนมัติ
+// (เกิดจากตอนที่ยังเปิด Anonymous Auth ไว้ก่อนหน้านี้ แล้วเบราว์เซอร์จำ session นั้นค้างไว้)
+function handleAuthState(user) {
+  if (user && user.isAnonymous) {
+    // user เก่าที่ไม่มีสิทธิ์อ่าน/เขียนแล้ว — sign out แล้วรอ onAuthStateChanged เรียกซ้ำด้วย user = null
+    signOut(auth).catch((err) => console.error('signOut (stale anonymous) failed', err));
+    return;
+  }
+  if (user) {
+    loginOverlay.style.display = 'none';
+    setSynced();
+    startListening();
+  } else {
+    loadingOverlay.style.display = 'none';
+    loginOverlay.style.display = 'flex';
+  }
+}
+
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginOverlay.style.display = 'none';
-        setSynced();
-        startListening();
-      } else {
-        loadingOverlay.style.display = 'none';
-        loginOverlay.style.display = 'flex';
-      }
-    });
+    onAuthStateChanged(auth, handleAuthState);
   })
   .catch((err) => {
     console.error('setPersistence failed', err);
     // fallback: ยังคงลอง auth state ปกติแม้ persistence ตั้งไม่สำเร็จ
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginOverlay.style.display = 'none';
-        setSynced();
-        startListening();
-      } else {
-        loadingOverlay.style.display = 'none';
-        loginOverlay.style.display = 'flex';
-      }
-    });
+    onAuthStateChanged(auth, handleAuthState);
   });
 
 loginForm.addEventListener('submit', (e) => {
